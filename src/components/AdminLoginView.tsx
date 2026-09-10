@@ -197,38 +197,6 @@ export const AdminLoginView: React.FC<AdminLoginViewProps> = ({
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
-
-          {/* Quick Credentials Information Box */}
-          <div className="mt-6 pt-4 border-t border-slate-800/80 text-xs space-y-2">
-            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
-              Standart Giriş Məlumatları:
-            </span>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono">
-              <div
-                onClick={() => {
-                  handleRoleSelect('super_admin');
-                  setPassword('super123');
-                }}
-                className="p-2.5 bg-slate-800/60 rounded-xl border border-slate-700/60 hover:border-purple-500/60 cursor-pointer transition-colors"
-              >
-                <div className="text-purple-400 font-bold font-sans">Super Admin</div>
-                <div className="text-slate-400 mt-1">İstifadəçi: superadmin</div>
-                <div className="text-slate-400">Şifrə: super123</div>
-              </div>
-
-              <div
-                onClick={() => {
-                  handleRoleSelect('admin');
-                  setPassword('admin123');
-                }}
-                className="p-2.5 bg-slate-800/60 rounded-xl border border-slate-700/60 hover:border-purple-500/60 cursor-pointer transition-colors"
-              >
-                <div className="text-blue-400 font-bold font-sans">Admin</div>
-                <div className="text-slate-400 mt-1">İstifadəçi: admin</div>
-                <div className="text-slate-400">Şifrə: admin123</div>
-              </div>
-            </div>
-          </div>
         </div>
       </main>
 
