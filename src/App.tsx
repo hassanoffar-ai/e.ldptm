@@ -47,7 +47,7 @@ const getInitialRoute = (): 'public' | 'admin' => {
   if (typeof window === 'undefined') return 'public';
   const path = window.location.pathname.toLowerCase();
   const hash = window.location.hash.toLowerCase();
-  if (path.startsWith('/admin') || hash.includes('admin')) {
+  if (path.startsWith('/admin') || path.includes('admin') || hash.includes('admin')) {
     return 'admin';
   }
   return 'public';
@@ -102,7 +102,7 @@ export default function App() {
     const handleLocationChange = () => {
       const path = window.location.pathname.toLowerCase();
       const hash = window.location.hash.toLowerCase();
-      if (path.startsWith('/admin') || hash.includes('admin')) {
+      if (path.startsWith('/admin') || path.includes('admin') || hash.includes('admin')) {
         setCurrentRoute('admin');
       } else {
         setCurrentRoute('public');
