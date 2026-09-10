@@ -146,7 +146,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                 {student.name}
               </span>
               <span className="text-[11px] font-mono text-purple-700 font-semibold">
-                {student.studentId} • Qrup: {student.group}
+                {student.studentId} {student.group && student.group !== 'YTP' ? `• Qrup: ${student.group}` : '• YTP'}
               </span>
             </div>
 

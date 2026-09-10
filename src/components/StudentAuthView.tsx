@@ -45,8 +45,6 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
   const [studentId, setStudentId] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [specialty, setSpecialty] = useState('Veb dizayn və proqram təminatı (YTP)');
-  const [group, setGroup] = useState('101-YTP');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
@@ -154,8 +152,8 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
       studentId: cleanStudentId,
       finCode: cleanFin,
       name: fullName,
-      group: group.trim() || '101-YTP',
-      specialty: specialty.trim() || 'Yüksək Texniki Peşə (YTP)',
+      group: 'YTP',
+      specialty: 'Yüksək Texniki Peşə',
       phone: phone.trim(),
       email: email.trim(),
       passwordHash: password,
@@ -455,44 +453,7 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    İxtisas (YTP)
-                  </label>
-                  <select
-                    value={specialty}
-                    onChange={(e) => setSpecialty(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white outline-none focus:border-purple-500"
-                  >
-                    <option value="Veb dizayn və proqram təminatı (YTP)">
-                      Veb dizayn və proqram təminatı (YTP)
-                    </option>
-                    <option value="Kompüter sistemlərində proqram təminatı (YTP)">
-                      Kompüter sistemlərində proqram təminatı (YTP)
-                    </option>
-                    <option value="Şəbəkə inzibatçılığı (YTP)">
-                      Şəbəkə inzibatçılığı (YTP)
-                    </option>
-                    <option value="Kibertəhlükəsizlik və şəbəkə sistemləri (YTP)">
-                      Kibertəhlükəsizlik və şəbəkə sistemləri (YTP)
-                    </option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    Qrup
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Məs: 101-YTP"
-                    value={group}
-                    onChange={(e) => setGroup(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-xs text-white outline-none focus:border-purple-500 font-mono"
-                  />
-                </div>
-              </div>
+
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
