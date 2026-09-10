@@ -260,7 +260,6 @@ export default function App() {
         students={students}
         sessions={sessions}
         courses={courses}
-        onNavigateToAdmin={() => navigateTo('admin')}
       />
     );
   }

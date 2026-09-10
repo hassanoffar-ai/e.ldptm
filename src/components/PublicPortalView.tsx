@@ -27,14 +27,12 @@ interface PublicPortalViewProps {
   students: Student[];
   sessions: ExamSession[];
   courses: GradeBookCourse[];
-  onNavigateToAdmin: () => void;
 }
 
 export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
   students,
   sessions,
   courses,
-  onNavigateToAdmin,
 }) => {
   const [activeSection, setActiveSection] = useState<
     'search_ticket' | 'schedule' | 'grades' | 'rules'
@@ -158,16 +156,10 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
             </button>
           </nav>
 
-          {/* Admin Girişi Button */}
-          <div className="flex items-center gap-3">
-            <button
-              id="public-to-admin-btn"
-              onClick={onNavigateToAdmin}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#5300b7] hover:bg-[#430094] text-white text-xs font-bold shadow-md shadow-purple-900/20 transition-all active:scale-[0.98] cursor-pointer"
-            >
-              <Lock className="w-3.5 h-3.5" />
-              <span>Admin Girişi</span>
-            </button>
+          {/* Status Indicator */}
+          <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 bg-slate-100/80 px-3.5 py-2 rounded-xl border border-slate-200/80">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="hidden sm:inline">İmtahan Sistemi Aktivdir</span>
           </div>
         </div>
       </header>
@@ -737,14 +729,8 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
             <span className="font-bold text-slate-800">E-LDPTM</span> — Lənkəran Dövlət Peşə Təhsil Mərkəzi © 2026.
             Bütün hüquqlar qorunur.
           </div>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={onNavigateToAdmin}
-              className="text-[#5300b7] hover:underline font-bold flex items-center gap-1 cursor-pointer"
-            >
-              <Lock className="w-3.5 h-3.5" />
-              <span>İdarəetmə Paneli (/admin)</span>
-            </button>
+          <div className="flex items-center gap-4 text-slate-400 font-medium">
+            <span>Rəsmi Tələbə Məlumat Portalı</span>
           </div>
         </div>
       </footer>
