@@ -4,12 +4,17 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { ActiveTab, ExamSession, GradeBookCourse, Student } from './types';
+import { ActiveTab, AdminPermissions, AdminUser, ExamSession, GradeBookCourse, Student } from './types';
 import {
   INITIAL_STUDENTS,
   INITIAL_EXAM_SESSIONS,
   INITIAL_GRADE_COURSES,
 } from './data/mockData';
+import {
+  getStoredPermissions,
+  getStoredSession,
+  saveStoredSession,
+} from './data/auth';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { ExamProtocolView } from './components/ExamProtocolView';
@@ -18,9 +23,13 @@ import { GradeEntryView } from './components/GradeEntryView';
 import { DashboardView } from './components/DashboardView';
 import { StudentsView } from './components/StudentsView';
 import { GroupsAndOtherViews } from './components/GroupsAndOtherViews';
+import { AdminPermissionsView } from './components/AdminPermissionsView';
+import { AdminLoginView } from './components/AdminLoginView';
+import { PublicPortalView } from './components/PublicPortalView';
 import { NewStudentModal } from './components/NewStudentModal';
 import { NewExamSessionModal } from './components/NewExamSessionModal';
 import { NewGradeCourseModal } from './components/NewGradeCourseModal';
+import { ShieldAlert } from 'lucide-react';
 
 const loadFromStorage = <T,>(key: string, fallback: T): T => {
   try {
@@ -31,7 +40,24 @@ const loadFromStorage = <T,>(key: string, fallback: T): T => {
   }
 };
 
+const getInitialRoute = (): 'public' | 'admin' => {
+  if (typeof window === 'undefined') return 'public';
+  const path = window.location.pathname.toLowerCase();
+  const hash = window.location.hash.toLowerCase();
+  if (path.startsWith('/admin') || hash.includes('admin')) {
+    return 'admin';
+  }
+  return 'public';
+};
+
 export default function App() {
+  // Top-level route: 'public' (Production site at /) vs 'admin' (Admin Panel at /admin)
+  const [currentRoute, setCurrentRoute] = useState<'public' | 'admin'>(getInitialRoute);
+
+  // Authentication & permissions
+  const [currentUser, setCurrentUser] = useState<AdminUser | null>(getStoredSession);
+  const [permissions, setPermissions] = useState<AdminPermissions>(getStoredPermissions);
+
   const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -53,6 +79,57 @@ export default function App() {
   const [courses, setCourses] = useState<GradeBookCourse[]>(() =>
     loadFromStorage('eldptm_courses', INITIAL_GRADE_COURSES)
   );
+
+  // Sync route with URL navigation and history
+  useEffect(() => {
+    const handleLocationChange = () => {
+      const path = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
+      if (path.startsWith('/admin') || hash.includes('admin')) {
+        setCurrentRoute('admin');
+      } else {
+        setCurrentRoute('public');
+      }
+    };
+
+    window.addEventListener('popstate', handleLocationChange);
+    window.addEventListener('hashchange', handleLocationChange);
+
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      window.removeEventListener('hashchange', handleLocationChange);
+    };
+  }, []);
+
+  // Sync cross-tab permissions or storage changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setPermissions(getStoredPermissions());
+      setCurrentUser(getStoredSession());
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  const navigateTo = (route: 'public' | 'admin') => {
+    setCurrentRoute(route);
+    if (route === 'admin') {
+      window.history.pushState(null, '', '/admin');
+    } else {
+      window.history.pushState(null, '', '/');
+    }
+  };
+
+  const handleLogout = () => {
+    saveStoredSession(null);
+    setCurrentUser(null);
+  };
+
+  const handleLoginSuccess = (user: AdminUser) => {
+    setCurrentUser(user);
+    setPermissions(getStoredPermissions());
+    setActiveTab('dashboard');
+  };
 
   // Sync to localStorage
   useEffect(() => {
@@ -161,6 +238,44 @@ export default function App() {
     setActiveTab('tickets');
   };
 
+  // Check tab accessibility based on role and permissions
+  const isTabAllowed = (tab: ActiveTab): boolean => {
+    if (!currentUser) return false;
+    if (currentUser.role === 'super_admin') return true;
+    if (tab === 'users') return false;
+    if (tab === 'students' && !permissions.canManageStudents) return false;
+    if (tab === 'exams' && !permissions.canManageExams) return false;
+    if (tab === 'grades' && !permissions.canManageGrades) return false;
+    if (tab === 'tickets' && !permissions.canAccessTickets) return false;
+    if (tab === 'rooms' && !permissions.canAccessRooms) return false;
+    if (tab === 'reports' && !permissions.canViewReports) return false;
+    if (tab === 'journal' && !permissions.canAccessJournal) return false;
+    return true;
+  };
+
+  // 1. PUBLIC SITE ROUTE (/)
+  if (currentRoute === 'public') {
+    return (
+      <PublicPortalView
+        students={students}
+        sessions={sessions}
+        courses={courses}
+        onNavigateToAdmin={() => navigateTo('admin')}
+      />
+    );
+  }
+
+  // 2. ADMIN ROUTE (/admin) - NOT LOGGED IN
+  if (!currentUser) {
+    return (
+      <AdminLoginView
+        onLoginSuccess={handleLoginSuccess}
+        onNavigateHome={() => navigateTo('public')}
+      />
+    );
+  }
+
+  // 3. ADMIN ROUTE (/admin) - AUTHENTICATED
   return (
     <div className="bg-[#f8f9ff] text-[#121c2a] min-h-screen flex antialiased">
       {/* Sidebar Navigation */}
@@ -175,6 +290,10 @@ export default function App() {
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
         onOpenNewStudentModal={() => setIsNewStudentModalOpen(true)}
+        currentUser={currentUser}
+        permissions={permissions}
+        onLogout={handleLogout}
+        onNavigateToPublic={() => navigateTo('public')}
       />
 
       {/* Main Content Area */}
@@ -186,83 +305,114 @@ export default function App() {
           setSearchQuery={setSearchQuery}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
+          currentUser={currentUser}
+          onLogout={handleLogout}
+          onNavigateToPublic={() => navigateTo('public')}
         />
 
-        {/* View Routing */}
+        {/* View Routing with Permission Checks */}
         <div className="flex-1 flex flex-col">
-          {activeTab === 'dashboard' && (
-            <DashboardView
-              sessions={sessions}
-              courses={courses}
-              students={students}
-              setActiveTab={setActiveTab}
-              onOpenTicketKioskForStudent={handleOpenTicketKioskForStudent}
-            />
-          )}
+          {!isTabAllowed(activeTab) ? (
+            <div className="p-8 flex-1 flex flex-col items-center justify-center text-center">
+              <div className="w-16 h-16 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mb-4">
+                <ShieldAlert className="w-8 h-8" />
+              </div>
+              <h2 className="text-xl font-bold text-slate-800">
+                Giriş Məhdudlaşdırılıb
+              </h2>
+              <p className="text-xs text-slate-500 mt-2 max-w-md">
+                Bu bölməyə daxil olmaq üçün hesabınıza səlahiyyət verilməyib.
+                İcazələrin təyini yalnız <strong>Super Admin</strong> tərəfindən həyata keçirilir.
+              </p>
+              <button
+                onClick={() => setActiveTab('dashboard')}
+                className="mt-4 px-4 py-2 bg-[#5300b7] text-white rounded-xl text-xs font-semibold cursor-pointer"
+              >
+                Əsas Panelə Qayıt
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* SUPER ADMIN CONTROL CENTER: Users & Permissions Matrix */}
+              {activeTab === 'users' && currentUser.role === 'super_admin' && (
+                <AdminPermissionsView currentUser={currentUser} />
+              )}
 
-          {/* SCREEN 1: İMTAHAN PROTOKOLU */}
-          {activeTab === 'exams' && (
-            <ExamProtocolView
-              sessions={sessions}
-              selectedSessionId={selectedSessionId}
-              onSelectSession={setSelectedSessionId}
-              onUpdateSession={handleUpdateSession}
-              onOpenNewSessionModal={() => setIsNewSessionModalOpen(true)}
-              onDeleteSession={handleDeleteSession}
-              onOpenTicketKioskForStudent={handleOpenTicketKioskForStudent}
-              students={students}
-            />
-          )}
+              {/* DASHBOARD */}
+              {activeTab === 'dashboard' && (
+                <DashboardView
+                  sessions={sessions}
+                  courses={courses}
+                  students={students}
+                  setActiveTab={setActiveTab}
+                  onOpenTicketKioskForStudent={handleOpenTicketKioskForStudent}
+                />
+              )}
 
-          {/* SCREEN 2: İMTAHAN ZALI EKRANI (BİLET ÇAPI KİOSKU) */}
-          {activeTab === 'tickets' && (
-            <ExamTicketKioskView
-              students={students}
-              sessions={sessions}
-              initialStudentId={kioskStudentId}
-              onClearInitialStudentId={() => setKioskStudentId(undefined)}
-            />
-          )}
+              {/* SCREEN 1: İMTAHAN PROTOKOLU */}
+              {activeTab === 'exams' && (
+                <ExamProtocolView
+                  sessions={sessions}
+                  selectedSessionId={selectedSessionId}
+                  onSelectSession={setSelectedSessionId}
+                  onUpdateSession={handleUpdateSession}
+                  onOpenNewSessionModal={() => setIsNewSessionModalOpen(true)}
+                  onDeleteSession={handleDeleteSession}
+                  onOpenTicketKioskForStudent={handleOpenTicketKioskForStudent}
+                  students={students}
+                />
+              )}
 
-          {/* SCREEN 3: QİYMƏT DAXİLETMƏ */}
-          {activeTab === 'grades' && (
-            <GradeEntryView
-              courses={courses}
-              onUpdateCourses={setCourses}
-              onOpenNewCourseModal={() => setIsNewCourseModalOpen(true)}
-              onDeleteCourse={handleDeleteCourse}
-            />
-          )}
+              {/* SCREEN 2: İMTAHAN ZALI EKRANI (BİLET ÇAPI KİOSKU) */}
+              {activeTab === 'tickets' && (
+                <ExamTicketKioskView
+                  students={students}
+                  sessions={sessions}
+                  initialStudentId={kioskStudentId}
+                  onClearInitialStudentId={() => setKioskStudentId(undefined)}
+                />
+              )}
 
-          {/* Tələbələr Database View */}
-          {activeTab === 'students' && (
-            <StudentsView
-              students={students}
-              onOpenTicketKioskForStudent={handleOpenTicketKioskForStudent}
-              onOpenNewStudentModal={() => setIsNewStudentModalOpen(true)}
-              onDeleteStudent={handleDeleteStudent}
-            />
-          )}
+              {/* SCREEN 3: QİYMƏT DAXİLETMƏ */}
+              {activeTab === 'grades' && (
+                <GradeEntryView
+                  courses={courses}
+                  onUpdateCourses={setCourses}
+                  onOpenNewCourseModal={() => setIsNewCourseModalOpen(true)}
+                  onDeleteCourse={handleDeleteCourse}
+                />
+              )}
 
-          {/* Additional tab views (Qruplar, İxtisaslar, Fənlər, Otaqlar, Davamiyyət, Jurnal, Hesabatlar, Ayarlar) */}
-          {[
-            'groups',
-            'specialties',
-            'subjects',
-            'journal',
-            'attendance',
-            'rooms',
-            'reports',
-            'users',
-            'settings',
-          ].includes(activeTab) && (
-            <GroupsAndOtherViews
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              students={students}
-              sessions={sessions}
-              courses={courses}
-            />
+              {/* Tələbələr Database View */}
+              {activeTab === 'students' && (
+                <StudentsView
+                  students={students}
+                  onOpenTicketKioskForStudent={handleOpenTicketKioskForStudent}
+                  onOpenNewStudentModal={() => setIsNewStudentModalOpen(true)}
+                  onDeleteStudent={handleDeleteStudent}
+                />
+              )}
+
+              {/* Additional tab views (Qruplar, İxtisaslar, Fənlər, Otaqlar, Davamiyyət, Jurnal, Hesabatlar, Ayarlar) */}
+              {[
+                'groups',
+                'specialties',
+                'subjects',
+                'journal',
+                'attendance',
+                'rooms',
+                'reports',
+                'settings',
+              ].includes(activeTab) && (
+                <GroupsAndOtherViews
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
+                  students={students}
+                  sessions={sessions}
+                  courses={courses}
+                />
+              )}
+            </>
           )}
         </div>
       </main>

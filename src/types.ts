@@ -96,3 +96,22 @@ export type ActiveTab =
   | 'reports'
   | 'users'
   | 'settings';
+
+export type UserRole = 'super_admin' | 'admin';
+
+export interface AdminPermissions {
+  canManageStudents: boolean;
+  canManageExams: boolean;
+  canManageGrades: boolean;
+  canAccessRooms: boolean;
+  canAccessJournal: boolean;
+  canViewReports: boolean;
+  canAccessTickets: boolean;
+}
+
+export interface AdminUser {
+  username: string;
+  fullName: string;
+  role: UserRole;
+}
+
