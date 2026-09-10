@@ -4,11 +4,12 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { ActiveTab, AdminPermissions, AdminUser, ExamSession, GradeBookCourse, Student, StudentUser } from './types';
+import { ActiveTab, AdminPermissions, AdminUser, ExamSession, GradeBookCourse, SpecialtyItem, Student, StudentUser } from './types';
 import {
   INITIAL_STUDENTS,
   INITIAL_EXAM_SESSIONS,
   INITIAL_GRADE_COURSES,
+  INITIAL_SPECIALTIES,
 } from './data/mockData';
 import {
   getStoredPermissions,
@@ -96,6 +97,9 @@ export default function App() {
   const [courses, setCourses] = useState<GradeBookCourse[]>(() =>
     loadFromStorage('eldptm_courses', INITIAL_GRADE_COURSES)
   );
+  const [specialties, setSpecialties] = useState<SpecialtyItem[]>(() =>
+    loadFromStorage('eldptm_specialties', INITIAL_SPECIALTIES)
+  );
 
   // Sync route with URL navigation and history
   useEffect(() => {
@@ -172,6 +176,28 @@ export default function App() {
       console.error(e);
     }
   }, [courses]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('eldptm_specialties', JSON.stringify(specialties));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [specialties]);
+
+  const handleAddSpecialty = (newSpecialty: SpecialtyItem) => {
+    setSpecialties((prev) => [newSpecialty, ...prev]);
+  };
+
+  const handleUpdateSpecialty = (updatedSpecialty: SpecialtyItem) => {
+    setSpecialties((prev) =>
+      prev.map((s) => (s.id === updatedSpecialty.id ? updatedSpecialty : s))
+    );
+  };
+
+  const handleDeleteSpecialty = (id: string) => {
+    setSpecialties((prev) => prev.filter((s) => s.id !== id));
+  };
 
   // Quick ticket kiosk student selection
   const [kioskStudentId, setKioskStudentId] = useState<string | undefined>(
@@ -413,6 +439,7 @@ export default function App() {
                   onUpdateCourses={setCourses}
                   onOpenNewCourseModal={() => setIsNewCourseModalOpen(true)}
                   onDeleteCourse={handleDeleteCourse}
+                  specialties={specialties}
                 />
               )}
 
@@ -443,6 +470,10 @@ export default function App() {
                   students={students}
                   sessions={sessions}
                   courses={courses}
+                  specialties={specialties}
+                  onAddSpecialty={handleAddSpecialty}
+                  onUpdateSpecialty={handleUpdateSpecialty}
+                  onDeleteSpecialty={handleDeleteSpecialty}
                 />
               )}
             </>
@@ -455,6 +486,7 @@ export default function App() {
         isOpen={isNewStudentModalOpen}
         onClose={() => setIsNewStudentModalOpen(false)}
         onAddStudent={handleAddStudent}
+        specialties={specialties}
       />
 
       {/* New Exam Session Modal */}
@@ -463,6 +495,7 @@ export default function App() {
         onClose={() => setIsNewSessionModalOpen(false)}
         onAddSession={handleCreateSession}
         students={students}
+        specialties={specialties}
       />
 
       {/* New Grade Course Modal */}
@@ -471,6 +504,7 @@ export default function App() {
         onClose={() => setIsNewCourseModalOpen(false)}
         onAddCourse={handleCreateCourse}
         students={students}
+        specialties={specialties}
       />
     </div>
   );

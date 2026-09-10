@@ -94,6 +94,17 @@ export interface ExamHallTicket {
   qrCodeValue: string;
 }
 
+export interface SpecialtyItem {
+  id: string;
+  name: string;
+  code: string;
+  direction: string; // Peşə İstiqaməti (məs: Yüksək Texniki Peşə (YTP), Texniki Peşə, İlk Peşə)
+  duration?: string; // Təhsil müddəti (məs: 2 il)
+  educationType?: 'Əyani' | 'Qiyabi';
+  description?: string;
+  createdAt?: string;
+}
+
 export type ActiveTab =
   | 'dashboard'
   | 'students'

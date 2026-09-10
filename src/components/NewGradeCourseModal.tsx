@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Award, BookOpen, Grid, Users } from 'lucide-react';
-import { GradeBookCourse, Student, StudentGrade } from '../types';
-import { GROUPS_LIST, SPECIALTIES_LIST, SUBJECTS_LIST } from '../data/mockData';
+import { GradeBookCourse, SpecialtyItem, Student, StudentGrade } from '../types';
+import { GROUPS_LIST, SUBJECTS_LIST } from '../data/mockData';
 
 interface NewGradeCourseModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddCourse: (newCourse: GradeBookCourse) => void;
   students: Student[];
+  specialties?: SpecialtyItem[];
 }
 
 export const NewGradeCourseModal: React.FC<NewGradeCourseModalProps> = ({
@@ -15,13 +16,21 @@ export const NewGradeCourseModal: React.FC<NewGradeCourseModalProps> = ({
   onClose,
   onAddCourse,
   students,
+  specialties = [],
 }) => {
   const [group, setGroup] = useState(GROUPS_LIST[0] || '');
   const [subject, setSubject] = useState(SUBJECTS_LIST[0] || '');
-  const [specialty, setSpecialty] = useState(SPECIALTIES_LIST[0] || '');
+  const [specialty, setSpecialty] = useState('');
+  const [customSpecialty, setCustomSpecialty] = useState('');
   const [subjectCode, setSubjectCode] = useState('');
   const [semester, setSemester] = useState('Yaz Semestri (2024/2025)');
   const [maxScore] = useState(50);
+
+  useEffect(() => {
+    if (specialties.length > 0 && !specialty) {
+      setSpecialty(specialties[0].name);
+    }
+  }, [specialties, specialty]);
 
   if (!isOpen) return null;
 
@@ -50,10 +59,15 @@ export const NewGradeCourseModal: React.FC<NewGradeCourseModalProps> = ({
       };
     });
 
+    const resolvedSpecialty =
+      specialty === '__custom__' || !specialty
+        ? customSpecialty.trim() || 'İnformasiya Texnologiyaları'
+        : specialty;
+
     const newCourse: GradeBookCourse = {
       id: `course-${Date.now()}`,
       group,
-      specialty,
+      specialty: resolvedSpecialty,
       subject: subject.trim(),
       subjectCode: subjectCode.trim() || `${group}-CS`,
       semester,
@@ -132,17 +146,39 @@ export const NewGradeCourseModal: React.FC<NewGradeCourseModalProps> = ({
               <label className="block text-xs font-semibold text-[#4a4455] mb-1">
                 İxtisas
               </label>
-              <select
-                value={specialty}
-                onChange={(e) => setSpecialty(e.target.value)}
-                className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
-              >
-                {SPECIALTIES_LIST.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
+              {specialties.length > 0 ? (
+                <div className="space-y-2">
+                  <select
+                    value={specialty}
+                    onChange={(e) => setSpecialty(e.target.value)}
+                    className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
+                  >
+                    {specialties.map((s) => (
+                      <option key={s.id} value={s.name}>
+                        {s.name} ({s.code})
+                      </option>
+                    ))}
+                    <option value="__custom__">+ Digər / Fərdi İxtisas</option>
+                  </select>
+                  {specialty === '__custom__' && (
+                    <input
+                      type="text"
+                      placeholder="İxtisasın adını yazın..."
+                      value={customSpecialty}
+                      onChange={(e) => setCustomSpecialty(e.target.value)}
+                      className="w-full px-3 py-2 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-xs outline-none focus:ring-2 focus:ring-[#5300b7]"
+                    />
+                  )}
+                </div>
+              ) : (
+                <input
+                  type="text"
+                  placeholder="məs: Kompüter sistemlərində proqram təminatı"
+                  value={customSpecialty}
+                  onChange={(e) => setCustomSpecialty(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
+                />
+              )}
             </div>
 
             <div>

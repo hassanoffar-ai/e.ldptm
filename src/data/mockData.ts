@@ -1,4 +1,4 @@
-import { ExamSession, GradeBookCourse, Student } from '../types';
+import { ExamSession, GradeBookCourse, SpecialtyItem, Student } from '../types';
 
 export const INITIAL_STUDENTS: Student[] = [];
 
@@ -8,13 +8,9 @@ export const INITIAL_GRADE_COURSES: GradeBookCourse[] = [];
 
 export const GROUPS_LIST = ['İT-21', 'IT-04', 'IT-201', 'TK-12', 'DI-15', 'CS-101'];
 
-export const SPECIALTIES_LIST = [
-  'İnformasiya Texnologiyaları',
-  'Kompüter Mühəndisliyi',
-  'Proqram Təminatı və Şəbəkələr',
-  'Qrafik Dizayn və Multimedia',
-  'Kibertəhlükəsizlik',
-];
+export const INITIAL_SPECIALTIES: SpecialtyItem[] = [];
+
+export const SPECIALTIES_LIST: string[] = [];
 
 export const SUBJECTS_LIST = [
   'Proqramlaşdırma Əsasları',

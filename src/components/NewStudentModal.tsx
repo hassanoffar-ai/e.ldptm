@@ -1,27 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, UserPlus, GraduationCap, Users, Mail, Phone, Hash } from 'lucide-react';
-import { Student } from '../types';
-import { GROUPS_LIST, SPECIALTIES_LIST } from '../data/mockData';
+import { SpecialtyItem, Student } from '../types';
+import { GROUPS_LIST } from '../data/mockData';
 
 interface NewStudentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddStudent: (newStudent: Student) => void;
+  specialties?: SpecialtyItem[];
 }
 
 export const NewStudentModal: React.FC<NewStudentModalProps> = ({
   isOpen,
   onClose,
   onAddStudent,
+  specialties = [],
 }) => {
   const [name, setName] = useState('');
   const [studentId, setStudentId] = useState('');
   const [finCode, setFinCode] = useState('');
-  const [group, setGroup] = useState(GROUPS_LIST[0]);
-  const [specialty, setSpecialty] = useState(SPECIALTIES_LIST[0]);
+  const [group, setGroup] = useState(GROUPS_LIST[0] || 'İT-21');
+  const [specialty, setSpecialty] = useState('');
+  const [customSpecialty, setCustomSpecialty] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('123456');
+
+  useEffect(() => {
+    if (specialties.length > 0 && !specialty) {
+      setSpecialty(specialties[0].name);
+    }
+  }, [specialties, specialty]);
 
   if (!isOpen) return null;
 
@@ -29,13 +38,18 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
     e.preventDefault();
     if (!name || !studentId) return;
 
+    const resolvedSpecialty =
+      specialty === '__custom__' || !specialty
+        ? customSpecialty.trim() || 'İnformasiya Texnologiyaları'
+        : specialty;
+
     const student: Student = {
       id: `std-${Date.now()}`,
       studentId: studentId.trim(),
       finCode: finCode.trim().toUpperCase() || undefined,
       name: name.trim(),
       group,
-      specialty,
+      specialty: resolvedSpecialty,
       email: email || `${studentId.toLowerCase()}@eldptm.edu.az`,
       phone: phone || '+994 50 000 00 00',
       passwordHash: password.trim() || '123456',
@@ -147,19 +161,41 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-                İxtisas (YTP)
+                İxtisas / Peşə İstiqaməti
               </label>
-              <select
-                value={specialty}
-                onChange={(e) => setSpecialty(e.target.value)}
-                className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
-              >
-                {SPECIALTIES_LIST.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
+              {specialties.length > 0 ? (
+                <div className="space-y-2">
+                  <select
+                    value={specialty}
+                    onChange={(e) => setSpecialty(e.target.value)}
+                    className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
+                  >
+                    {specialties.map((s) => (
+                      <option key={s.id} value={s.name}>
+                        {s.name} ({s.code})
+                      </option>
+                    ))}
+                    <option value="__custom__">+ Digər / Fərdi İxtisas Daxil Et</option>
+                  </select>
+                  {specialty === '__custom__' && (
+                    <input
+                      type="text"
+                      placeholder="İxtisasın adını yazın..."
+                      value={customSpecialty}
+                      onChange={(e) => setCustomSpecialty(e.target.value)}
+                      className="w-full px-3 py-2 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-xs outline-none focus:ring-2 focus:ring-[#5300b7]"
+                    />
+                  )}
+                </div>
+              ) : (
+                <input
+                  type="text"
+                  placeholder="məs: Kompüter sistemlərində proqram təminatı"
+                  value={customSpecialty}
+                  onChange={(e) => setCustomSpecialty(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
+                />
+              )}
             </div>
           </div>
 

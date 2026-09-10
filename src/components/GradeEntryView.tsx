@@ -13,14 +13,15 @@ import {
   Check,
   Award
 } from 'lucide-react';
-import { GradeBookCourse, StudentGrade } from '../types';
-import { GROUPS_LIST, SPECIALTIES_LIST, SUBJECTS_LIST } from '../data/mockData';
+import { GradeBookCourse, SpecialtyItem, StudentGrade } from '../types';
+import { GROUPS_LIST, SUBJECTS_LIST } from '../data/mockData';
 
 interface GradeEntryViewProps {
   courses: GradeBookCourse[];
   onUpdateCourses: (updated: GradeBookCourse[]) => void;
   onOpenNewCourseModal?: () => void;
   onDeleteCourse?: (id: string) => void;
+  specialties?: SpecialtyItem[];
 }
 
 export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
@@ -28,6 +29,7 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
   onUpdateCourses,
   onOpenNewCourseModal,
   onDeleteCourse,
+  specialties = [],
 }) => {
   const currentCourse =
     courses.find(
@@ -38,7 +40,7 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
     currentCourse?.group || GROUPS_LIST[0] || 'İT-21'
   );
   const [selectedSpecialty, setSelectedSpecialty] = useState(
-    currentCourse?.specialty || SPECIALTIES_LIST[0] || 'İnformasiya Texnologiyaları'
+    currentCourse?.specialty || specialties[0]?.name || 'İnformasiya Texnologiyaları'
   );
   const [selectedSubject, setSelectedSubject] = useState(
     currentCourse?.subject || SUBJECTS_LIST[0] || 'Veb Proqramlaşdırma əsasları'
@@ -347,11 +349,15 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
                 onChange={(e) => setSelectedSpecialty(e.target.value)}
                 className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7] focus:border-[#5300b7] transition-all cursor-pointer"
               >
-                {SPECIALTIES_LIST.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
+                {specialties.length > 0 ? (
+                  specialties.map((s) => (
+                    <option key={s.id} value={s.name}>
+                      {s.name} ({s.code})
+                    </option>
+                  ))
+                ) : (
+                  <option value={selectedSpecialty}>{selectedSpecialty || 'İxtisas seçilməyib'}</option>
+                )}
               </select>
             </div>
           </div>

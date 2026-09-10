@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Calendar, Clock, DoorClosed, UserCheck, BookOpen, Grid, GraduationCap } from 'lucide-react';
-import { ExamSession, ExamProtocolItem, Student } from '../types';
-import { GROUPS_LIST, ROOMS_LIST, SPECIALTIES_LIST, SUBJECTS_LIST } from '../data/mockData';
+import { ExamSession, ExamProtocolItem, SpecialtyItem, Student } from '../types';
+import { GROUPS_LIST, ROOMS_LIST, SUBJECTS_LIST } from '../data/mockData';
 
 interface NewExamSessionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddSession: (newSession: ExamSession) => void;
   students: Student[];
+  specialties?: SpecialtyItem[];
 }
 
 export const NewExamSessionModal: React.FC<NewExamSessionModalProps> = ({
@@ -15,11 +16,13 @@ export const NewExamSessionModal: React.FC<NewExamSessionModalProps> = ({
   onClose,
   onAddSession,
   students,
+  specialties = [],
 }) => {
   const [subject, setSubject] = useState(SUBJECTS_LIST[0] || '');
   const [subjectCode, setSubjectCode] = useState('');
   const [group, setGroup] = useState(GROUPS_LIST[0] || '');
-  const [specialty, setSpecialty] = useState(SPECIALTIES_LIST[0] || '');
+  const [specialty, setSpecialty] = useState('');
+  const [customSpecialty, setCustomSpecialty] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [time, setTime] = useState('10:00 - 12:00');
   const [room, setRoom] = useState(ROOMS_LIST[0] || 'Lab-1');
@@ -27,6 +30,12 @@ export const NewExamSessionModal: React.FC<NewExamSessionModalProps> = ({
   const [academicYear, setAcademicYear] = useState('2024/2025');
   const [semester, setSemester] = useState('Yaz Semestri');
   const [autoIncludeGroupStudents, setAutoIncludeGroupStudents] = useState(true);
+
+  useEffect(() => {
+    if (specialties.length > 0 && !specialty) {
+      setSpecialty(specialties[0].name);
+    }
+  }, [specialties, specialty]);
 
   if (!isOpen) return null;
 
@@ -52,12 +61,17 @@ export const NewExamSessionModal: React.FC<NewExamSessionModalProps> = ({
       hasSigned: false,
     }));
 
+    const resolvedSpecialty =
+      specialty === '__custom__' || !specialty
+        ? customSpecialty.trim() || 'İnformasiya Texnologiyaları'
+        : specialty;
+
     const newSession: ExamSession = {
       id: `exam-${Date.now()}`,
       subject: subject.trim(),
       subjectCode: subjectCode.trim() || `${group}-EX`,
       group,
-      specialty,
+      specialty: resolvedSpecialty,
       date,
       time,
       room,
@@ -148,17 +162,39 @@ export const NewExamSessionModal: React.FC<NewExamSessionModalProps> = ({
               <label className="block text-xs font-semibold text-[#4a4455] mb-1">
                 İxtisas
               </label>
-              <select
-                value={specialty}
-                onChange={(e) => setSpecialty(e.target.value)}
-                className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
-              >
-                {SPECIALTIES_LIST.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
+              {specialties.length > 0 ? (
+                <div className="space-y-2">
+                  <select
+                    value={specialty}
+                    onChange={(e) => setSpecialty(e.target.value)}
+                    className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
+                  >
+                    {specialties.map((s) => (
+                      <option key={s.id} value={s.name}>
+                        {s.name} ({s.code})
+                      </option>
+                    ))}
+                    <option value="__custom__">+ Digər / Fərdi İxtisas</option>
+                  </select>
+                  {specialty === '__custom__' && (
+                    <input
+                      type="text"
+                      placeholder="İxtisasın adını yazın..."
+                      value={customSpecialty}
+                      onChange={(e) => setCustomSpecialty(e.target.value)}
+                      className="w-full px-3 py-2 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-xs outline-none focus:ring-2 focus:ring-[#5300b7]"
+                    />
+                  )}
+                </div>
+              ) : (
+                <input
+                  type="text"
+                  placeholder="məs: Kompüter sistemlərində proqram təminatı"
+                  value={customSpecialty}
+                  onChange={(e) => setCustomSpecialty(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
+                />
+              )}
             </div>
           </div>
 
