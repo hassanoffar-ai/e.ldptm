@@ -259,14 +259,18 @@ export default function App() {
   const isTabAllowed = (tab: ActiveTab): boolean => {
     if (!currentUser) return false;
     if (currentUser.role === 'super_admin') return true;
-    if (tab === 'users') return false;
+    if (tab === 'users' || tab === 'settings') return false;
     if (tab === 'students' && !permissions.canManageStudents) return false;
+    if (tab === 'groups' && !permissions.canManageGroups) return false;
+    if (tab === 'specialties' && !permissions.canManageSpecialties) return false;
+    if (tab === 'subjects' && !permissions.canManageSubjects) return false;
     if (tab === 'exams' && !permissions.canManageExams) return false;
     if (tab === 'grades' && !permissions.canManageGrades) return false;
     if (tab === 'tickets' && !permissions.canAccessTickets) return false;
     if (tab === 'rooms' && !permissions.canAccessRooms) return false;
     if (tab === 'reports' && !permissions.canViewReports) return false;
     if (tab === 'journal' && !permissions.canAccessJournal) return false;
+    if (tab === 'attendance' && !permissions.canManageAttendance) return false;
     return true;
   };
 
@@ -278,6 +282,7 @@ export default function App() {
           students={students}
           onRegisterStudent={handleAddStudent}
           onLoginSuccess={handleStudentLoginSuccess}
+          onNavigateToAdmin={() => navigateTo('admin')}
         />
       );
     }
@@ -288,6 +293,7 @@ export default function App() {
         courses={courses}
         sessions={sessions}
         onLogout={handleStudentLogout}
+        onNavigateToAdmin={() => navigateTo('admin')}
       />
     );
   }

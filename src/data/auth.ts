@@ -15,6 +15,10 @@ export const DEFAULT_ADMIN_PERMISSIONS: AdminPermissions = {
   canAccessJournal: true,
   canViewReports: false,
   canAccessTickets: true,
+  canManageGroups: true,
+  canManageSpecialties: true,
+  canManageSubjects: true,
+  canManageAttendance: true,
 };
 
 const DEFAULT_ACCOUNTS: AccountCredentials[] = [
@@ -56,7 +60,7 @@ export const getStoredPermissions = (): AdminPermissions => {
   try {
     const raw = localStorage.getItem('eldptm_admin_permissions');
     if (raw) {
-      return JSON.parse(raw);
+      return { ...DEFAULT_ADMIN_PERMISSIONS, ...JSON.parse(raw) };
     }
   } catch (e) {
     console.error(e);

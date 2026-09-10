@@ -120,6 +120,10 @@ export interface AdminPermissions {
   canAccessJournal: boolean;
   canViewReports: boolean;
   canAccessTickets: boolean;
+  canManageGroups: boolean;
+  canManageSpecialties: boolean;
+  canManageSubjects: boolean;
+  canManageAttendance: boolean;
 }
 
 export interface AdminUser {

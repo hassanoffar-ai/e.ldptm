@@ -24,6 +24,7 @@ interface PublicPortalViewProps {
   courses: GradeBookCourse[];
   sessions: ExamSession[];
   onLogout: () => void;
+  onNavigateToAdmin?: () => void;
 }
 
 export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
@@ -31,6 +32,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
   courses,
   sessions,
   onLogout,
+  onNavigateToAdmin,
 }) => {
   const [activeTab, setActiveTab] = useState<'grades' | 'schedule' | 'attendance' | 'rules'>(
     'grades'
@@ -646,8 +648,23 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
       </main>
 
       {/* 5. Footer */}
-      <footer className="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
-        Lənkəran Dövlət Peşə Təhsil Mərkəzi — Yüksək Texniki Peşə (YTP) Şəxsi Kabineti © 2026
+      <footer className="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 px-4">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-2">
+          <span>Lənkəran Dövlət Peşə Təhsil Mərkəzi — Yüksək Texniki Peşə (YTP) Şəxsi Kabineti © 2026</span>
+          {onNavigateToAdmin && (
+            <>
+              <span className="hidden sm:inline">•</span>
+              <button
+                type="button"
+                onClick={onNavigateToAdmin}
+                className="inline-flex items-center gap-1 text-purple-700 hover:text-purple-900 font-semibold cursor-pointer"
+              >
+                <Shield className="w-3.5 h-3.5" />
+                <span>İnzibatçı Paneli (/admin)</span>
+              </button>
+            </>
+          )}
+        </div>
       </footer>
     </div>
   );

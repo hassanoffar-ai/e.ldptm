@@ -52,18 +52,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const allMenuItems = [
     { id: 'dashboard', label: 'Panel', icon: LayoutDashboard, requiredPerm: null },
     { id: 'students', label: 'Tələbələr', icon: Users, requiredPerm: 'canManageStudents' as const },
-    { id: 'groups', label: 'Qruplar', icon: Grid, requiredPerm: null },
-    { id: 'specialties', label: 'İxtisaslar', icon: GraduationCap, requiredPerm: null },
-    { id: 'subjects', label: 'Fənlər', icon: BookOpen, requiredPerm: null },
+    { id: 'groups', label: 'Qruplar', icon: Grid, requiredPerm: 'canManageGroups' as const },
+    { id: 'specialties', label: 'İxtisaslar', icon: GraduationCap, requiredPerm: 'canManageSpecialties' as const },
+    { id: 'subjects', label: 'Fənlər', icon: BookOpen, requiredPerm: 'canManageSubjects' as const },
     { id: 'journal', label: 'Jurnal', icon: BookMarked, requiredPerm: 'canAccessJournal' as const },
     { id: 'grades', label: 'Qiymətlər', icon: Award, requiredPerm: 'canManageGrades' as const },
-    { id: 'attendance', label: 'Davamiyyət', icon: CheckSquare, requiredPerm: null },
+    { id: 'attendance', label: 'Davamiyyət', icon: CheckSquare, requiredPerm: 'canManageAttendance' as const },
     { id: 'exams', label: 'İmtahanlar', icon: FileText, requiredPerm: 'canManageExams' as const },
     { id: 'tickets', label: 'Biletlər', icon: Ticket, requiredPerm: 'canAccessTickets' as const },
     { id: 'rooms', label: 'Otaqlar', icon: DoorClosed, requiredPerm: 'canAccessRooms' as const },
     { id: 'reports', label: 'Hesabatlar', icon: BarChart3, requiredPerm: 'canViewReports' as const },
     { id: 'users', label: 'Səlahiyyətlər', icon: UserCheck, superAdminOnly: true },
-    { id: 'settings', label: 'Ayarlar', icon: Settings, requiredPerm: null },
+    { id: 'settings', label: 'Ayarlar', icon: Settings, superAdminOnly: true },
   ];
 
   // Filter items based on role & permissions
