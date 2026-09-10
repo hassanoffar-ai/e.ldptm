@@ -324,7 +324,7 @@ export default function App() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 md:ml-72 flex flex-col min-h-screen">
+      <main className="flex-1 md:ml-72 flex flex-col min-h-screen min-w-0 overflow-x-hidden">
         {/* Top Header */}
         <Header
           onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}

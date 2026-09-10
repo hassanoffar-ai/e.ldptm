@@ -192,33 +192,32 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
       </div>
 
       {/* Top Navbar */}
-      <header className="w-full px-6 py-6 flex items-center justify-between relative z-10 max-w-6xl mx-auto">
-        <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#5300b7] to-[#7c3aed] flex items-center justify-center text-white shadow-xl shadow-purple-950/40">
-            <GraduationCap className="w-6 h-6" />
+      <header className="w-full px-4 sm:px-6 py-4 sm:py-6 flex items-center justify-between relative z-10 max-w-6xl mx-auto">
+        <div className="flex items-center gap-2.5 sm:gap-3.5">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-[#5300b7] to-[#7c3aed] flex items-center justify-center text-white shadow-xl shadow-purple-950/40 shrink-0">
+            <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div>
-            <span className="font-extrabold text-lg sm:text-xl tracking-tight text-white block leading-tight">
+            <span className="font-extrabold text-base sm:text-xl tracking-tight text-white block leading-tight">
               E-LDPTM
             </span>
-            <span className="text-[11px] text-purple-300 font-semibold tracking-wide uppercase">
+            <span className="text-[10px] sm:text-[11px] text-purple-300 font-semibold tracking-wide uppercase">
               Yüksək Texniki Peşə (YTP) Portalı
             </span>
           </div>
         </div>
 
-        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-purple-200">
+        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-purple-200">
           <Building2 className="w-3.5 h-3.5 text-purple-400" />
           <span>Lənkəran Dövlət Peşə Təhsil Mərkəzi</span>
         </div>
       </header>
 
       {/* Main Center Container */}
-      <main className="flex-1 flex items-center justify-center p-4 sm:p-6 relative z-10 my-4">
-        <div className="w-full max-w-xl bg-slate-900/85 backdrop-blur-2xl border border-slate-700/60 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-purple-950/60 relative">
+      <main className="flex-1 flex items-center justify-center p-3 sm:p-6 relative z-10 my-2 sm:my-4">
+        <div className="w-full max-w-xl bg-slate-900/85 backdrop-blur-2xl border border-slate-700/60 rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-2xl shadow-purple-950/60 relative">
           {/* Header Banner */}
-          {/* Header Banner */}
-          <div className="text-center mb-6">
+          <div className="text-center mb-5 sm:mb-6">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/25 text-purple-300 text-xs font-bold mb-3 shadow-inner">
               <Sparkles className="w-3.5 h-3.5 text-purple-400" />
               <span>YTP Subbakalavr Təhsili</span>

@@ -118,18 +118,18 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
     <div className="min-h-screen bg-[#f8f9ff] text-[#121c2a] flex flex-col antialiased">
       {/* 1. Header */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-2xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
           {/* Brand & Specialty */}
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#5300b7] to-[#7c3aed] flex items-center justify-center text-white shadow-md shadow-purple-950/20">
-              <GraduationCap className="w-6 h-6" />
+          <div className="flex items-center gap-2.5 sm:gap-3.5">
+            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#5300b7] to-[#7c3aed] flex items-center justify-center text-white shadow-md shadow-purple-950/20 shrink-0">
+              <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xl font-extrabold text-[#121c2a] tracking-tight">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="text-lg sm:text-xl font-extrabold text-[#121c2a] tracking-tight">
                   E-LDPTM
                 </span>
-                <span className="px-2.5 py-0.5 rounded-full bg-purple-100 text-[#5300b7] text-[10px] font-bold uppercase tracking-wider">
+                <span className="px-2 sm:px-2.5 py-0.5 rounded-full bg-purple-100 text-[#5300b7] text-[9px] sm:text-[10px] font-bold uppercase tracking-wider">
                   YTP Şəxsi Kabinet
                 </span>
               </div>
@@ -140,7 +140,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
           </div>
 
           {/* Student Profile Overview & Logout */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <div className="hidden md:flex flex-col text-right">
               <span className="text-xs font-bold text-slate-800 leading-tight">
                 {student.name}
@@ -152,7 +152,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
 
             <button
               onClick={onLogout}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 text-xs font-bold transition-all cursor-pointer"
+              className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 text-xs font-bold transition-all cursor-pointer"
               title="Kabinetdən Çıxış"
             >
               <LogOut className="w-4 h-4 text-rose-500" />
@@ -163,11 +163,11 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
       </header>
 
       {/* 2. Hero Profile Card */}
-      <section className="bg-gradient-to-r from-[#5300b7] via-[#6d28d9] to-[#7c3aed] text-white py-8 px-4 sm:px-6 lg:px-8 shadow-lg">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      <section className="bg-gradient-to-r from-[#5300b7] via-[#6d28d9] to-[#7c3aed] text-white py-6 sm:py-8 px-3 sm:px-6 lg:px-8 shadow-lg">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-5 sm:gap-6">
           {/* Identity info */}
-          <div className="flex items-start gap-4">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white font-extrabold text-2xl sm:text-3xl shadow-inner">
+          <div className="flex items-start gap-3.5 sm:gap-4">
+            <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white font-extrabold text-xl sm:text-3xl shadow-inner shrink-0">
               {student.name
                 .split(' ')
                 .map((n) => n[0])
@@ -175,17 +175,17 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                 .join('')}
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
+                <h1 className="text-xl sm:text-3xl font-black tracking-tight break-words leading-tight">
                   {student.name}
                 </h1>
-                <span className="px-2.5 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-400/40 text-emerald-200 text-xs font-bold">
+                <span className="px-2 sm:px-2.5 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-400/40 text-emerald-200 text-[11px] sm:text-xs font-bold shrink-0">
                   Aktiv Tələbə
                 </span>
               </div>
 
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-purple-100/90 font-medium">
+              <div className="flex flex-wrap items-center gap-x-3 sm:gap-x-4 gap-y-1 text-xs text-purple-100/90 font-medium">
                 <span>
                   Tələbə ID: <strong className="font-mono text-white">{student.studentId}</strong>
                 </span>
@@ -206,30 +206,30 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
           </div>
 
           {/* KPI Mini Badges */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <div className="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 text-center">
-              <span className="text-[11px] text-purple-200 uppercase font-semibold block">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
+            <div className="p-2.5 sm:p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 text-center">
+              <span className="text-[10px] sm:text-[11px] text-purple-200 uppercase font-semibold block">
                 Semestr Fənləri
               </span>
-              <span className="text-xl sm:text-2xl font-black text-white">
+              <span className="text-lg sm:text-2xl font-black text-white">
                 {totalCourses} fənn
               </span>
             </div>
 
-            <div className="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 text-center">
-              <span className="text-[11px] text-purple-200 uppercase font-semibold block">
+            <div className="p-2.5 sm:p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 text-center">
+              <span className="text-[10px] sm:text-[11px] text-purple-200 uppercase font-semibold block">
                 Orta Giriş Balı
               </span>
-              <span className="text-xl sm:text-2xl font-black text-amber-300 font-mono">
+              <span className="text-lg sm:text-2xl font-black text-amber-300 font-mono">
                 {averageEntryScore} / 50
               </span>
             </div>
 
-            <div className="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 text-center col-span-2 sm:col-span-1">
-              <span className="text-[11px] text-purple-200 uppercase font-semibold block">
+            <div className="p-2.5 sm:p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 text-center col-span-2 sm:col-span-1">
+              <span className="text-[10px] sm:text-[11px] text-purple-200 uppercase font-semibold block">
                 Təhsil Pilləsi
               </span>
-              <span className="text-xs font-bold text-emerald-300 block mt-1">
+              <span className="text-xs font-bold text-emerald-300 block mt-0.5 sm:mt-1">
                 YTP Subbakalavr
               </span>
             </div>
@@ -238,60 +238,60 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
       </section>
 
       {/* 3. Navigation Tabs */}
-      <div className="bg-white border-b border-slate-200 sticky top-20 z-30 shadow-2xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-1 sm:space-x-3 overflow-x-auto py-2">
+      <div className="bg-white border-b border-slate-200 sticky top-16 sm:top-20 z-30 shadow-2xs">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex space-x-1.5 sm:space-x-3 overflow-x-auto no-scrollbar py-2">
           <button
             onClick={() => setActiveTab('grades')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
               activeTab === 'grades'
                 ? 'bg-[#5300b7] text-white shadow-sm'
                 : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
-            <Award className="w-4 h-4" />
+            <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span>Semestr Balları və Qiymətlər</span>
           </button>
 
           <button
             onClick={() => setActiveTab('schedule')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
               activeTab === 'schedule'
                 ? 'bg-[#5300b7] text-white shadow-sm'
                 : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
-            <Calendar className="w-4 h-4" />
+            <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span>İmtahan Cədvəli ({studentSessions.length})</span>
           </button>
 
           <button
             onClick={() => setActiveTab('attendance')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
               activeTab === 'attendance'
                 ? 'bg-[#5300b7] text-white shadow-sm'
                 : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
-            <Percent className="w-4 h-4" />
+            <Percent className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span>Davamiyyət İcmalı</span>
           </button>
 
           <button
             onClick={() => setActiveTab('rules')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
               activeTab === 'rules'
                 ? 'bg-[#5300b7] text-white shadow-sm'
                 : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
-            <BookOpen className="w-4 h-4" />
+            <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span>YTP Qiymətləndirmə Qaydaları</span>
           </button>
         </div>
       </div>
 
       {/* 4. Main Body */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-3 sm:px-6 lg:px-8 py-5 sm:py-8 space-y-6 sm:space-y-8">
         {/* TAB 1: SEMESTER GRADES & ACTIVITY */}
         {activeTab === 'grades' && (
           <div className="space-y-6">
@@ -310,7 +310,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
             </div>
 
             {studentCoursesWithGrades.length === 0 ? (
-              <div className="p-12 text-center bg-white rounded-3xl border border-slate-200 shadow-sm text-slate-400">
+              <div className="p-8 sm:p-12 text-center bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm text-slate-400">
                 <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-40 text-purple-600" />
                 <h3 className="text-base font-bold text-slate-700">
                   Hazırda heç bir fənn üzrə jurnal daxil edilməyib
@@ -344,16 +344,16 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                   return (
                     <div
                       key={course.id}
-                      className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs hover:border-purple-300 transition-all space-y-4"
+                      className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-4 sm:p-6 shadow-xs hover:border-purple-300 transition-all space-y-4"
                     >
                       {/* Course Header */}
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 sm:pb-4 border-b border-slate-100 gap-2.5 sm:gap-3">
                         <div>
-                          <div className="flex items-center gap-2.5">
-                            <span className="px-2.5 py-1 bg-purple-50 text-[#5300b7] rounded-lg text-xs font-mono font-bold">
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 bg-purple-50 text-[#5300b7] rounded-lg text-xs font-mono font-bold">
                               {course.subjectCode}
                             </span>
-                            <h3 className="font-bold text-base text-slate-900">
+                            <h3 className="font-bold text-sm sm:text-base text-slate-900">
                               {course.subject}
                             </h3>
                           </div>
@@ -365,7 +365,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                         {/* Status badge */}
                         <div className="flex items-center gap-2">
                           <span
-                            className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                            className={`px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border ${
                               !hasScored
                                 ? 'bg-slate-50 text-slate-500 border-slate-200'
                                 : isQualifiedForExam
@@ -383,49 +383,49 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                       </div>
 
                       {/* 50 Point Breakdown Grid */}
-                      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                        <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 text-center">
-                          <span className="text-[11px] text-slate-500 font-semibold block mb-1">
+                      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3">
+                        <div className="p-2.5 sm:p-3 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-100 text-center">
+                          <span className="text-[10px] sm:text-[11px] text-slate-500 font-semibold block mb-0.5 sm:mb-1">
                             Seminar (Maks 10)
                           </span>
-                          <span className="text-lg font-bold text-slate-800 font-mono">
+                          <span className="text-base sm:text-lg font-bold text-slate-800 font-mono">
                             {seminar !== null ? `${seminar} bal` : '-'}
                           </span>
                         </div>
 
-                        <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 text-center">
-                          <span className="text-[11px] text-slate-500 font-semibold block mb-1">
+                        <div className="p-2.5 sm:p-3 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-100 text-center">
+                          <span className="text-[10px] sm:text-[11px] text-slate-500 font-semibold block mb-0.5 sm:mb-1">
                             Laboratoriya (Maks 10)
                           </span>
-                          <span className="text-lg font-bold text-slate-800 font-mono">
+                          <span className="text-base sm:text-lg font-bold text-slate-800 font-mono">
                             {lab !== null ? `${lab} bal` : '-'}
                           </span>
                         </div>
 
-                        <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 text-center">
-                          <span className="text-[11px] text-slate-500 font-semibold block mb-1">
+                        <div className="p-2.5 sm:p-3 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-100 text-center">
+                          <span className="text-[10px] sm:text-[11px] text-slate-500 font-semibold block mb-0.5 sm:mb-1">
                             Sərbəst İş (Maks 10)
                           </span>
-                          <span className="text-lg font-bold text-slate-800 font-mono">
+                          <span className="text-base sm:text-lg font-bold text-slate-800 font-mono">
                             {indep !== null ? `${indep} bal` : '-'}
                           </span>
                         </div>
 
-                        <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 text-center">
-                          <span className="text-[11px] text-slate-500 font-semibold block mb-1">
+                        <div className="p-2.5 sm:p-3 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-100 text-center">
+                          <span className="text-[10px] sm:text-[11px] text-slate-500 font-semibold block mb-0.5 sm:mb-1">
                             Kollokvium (Maks 20)
                           </span>
-                          <span className="text-lg font-bold text-slate-800 font-mono">
+                          <span className="text-base sm:text-lg font-bold text-slate-800 font-mono">
                             {colloq !== null ? `${colloq} bal` : '-'}
                           </span>
                         </div>
 
                         {/* Total Entry Score (50) */}
-                        <div className="p-3 bg-purple-50 rounded-2xl border border-purple-200 text-center col-span-2 sm:col-span-1">
-                          <span className="text-[11px] text-purple-700 font-extrabold uppercase block mb-1">
+                        <div className="p-2.5 sm:p-3 bg-purple-50 rounded-xl sm:rounded-2xl border border-purple-200 text-center col-span-2 sm:col-span-1">
+                          <span className="text-[10px] sm:text-[11px] text-purple-700 font-extrabold uppercase block mb-0.5 sm:mb-1">
                             Giriş Balı (Maks 50)
                           </span>
-                          <span className="text-xl font-black text-[#5300b7] font-mono">
+                          <span className="text-lg sm:text-xl font-black text-[#5300b7] font-mono">
                             {entryTotal} / 50
                           </span>
                         </div>
@@ -474,7 +474,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
             </div>
 
             {studentSessions.length === 0 ? (
-              <div className="p-12 text-center bg-white rounded-3xl border border-slate-200 text-slate-400 text-xs">
+              <div className="p-8 sm:p-12 text-center bg-white rounded-2xl sm:rounded-3xl border border-slate-200 text-slate-400 text-xs">
                 Qrupunuz üçün hazırda heç bir imtahan sessiyası təyin edilməyib.
               </div>
             ) : (
@@ -482,7 +482,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                 {studentSessions.map((s) => (
                   <div
                     key={s.id}
-                    className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-3"
+                    className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs space-y-3"
                   >
                     <div className="flex justify-between items-start">
                       <span className="px-2.5 py-1 bg-purple-50 text-[#5300b7] rounded-lg font-mono font-bold text-xs">
@@ -541,7 +541,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs text-center">
+              <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs text-center">
                 <span className="text-xs text-slate-500 font-semibold block mb-1">
                   Ümumi İştirak Payı
                 </span>
@@ -551,7 +551,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs text-center">
+              <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs text-center">
                 <span className="text-xs text-slate-500 font-semibold block mb-1">
                   İcazə Verilən Maksimum Qayıb
                 </span>
@@ -561,7 +561,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs text-center">
+              <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs text-center">
                 <span className="text-xs text-slate-500 font-semibold block mb-1">
                   Status
                 </span>

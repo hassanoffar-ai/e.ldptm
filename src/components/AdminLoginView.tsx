@@ -67,16 +67,16 @@ export const AdminLoginView: React.FC<AdminLoginViewProps> = ({
       </div>
 
       {/* Top Navbar */}
-      <header className="w-full px-6 py-5 flex items-center justify-between relative z-10 max-w-6xl mx-auto">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#6d28d9] to-[#9333ea] flex items-center justify-center text-white shadow-lg shadow-purple-900/30">
+      <header className="w-full px-4 sm:px-6 py-3.5 sm:py-5 flex items-center justify-between relative z-10 max-w-6xl mx-auto">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-[#6d28d9] to-[#9333ea] flex items-center justify-center text-white shadow-lg shadow-purple-900/30 shrink-0">
             <Shield className="w-5 h-5" />
           </div>
           <div>
-            <span className="font-extrabold text-lg tracking-tight text-white block leading-tight">
+            <span className="font-extrabold text-base sm:text-lg tracking-tight text-white block leading-tight">
               E-LDPTM
             </span>
-            <span className="text-[11px] text-purple-300 font-medium tracking-wide uppercase">
+            <span className="text-[10px] sm:text-[11px] text-purple-300 font-medium tracking-wide uppercase">
               Mərkəzi İdarəetmə Sistemi
             </span>
           </div>
@@ -84,16 +84,17 @@ export const AdminLoginView: React.FC<AdminLoginViewProps> = ({
 
         <button
           onClick={onNavigateHome}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 text-xs font-semibold backdrop-blur-md transition-all cursor-pointer"
+          className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 text-xs font-semibold backdrop-blur-md transition-all cursor-pointer"
         >
           <Globe className="w-4 h-4 text-purple-400" />
-          <span>Əsas Sayta Qayıt</span>
+          <span className="hidden sm:inline">Əsas Sayta Qayıt</span>
+          <span className="sm:hidden">Əsas Sayt</span>
         </button>
       </header>
 
       {/* Center Card */}
-      <main className="flex-1 flex items-center justify-center p-4 relative z-10 my-4">
-        <div className="w-full max-w-md bg-slate-900/80 backdrop-blur-xl border border-slate-700/60 rounded-3xl p-6 sm:p-8 shadow-2xl relative shadow-purple-950/50">
+      <main className="flex-1 flex items-center justify-center p-3 sm:p-4 relative z-10 my-2 sm:my-4">
+        <div className="w-full max-w-md bg-slate-900/85 backdrop-blur-xl border border-slate-700/60 rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-2xl relative shadow-purple-950/50">
           <div className="text-center mb-6">
             <div className="inline-flex p-3 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 mb-3 shadow-inner">
               <KeyRound className="w-6 h-6" />
@@ -202,7 +203,7 @@ export const AdminLoginView: React.FC<AdminLoginViewProps> = ({
             <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
               Standart Giriş Məlumatları:
             </span>
-            <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono">
               <div
                 onClick={() => {
                   handleRoleSelect('super_admin');
