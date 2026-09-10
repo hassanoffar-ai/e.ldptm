@@ -85,13 +85,13 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                   <div className="flex justify-between">
                     <span>Tələbə sayı:</span>
                     <strong className="text-slate-900">
-                      {groupStudents.length || 5} nəfər
+                      {groupStudents.length} nəfər
                     </strong>
                   </div>
                   <div className="flex justify-between">
                     <span>Təyin olunmuş imtahanlar:</span>
                     <strong className="text-[#5300b7]">
-                      {groupExams.length || 1} fənn
+                      {groupExams.length} fənn
                     </strong>
                   </div>
                 </div>
@@ -234,57 +234,70 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {ROOMS_LIST.slice(0, 4).map((room, idx) => (
-            <div
-              key={room}
-              className="bg-white p-6 rounded-2xl border border-[#ccc3d7] shadow-xs"
-            >
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-xl font-bold text-[#121c2a]">{room}</h3>
-                  <p className="text-xs text-[#64748b]">
-                    Tutum: 20 Kompüter • Onlayn İmtahan Sistemi Qurulub
-                  </p>
+          {ROOMS_LIST.slice(0, 4).map((room) => {
+            const activeSession = sessions.find((s) => s.room === room);
+            const occupiedCount = activeSession ? activeSession.items.length : 0;
+
+            return (
+              <div
+                key={room}
+                className="bg-white p-6 rounded-2xl border border-[#ccc3d7] shadow-xs"
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-[#121c2a]">{room}</h3>
+                    <p className="text-xs text-[#64748b]">
+                      Tutum: 20 Kompüter • Onlayn İmtahan Sistemi
+                    </p>
+                  </div>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-semibold border ${
+                      activeSession
+                        ? 'bg-purple-50 text-[#5300b7] border-purple-200'
+                        : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    }`}
+                  >
+                    {activeSession ? 'İmtahan Gedir' : 'Boş / Hazır'}
+                  </span>
                 </div>
-                <span className="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-semibold">
-                  Aktiv Zal
-                </span>
-              </div>
 
-              {/* PC visual grid */}
-              <div className="grid grid-cols-5 gap-2 py-3">
-                {Array.from({ length: 10 }).map((_, pcIdx) => {
-                  const pcNum = `PC-${(pcIdx + 1).toString().padStart(2, '0')}`;
-                  const isOccupied = pcIdx < 5;
-                  return (
-                    <div
-                      key={pcNum}
-                      className={`p-2 rounded-xl border text-center text-xs transition-colors ${
-                        isOccupied
-                          ? 'bg-purple-50 border-purple-300 text-[#5300b7] font-bold'
-                          : 'bg-slate-50 border-slate-200 text-slate-500'
-                      }`}
-                    >
-                      <Monitor className="w-4 h-4 mx-auto mb-1 opacity-70" />
-                      <span>{pcNum}</span>
-                    </div>
-                  );
-                })}
-              </div>
+                {/* PC visual grid */}
+                <div className="grid grid-cols-5 gap-2 py-3">
+                  {Array.from({ length: 10 }).map((_, pcIdx) => {
+                    const pcNum = `PC-${(pcIdx + 1).toString().padStart(2, '0')}`;
+                    const isOccupied = pcIdx < occupiedCount;
+                    return (
+                      <div
+                        key={pcNum}
+                        className={`p-2 rounded-xl border text-center text-xs transition-colors ${
+                          isOccupied
+                            ? 'bg-purple-50 border-purple-300 text-[#5300b7] font-bold'
+                            : 'bg-slate-50 border-slate-200 text-slate-500'
+                        }`}
+                      >
+                        <Monitor className="w-4 h-4 mx-auto mb-1 opacity-70" />
+                        <span>{pcNum}</span>
+                      </div>
+                    );
+                  })}
+                </div>
 
-              <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
-                <span className="text-slate-500">
-                  Cari İmtahan: Veb Proqramlaşdırma (İT-21)
-                </span>
-                <button
-                  onClick={() => setActiveTab('exams')}
-                  className="text-[#5300b7] font-semibold hover:underline"
-                >
-                  Protokola bax →
-                </button>
+                <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+                  <span className="text-slate-500">
+                    {activeSession
+                      ? `Cari İmtahan: ${activeSession.subject} (${activeSession.group})`
+                      : 'Hazırda bu zalda imtahan təyin edilməyib'}
+                  </span>
+                  <button
+                    onClick={() => setActiveTab('exams')}
+                    className="text-[#5300b7] font-semibold hover:underline cursor-pointer"
+                  >
+                    Protokola bax →
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     );
@@ -309,57 +322,46 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
         </div>
 
         <div className="bg-white rounded-2xl border border-[#ccc3d7] p-6 shadow-xs">
-          <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-100 mb-4">
-            <div className="text-sm font-semibold text-slate-800">
-              Qrup: İT-21 • Fənn: Veb Proqramlaşdırma əsasları
+          {students.length === 0 ? (
+            <div className="p-8 text-center text-slate-400 text-sm">
+              Jurnalda göstərmək üçün sistemdə hələ heç bir tələbə qeydiyyatda deyil. Əvvəlcə tələbələr əlavə edin.
             </div>
-            <span className="text-xs px-3 py-1 bg-purple-50 text-[#5300b7] rounded-full font-medium">
-              May 2024 Davamiyyət Dərəcəsi: 96.4%
-            </span>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-slate-600">
-                  <th className="p-3">Tələbə</th>
-                  <th className="p-3 text-center">02 May</th>
-                  <th className="p-3 text-center">05 May</th>
-                  <th className="p-3 text-center">08 May</th>
-                  <th className="p-3 text-center">12 May</th>
-                  <th className="p-3 text-center">15 May (İmtahan)</th>
-                  <th className="p-3 text-center">İştirak</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {students.slice(0, 5).map((s) => (
-                  <tr key={s.id} className="hover:bg-slate-50/60">
-                    <td className="p-3 font-semibold text-slate-800">
-                      {s.name} ({s.studentId})
-                    </td>
-                    <td className="p-3 text-center text-emerald-600 font-bold">
-                      +
-                    </td>
-                    <td className="p-3 text-center text-emerald-600 font-bold">
-                      +
-                    </td>
-                    <td className="p-3 text-center text-emerald-600 font-bold">
-                      +
-                    </td>
-                    <td className="p-3 text-center text-emerald-600 font-bold">
-                      +
-                    </td>
-                    <td className="p-3 text-center text-purple-700 font-bold">
-                      İştirak edib
-                    </td>
-                    <td className="p-3 text-center font-semibold text-emerald-700">
-                      100%
-                    </td>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-50 text-slate-600">
+                    <th className="p-3">Tələbə</th>
+                    <th className="p-3">Qrup</th>
+                    <th className="p-3">İxtisas</th>
+                    <th className="p-3 text-center">Status</th>
+                    <th className="p-3 text-center">İştirak Payı</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {students.map((s) => (
+                    <tr key={s.id} className="hover:bg-slate-50/60">
+                      <td className="p-3 font-semibold text-slate-800">
+                        {s.name} ({s.studentId})
+                      </td>
+                      <td className="p-3 text-slate-600 font-medium">
+                        {s.group}
+                      </td>
+                      <td className="p-3 text-slate-500">
+                        {s.specialty}
+                      </td>
+                      <td className="p-3 text-center text-emerald-600 font-bold">
+                        Aktiv
+                      </td>
+                      <td className="p-3 text-center font-semibold text-purple-700">
+                        100%
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
     );

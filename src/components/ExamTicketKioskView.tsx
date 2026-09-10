@@ -90,48 +90,28 @@ export const ExamTicketKioskView: React.FC<ExamTicketKioskViewProps> = ({
     );
 
     if (!foundItem && !foundStudent) {
-      // Default fallback sample if student matches exact demo ST-2023-4012
-      if (trimmedId.toUpperCase() === 'ST-2023-4012') {
-        setTicketData({
-          studentName: 'Əli Məmmədov',
-          studentId: 'ST-2023-4012',
-          specialty: 'İnformasiya Texnologiyaları',
-          group: 'IT-04',
-          subject: 'Verilənlər Bazasının İdarəedilməsi Sistemləri',
-          date: '15 Noyabr 2023',
-          time: '10:00 - 12:00',
-          room: 'Lab-4',
-          computerNo: 'PC-12',
-          ticketNo: '#EX-98234',
-          academicYear: '2023/2024 Tədris İli',
-          semester: 'Payız Semestri',
-          docNumber: 'EX-98234',
-        });
-        setErrorMessage(null);
-        setPhase('ticket');
-        return;
-      }
-
       setErrorMessage(
-        `"${trimmedId}" nömrəli tələbə ID-si üzrə aktiv imtahan tapılmadı. Nəzarətçiyə müraciət edin.`
+        `"${trimmedId}" nömrəli tələbə ID-si üzrə sistemdə tələbə və ya aktiv imtahan tapılmadı. Zəhmət olmasa ID-ni dəqiqləşdirin və ya administratora müraciət edin.`
       );
       return;
     }
 
     const studentName =
       foundItem?.studentName || foundStudent?.name || 'Tələbə';
-    const group = foundItem?.group || foundStudent?.group || 'İT-21';
+    const group = foundItem?.group || foundStudent?.group || '-';
     const specialty =
       foundStudent?.specialty ||
       foundSession?.specialty ||
-      'İnformasiya Texnologiyaları';
+      '-';
     const subject =
-      foundSession?.subject || 'Veb Proqramlaşdırma əsasları';
-    const date = foundSession?.date || '15 May 2024';
-    const time = foundSession?.time || '10:00 - 12:00';
-    const room = foundItem?.room || foundSession?.room || 'Lab-3';
+      foundSession?.subject || 'Təyin olunmuş imtahan';
+    const date = foundSession?.date || new Date().toISOString().split('T')[0];
+    const time = foundSession?.time || foundItem?.time || '10:00';
+    const room = foundItem?.room || foundSession?.room || 'Təyin olunmayıb';
     const computerNo = foundItem?.computerNo || 'PC-01';
-    const ticketNo = foundItem?.ticketNo || '#EX-98234';
+    const ticketNo = foundItem?.ticketNo
+      ? (foundItem.ticketNo.startsWith('#') ? foundItem.ticketNo : `#EX-${foundItem.ticketNo}`)
+      : `#EX-${Math.floor(Math.random() * 89999 + 10000)}`;
 
     setTicketData({
       studentName,
@@ -143,11 +123,13 @@ export const ExamTicketKioskView: React.FC<ExamTicketKioskViewProps> = ({
       time,
       room,
       computerNo,
-      ticketNo: ticketNo.startsWith('#') ? ticketNo : `#EX-${ticketNo.replace('B-', '')}92`,
-      academicYear: foundSession?.academicYear || '2023/2024 Tədris İli',
-      semester: foundSession?.semester || 'Yaz Semestri',
+      ticketNo,
+      academicYear: foundSession?.academicYear || '2024/2025 Tədris İli',
+      semester: foundSession?.semester || 'Semestr İmtahanı',
       docNumber: `EX-${Math.floor(Math.random() * 89999 + 10000)}`,
     });
+    setErrorMessage(null);
+    setPhase('ticket');
 
     setErrorMessage(null);
     setPhase('ticket');
@@ -277,30 +259,26 @@ export const ExamTicketKioskView: React.FC<ExamTicketKioskViewProps> = ({
               </button>
             </form>
 
-            {/* Quick selection tags for easy demo usage */}
-            <div className="mt-6 pt-5 border-t border-slate-100 text-left">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block mb-2">
-                Nümunə Tələbələr (Test üçün klikləyin):
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { id: 'ST-2023-4012', name: 'Əli Məmmədov' },
-                  { id: 'STD-10021', name: 'Rəşad M.' },
-                  { id: 'STD-10022', name: 'Aygün Q.' },
-                  { id: 'STD-10030', name: 'Leyla S.' },
-                  { id: '203948', name: 'Anar Ə.' },
-                ].map((demo) => (
-                  <button
-                    key={demo.id}
-                    type="button"
-                    onClick={() => handleQuickSelect(demo.id)}
-                    className="px-2.5 py-1 text-xs bg-purple-50 hover:bg-purple-100 text-[#5300b7] rounded-lg border border-purple-200/60 font-mono transition-colors"
-                  >
-                    {demo.id} <span className="text-slate-500 font-sans">({demo.name})</span>
-                  </button>
-                ))}
+            {/* Real registered students quick selection if any exist */}
+            {students.length > 0 && (
+              <div className="mt-6 pt-5 border-t border-slate-100 text-left">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block mb-2">
+                  Qeydiyyatdakı Tələbələr:
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {students.slice(0, 6).map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => handleQuickSelect(s.studentId)}
+                      className="px-2.5 py-1 text-xs bg-purple-50 hover:bg-purple-100 text-[#5300b7] rounded-lg border border-purple-200/60 font-mono transition-colors cursor-pointer"
+                    >
+                      {s.studentId} <span className="text-slate-500 font-sans">({s.name})</span>
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           <p className="mt-6 text-sm text-[#7b7486] text-center">

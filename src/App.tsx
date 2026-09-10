@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ActiveTab, ExamSession, GradeBookCourse, Student } from './types';
 import {
   INITIAL_STUDENTS,
@@ -19,29 +19,75 @@ import { DashboardView } from './components/DashboardView';
 import { StudentsView } from './components/StudentsView';
 import { GroupsAndOtherViews } from './components/GroupsAndOtherViews';
 import { NewStudentModal } from './components/NewStudentModal';
+import { NewExamSessionModal } from './components/NewExamSessionModal';
+import { NewGradeCourseModal } from './components/NewGradeCourseModal';
+
+const loadFromStorage = <T,>(key: string, fallback: T): T => {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : fallback;
+  } catch {
+    return fallback;
+  }
+};
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('exams');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Persistent / dynamic mock data states
-  const [students, setStudents] = useState<Student[]>(INITIAL_STUDENTS);
-  const [sessions, setSessions] =
-    useState<ExamSession[]>(INITIAL_EXAM_SESSIONS);
-  const [selectedSessionId, setSelectedSessionId] = useState<string>(
-    INITIAL_EXAM_SESSIONS[0].id
+  // Persistent real data states
+  const [students, setStudents] = useState<Student[]>(() =>
+    loadFromStorage('eldptm_students', INITIAL_STUDENTS)
   );
-  const [courses, setCourses] =
-    useState<GradeBookCourse[]>(INITIAL_GRADE_COURSES);
+  const [sessions, setSessions] = useState<ExamSession[]>(() =>
+    loadFromStorage('eldptm_sessions', INITIAL_EXAM_SESSIONS)
+  );
+  const [selectedSessionId, setSelectedSessionId] = useState<string>(() => {
+    const savedSessions = loadFromStorage<ExamSession[]>(
+      'eldptm_sessions',
+      INITIAL_EXAM_SESSIONS
+    );
+    return savedSessions[0]?.id || '';
+  });
+  const [courses, setCourses] = useState<GradeBookCourse[]>(() =>
+    loadFromStorage('eldptm_courses', INITIAL_GRADE_COURSES)
+  );
+
+  // Sync to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('eldptm_students', JSON.stringify(students));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [students]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('eldptm_sessions', JSON.stringify(sessions));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [sessions]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('eldptm_courses', JSON.stringify(courses));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [courses]);
 
   // Quick ticket kiosk student selection
   const [kioskStudentId, setKioskStudentId] = useState<string | undefined>(
     undefined
   );
 
-  // New Student modal
+  // Modals
   const [isNewStudentModalOpen, setIsNewStudentModalOpen] = useState(false);
+  const [isNewSessionModalOpen, setIsNewSessionModalOpen] = useState(false);
+  const [isNewCourseModalOpen, setIsNewCourseModalOpen] = useState(false);
 
   const handleUpdateSession = (updated: ExamSession) => {
     setSessions((prev) =>
@@ -49,10 +95,33 @@ export default function App() {
     );
   };
 
+  const handleCreateSession = (newSession: ExamSession) => {
+    setSessions((prev) => [newSession, ...prev]);
+    setSelectedSessionId(newSession.id);
+  };
+
+  const handleDeleteSession = (id: string) => {
+    setSessions((prev) => {
+      const remaining = prev.filter((s) => s.id !== id);
+      if (selectedSessionId === id) {
+        setSelectedSessionId(remaining[0]?.id || '');
+      }
+      return remaining;
+    });
+  };
+
+  const handleCreateCourse = (newCourse: GradeBookCourse) => {
+    setCourses((prev) => [newCourse, ...prev]);
+  };
+
+  const handleDeleteCourse = (id: string) => {
+    setCourses((prev) => prev.filter((c) => c.id !== id));
+  };
+
   const handleAddStudent = (newStudent: Student) => {
     setStudents((prev) => [newStudent, ...prev]);
 
-    // Also optionally append to gradebook of their group
+    // Also optionally append to gradebook of their group if course exists
     setCourses((prevCourses) =>
       prevCourses.map((c) => {
         if (c.group === newStudent.group) {
@@ -69,7 +138,7 @@ export default function App() {
                 studentId: newStudent.id,
                 studentName: newStudent.name,
                 idNumber: newStudent.studentId,
-                avatarInitial: initials,
+                avatarInitial: initials || 'TL',
                 seminar: null,
                 laboratory: null,
                 independentWork: null,
@@ -138,7 +207,10 @@ export default function App() {
               selectedSessionId={selectedSessionId}
               onSelectSession={setSelectedSessionId}
               onUpdateSession={handleUpdateSession}
+              onOpenNewSessionModal={() => setIsNewSessionModalOpen(true)}
+              onDeleteSession={handleDeleteSession}
               onOpenTicketKioskForStudent={handleOpenTicketKioskForStudent}
+              students={students}
             />
           )}
 
@@ -157,6 +229,8 @@ export default function App() {
             <GradeEntryView
               courses={courses}
               onUpdateCourses={setCourses}
+              onOpenNewCourseModal={() => setIsNewCourseModalOpen(true)}
+              onDeleteCourse={handleDeleteCourse}
             />
           )}
 
@@ -198,6 +272,22 @@ export default function App() {
         isOpen={isNewStudentModalOpen}
         onClose={() => setIsNewStudentModalOpen(false)}
         onAddStudent={handleAddStudent}
+      />
+
+      {/* New Exam Session Modal */}
+      <NewExamSessionModal
+        isOpen={isNewSessionModalOpen}
+        onClose={() => setIsNewSessionModalOpen(false)}
+        onAddSession={handleCreateSession}
+        students={students}
+      />
+
+      {/* New Grade Course Modal */}
+      <NewGradeCourseModal
+        isOpen={isNewCourseModalOpen}
+        onClose={() => setIsNewCourseModalOpen(false)}
+        onAddCourse={handleCreateCourse}
+        students={students}
       />
     </div>
   );

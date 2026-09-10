@@ -179,8 +179,28 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-400 text-sm">
-                    Axtarışa uyğun tələbə tapılmadı.
+                  <td colSpan={7} className="p-12 text-center text-slate-400 text-sm">
+                    {students.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center space-y-3">
+                        <div className="w-12 h-12 rounded-full bg-purple-100 text-[#5300b7] flex items-center justify-center">
+                          <Users className="w-6 h-6" />
+                        </div>
+                        <div className="text-base font-bold text-slate-800">
+                          Hələ heç bir tələbə qeydiyyatdan keçirilməyib
+                        </div>
+                        <p className="text-xs text-slate-500 max-w-sm">
+                          Real tələbə bazanızı formalaşdırmaq üçün aşağıdakı düymə ilə ilk tələbənizi əlavə edin.
+                        </p>
+                        <button
+                          onClick={onOpenNewStudentModal}
+                          className="px-4 py-2 bg-[#6d28d9] hover:bg-[#581c87] text-white rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                        >
+                          + Yeni Tələbə Əlavə Et
+                        </button>
+                      </div>
+                    ) : (
+                      'Axtarışa uyğun tələbə tapılmadı.'
+                    )}
                   </td>
                 </tr>
               )}

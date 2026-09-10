@@ -11,16 +11,20 @@ import {
   Users as UsersIcon,
   BookOpen,
   CheckCircle,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Trash2,
 } from 'lucide-react';
-import { ExamSession, ExamProtocolItem } from '../types';
+import { ExamSession, ExamProtocolItem, Student } from '../types';
 
 interface ExamProtocolViewProps {
   sessions: ExamSession[];
   selectedSessionId: string;
   onSelectSession: (id: string) => void;
   onUpdateSession: (updated: ExamSession) => void;
+  onOpenNewSessionModal: () => void;
+  onDeleteSession: (id: string) => void;
   onOpenTicketKioskForStudent?: (studentId: string) => void;
+  students?: Student[];
 }
 
 export const ExamProtocolView: React.FC<ExamProtocolViewProps> = ({
@@ -28,20 +32,37 @@ export const ExamProtocolView: React.FC<ExamProtocolViewProps> = ({
   selectedSessionId,
   onSelectSession,
   onUpdateSession,
+  onOpenNewSessionModal,
+  onDeleteSession,
   onOpenTicketKioskForStudent,
+  students = [],
 }) => {
   const currentSession =
-    sessions.find((s) => s.id === selectedSessionId) || sessions[0];
+    sessions.find((s) => s.id === selectedSessionId) || sessions[0] || null;
 
   const [isEditingMeta, setIsEditingMeta] = useState(false);
   const [editedMeta, setEditedMeta] = useState({
-    subject: currentSession.subject,
-    group: currentSession.group,
-    date: currentSession.date,
-    supervisor: currentSession.supervisor,
-    room: currentSession.room,
-    time: currentSession.time,
+    subject: currentSession?.subject || '',
+    group: currentSession?.group || '',
+    date: currentSession?.date || '',
+    supervisor: currentSession?.supervisor || '',
+    room: currentSession?.room || '',
+    time: currentSession?.time || '',
   });
+
+  // Sync editedMeta when currentSession changes
+  React.useEffect(() => {
+    if (currentSession) {
+      setEditedMeta({
+        subject: currentSession.subject,
+        group: currentSession.group,
+        date: currentSession.date,
+        supervisor: currentSession.supervisor,
+        room: currentSession.room,
+        time: currentSession.time,
+      });
+    }
+  }, [currentSession?.id]);
 
   const [showAddStudent, setShowAddStudent] = useState(false);
   const [newStudentName, setNewStudentName] = useState('');
@@ -182,6 +203,38 @@ export const ExamProtocolView: React.FC<ExamProtocolViewProps> = ({
     showToast('Yeni tələbə protokola əlavə edildi.');
   };
 
+  const handleDeleteStudentItem = (itemId: string) => {
+    if (!currentSession) return;
+    const updatedItems = currentSession.items.filter((i) => i.id !== itemId);
+    onUpdateSession({ ...currentSession, items: updatedItems });
+    showToast('Tələbə protokoldan çıxarıldı.');
+  };
+
+  if (!currentSession) {
+    return (
+      <div className="p-4 md:p-8 flex-1 max-w-7xl mx-auto w-full flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="bg-white p-8 md:p-12 rounded-3xl border border-[#ccc3d7] text-center max-w-lg shadow-sm">
+          <div className="w-16 h-16 bg-purple-100 text-[#5300b7] rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <BookOpen className="w-8 h-8" />
+          </div>
+          <h3 className="text-xl font-bold text-[#121c2a] mb-2">
+            Heç bir imtahan protokolu yoxdur
+          </h3>
+          <p className="text-sm text-[#64748b] leading-relaxed mb-6">
+            Sistemdə aktiv imtahan protokolu mövcud deyil. Real imtahan sessiyası, bilet bölgüsü və rəsmi protokol üçün yeni imtahan əlavə edin.
+          </p>
+          <button
+            onClick={onOpenNewSessionModal}
+            className="px-6 py-3 bg-[#5300b7] hover:bg-[#430094] text-white rounded-xl font-semibold text-sm shadow-md transition-all flex items-center gap-2 mx-auto cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Yeni İmtahan Protokolu Yarat</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-4 md:p-8 flex-1 max-w-7xl mx-auto w-full">
       {/* Toast Notification */}
@@ -195,22 +248,51 @@ export const ExamProtocolView: React.FC<ExamProtocolViewProps> = ({
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-6">
         <div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <h2 className="text-2xl md:text-3xl font-bold text-[#121c2a]">
               İmtahan Protokolu
             </h2>
             {/* Session Selector */}
-            <select
-              value={selectedSessionId}
-              onChange={(e) => onSelectSession(e.target.value)}
-              className="text-xs bg-white border border-[#ccc3d7] rounded-lg px-2.5 py-1.5 text-purple-900 font-medium outline-none focus:ring-2 focus:ring-[#6d28d9] no-print"
+            {sessions.length > 0 && (
+              <select
+                value={selectedSessionId}
+                onChange={(e) => onSelectSession(e.target.value)}
+                className="text-xs bg-white border border-[#ccc3d7] rounded-lg px-2.5 py-1.5 text-purple-900 font-medium outline-none focus:ring-2 focus:ring-[#6d28d9] no-print"
+              >
+                {sessions.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.group} - {s.subject}
+                  </option>
+                ))}
+              </select>
+            )}
+
+            <button
+              onClick={onOpenNewSessionModal}
+              className="flex items-center gap-1 px-3 py-1.5 bg-[#5300b7] hover:bg-[#430094] text-white rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer no-print"
+              title="Yeni Protokol Yarat"
             >
-              {sessions.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.group} - {s.subject}
-                </option>
-              ))}
-            </select>
+              <Plus className="w-3.5 h-3.5" />
+              <span>Yeni Protokol</span>
+            </button>
+
+            {currentSession && (
+              <button
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      `"${currentSession.group} - ${currentSession.subject}" protokolunu silmək istədiyinizdən əminsiniz?`
+                    )
+                  ) {
+                    onDeleteSession(currentSession.id);
+                  }
+                }}
+                className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer no-print"
+                title="Bu Protokolu Sil"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
           </div>
           <p className="text-sm md:text-base text-[#4a4455] mt-1">
             {currentSession.academicYear} Tədris ili - {currentSession.semester}
@@ -422,68 +504,83 @@ export const ExamProtocolView: React.FC<ExamProtocolViewProps> = ({
               </tr>
             </thead>
             <tbody className="text-sm text-[#121c2a]">
-              {currentSession.items.map((item, index) => (
-                <tr
-                  key={item.id}
-                  className={`border-b border-[#e2e8f0] hover:bg-[#f8f9ff] transition-colors ${
-                    index % 2 === 1 ? 'bg-[#eff4ff]/30' : 'bg-white'
-                  }`}
-                >
-                  <td className="p-4 whitespace-nowrap font-medium text-[#121c2a]">
-                    <div className="flex items-center gap-2">
-                      <span>{item.studentName}</span>
-                      {onOpenTicketKioskForStudent && (
-                        <button
-                          onClick={() =>
-                            onOpenTicketKioskForStudent(item.studentId)
-                          }
-                          className="opacity-0 group-hover:opacity-100 hover:opacity-100 text-xs text-purple-600 hover:underline no-print px-1 py-0.5 bg-purple-50 rounded"
-                          title="Biletini Aç"
-                        >
-                          Bilet
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                  <td className="p-4 text-[#4a4455] whitespace-nowrap font-mono text-xs">
-                    {item.studentId}
-                  </td>
-                  <td className="p-4 whitespace-nowrap">{item.group}</td>
-                  <td className="p-4 whitespace-nowrap">{item.time}</td>
-                  <td className="p-4 whitespace-nowrap">{item.room}</td>
-                  <td className="p-4 whitespace-nowrap font-medium">
-                    {item.computerNo}
-                  </td>
-                  <td className="p-4 whitespace-nowrap font-bold text-[#5300b7]">
-                    {item.ticketNo}
-                  </td>
-                  <td className="p-4 text-[#4a4455] whitespace-nowrap">
-                    {item.ticketTime}
-                  </td>
-                  <td className="p-4 whitespace-nowrap">
-                    <div
-                      onClick={() => handleToggleSignature(item.id)}
-                      className="cursor-pointer group flex items-center"
-                      title="İmza statusunu dəyişmək üçün klikləyin"
-                    >
-                      {item.hasSigned ? (
-                        <div className="flex items-center gap-1.5 text-emerald-600 font-serif italic text-sm">
-                          <Check className="w-4 h-4" />
-                          <span className="underline decoration-wavy">
-                            {item.studentName.split(' ')[0]}
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="w-20 h-6 border-b-2 border-dashed border-[#ccc3d7] group-hover:border-purple-500 transition-colors flex items-center justify-center">
-                          <span className="text-[10px] text-slate-300 group-hover:text-purple-400 transition-colors">
-                            İmza
-                          </span>
-                        </div>
-                      )}
-                    </div>
+              {currentSession.items.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="p-8 text-center text-slate-400 text-sm">
+                    Bu protokolda hələ heç bir tələbə qeydiyyatda deyil. Aşağıdakı "+ Bu protokola tələbə əlavə et" düyməsi ilə tələbələri əlavə edə bilərsiniz.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                currentSession.items.map((item, index) => (
+                  <tr
+                    key={item.id}
+                    className={`border-b border-[#e2e8f0] hover:bg-[#f8f9ff] transition-colors group ${
+                      index % 2 === 1 ? 'bg-[#eff4ff]/30' : 'bg-white'
+                    }`}
+                  >
+                    <td className="p-4 whitespace-nowrap font-medium text-[#121c2a]">
+                      <div className="flex items-center gap-2">
+                        <span>{item.studentName}</span>
+                        {onOpenTicketKioskForStudent && (
+                          <button
+                            onClick={() =>
+                              onOpenTicketKioskForStudent(item.studentId)
+                            }
+                            className="opacity-0 group-hover:opacity-100 hover:opacity-100 text-xs text-purple-600 hover:underline no-print px-1.5 py-0.5 bg-purple-50 rounded"
+                            title="Biletini Aç"
+                          >
+                            Bilet
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDeleteStudentItem(item.id)}
+                          className="opacity-0 group-hover:opacity-100 hover:opacity-100 text-xs text-rose-500 hover:text-rose-700 p-1 rounded hover:bg-rose-50 transition-all no-print"
+                          title="Protokoldan sil"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                    <td className="p-4 text-[#4a4455] whitespace-nowrap font-mono text-xs">
+                      {item.studentId}
+                    </td>
+                    <td className="p-4 whitespace-nowrap">{item.group}</td>
+                    <td className="p-4 whitespace-nowrap">{item.time}</td>
+                    <td className="p-4 whitespace-nowrap">{item.room}</td>
+                    <td className="p-4 whitespace-nowrap font-medium">
+                      {item.computerNo}
+                    </td>
+                    <td className="p-4 whitespace-nowrap font-bold text-[#5300b7]">
+                      {item.ticketNo}
+                    </td>
+                    <td className="p-4 text-[#4a4455] whitespace-nowrap">
+                      {item.ticketTime}
+                    </td>
+                    <td className="p-4 whitespace-nowrap">
+                      <div
+                        onClick={() => handleToggleSignature(item.id)}
+                        className="cursor-pointer group flex items-center"
+                        title="İmza statusunu dəyişmək üçün klikləyin"
+                      >
+                        {item.hasSigned ? (
+                          <div className="flex items-center gap-1.5 text-emerald-600 font-serif italic text-sm">
+                            <Check className="w-4 h-4" />
+                            <span className="underline decoration-wavy">
+                              {item.studentName.split(' ')[0]}
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="w-20 h-6 border-b-2 border-dashed border-[#ccc3d7] group-hover:border-purple-500 transition-colors flex items-center justify-center">
+                            <span className="text-[10px] text-slate-300 group-hover:text-purple-400 transition-colors">
+                              İmza
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

@@ -10,7 +10,8 @@ import {
   Plus,
   Trash2,
   Download,
-  Check
+  Check,
+  Award
 } from 'lucide-react';
 import { GradeBookCourse, StudentGrade } from '../types';
 import { GROUPS_LIST, SPECIALTIES_LIST, SUBJECTS_LIST } from '../data/mockData';
@@ -18,39 +19,59 @@ import { GROUPS_LIST, SPECIALTIES_LIST, SUBJECTS_LIST } from '../data/mockData';
 interface GradeEntryViewProps {
   courses: GradeBookCourse[];
   onUpdateCourses: (updated: GradeBookCourse[]) => void;
+  onOpenNewCourseModal?: () => void;
+  onDeleteCourse?: (id: string) => void;
 }
 
 export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
   courses,
   onUpdateCourses,
+  onOpenNewCourseModal,
+  onDeleteCourse,
 }) => {
-  const [selectedGroupId, setSelectedGroupId] = useState('IT-201');
-  const [selectedSpecialty, setSelectedSpecialty] = useState(
-    'İnformasiya Texnologiyaları'
-  );
-  const [selectedSubject, setSelectedSubject] = useState(
-    'Proqramlaşdırma Əsasları'
-  );
-  const [selectedSemester, setSelectedSemester] = useState(
-    'II Semestr (2023/2024)'
-  );
-
-  // Find active course or create one
   const currentCourse =
     courses.find(
       (c) => c.group === selectedGroupId && c.subject === selectedSubject
-    ) || courses[0];
+    ) || courses[0] || null;
+
+  const [selectedGroupId, setSelectedGroupId] = useState(
+    currentCourse?.group || GROUPS_LIST[0] || 'İT-21'
+  );
+  const [selectedSpecialty, setSelectedSpecialty] = useState(
+    currentCourse?.specialty || SPECIALTIES_LIST[0] || 'İnformasiya Texnologiyaları'
+  );
+  const [selectedSubject, setSelectedSubject] = useState(
+    currentCourse?.subject || SUBJECTS_LIST[0] || 'Veb Proqramlaşdırma əsasları'
+  );
+  const [selectedSemester, setSelectedSemester] = useState(
+    currentCourse?.semester || 'Yaz Semestri (2024/2025)'
+  );
 
   const [gradesList, setGradesList] = useState<StudentGrade[]>(
-    currentCourse.grades
+    currentCourse?.grades || []
   );
   const [lastSavedTime, setLastSavedTime] = useState<string | null>(
-    currentCourse.lastSaved || null
+    currentCourse?.lastSaved || null
   );
   const [isPublished, setIsPublished] = useState<boolean>(
-    currentCourse.isPublished || false
+    currentCourse?.isPublished || false
   );
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Sync state whenever currentCourse changes
+  React.useEffect(() => {
+    if (currentCourse) {
+      setSelectedGroupId(currentCourse.group);
+      setSelectedSpecialty(currentCourse.specialty);
+      setSelectedSubject(currentCourse.subject);
+      setSelectedSemester(currentCourse.semester);
+      setGradesList(currentCourse.grades);
+      setLastSavedTime(currentCourse.lastSaved || null);
+      setIsPublished(currentCourse.isPublished || false);
+    } else {
+      setGradesList([]);
+    }
+  }, [currentCourse?.id]);
 
   // Sync if course changes
   const handleGroupChange = (group: string) => {
@@ -74,6 +95,7 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
     field: 'seminar' | 'laboratory' | 'independentWork' | 'colloquium',
     valStr: string
   ) => {
+    if (!currentCourse) return;
     const newGrades = [...gradesList];
     if (valStr === '' || valStr === '-') {
       newGrades[index][field] = null;
@@ -99,37 +121,55 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
     return sem + lab + ind + col;
   };
 
-  const handleSave = () => {
+  const handleSaveDraft = () => {
+    if (!currentCourse) return;
     const now = new Date();
-    const formatted = `${now.getDate()} ${now.toLocaleString('az-AZ', {
-      month: 'long',
-    })} ${now.getFullYear()}, ${now.toLocaleTimeString([], {
+    const timeStr = `${now.toLocaleDateString('az-AZ', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })}, ${now.toLocaleTimeString('az-AZ', {
       hour: '2-digit',
       minute: '2-digit',
     })}`;
 
-    setLastSavedTime(formatted);
-
-    const updatedCourse: GradeBookCourse = {
-      ...currentCourse,
-      grades: gradesList,
-      lastSaved: formatted,
-    };
-
-    const newCourses = courses.map((c) =>
-      c.id === currentCourse.id ? updatedCourse : c
+    const updatedCourses = courses.map((c) =>
+      c.id === currentCourse.id
+        ? { ...c, grades: gradesList, lastSaved: timeStr }
+        : c
     );
-    onUpdateCourses(newCourses);
-    showToast('Bütün ballar uğurla yadda saxlanıldı!');
+
+    onUpdateCourses(updatedCourses);
+    setLastSavedTime(timeStr);
+    showToast('Qiymətlər qaralama olaraq saxlanıldı.');
   };
 
-  const handlePublish = () => {
-    handleSave();
+  const handlePublishGrades = () => {
+    if (!currentCourse) return;
+    const now = new Date();
+    const timeStr = `${now.toLocaleDateString('az-AZ', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })}, ${now.toLocaleTimeString('az-AZ', {
+      hour: '2-digit',
+      minute: '2-digit',
+    })}`;
+
+    const updatedCourses = courses.map((c) =>
+      c.id === currentCourse.id
+        ? { ...c, grades: gradesList, lastSaved: timeStr, isPublished: true }
+        : c
+    );
+
+    onUpdateCourses(updatedCourses);
+    setLastSavedTime(timeStr);
     setIsPublished(true);
-    showToast('Ballar təsdiqləndi və Tələbə Kabinetində dərc edildi!');
+    showToast('Ballar rəsmi olaraq dərc edildi.');
   };
 
   const handleExportGradesCSV = () => {
+    if (!currentCourse) return;
     const headers = [
       '№',
       'Tələbə',
@@ -171,6 +211,36 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
     showToast('Qiymət cədvəli ixrac edildi.');
   };
 
+  const handleSave = handleSaveDraft;
+  const handlePublish = handlePublishGrades;
+
+  if (!currentCourse) {
+    return (
+      <div className="p-4 md:p-8 flex-1 max-w-7xl mx-auto w-full flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="bg-white p-8 md:p-12 rounded-3xl border border-[#ccc3d7] text-center max-w-lg shadow-sm">
+          <div className="w-16 h-16 bg-purple-100 text-[#5300b7] rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Award className="w-8 h-8" />
+          </div>
+          <h3 className="text-xl font-bold text-[#121c2a] mb-2">
+            Heç bir qiymət jurnalı yoxdur
+          </h3>
+          <p className="text-sm text-[#64748b] leading-relaxed mb-6">
+            Sistemdə hazırda aktiv qiymətləndirmə jurnalı mövcud deyil. Fənlər üzrə Seminar, Laboratoriya və Kollokvium ballarını daxil etmək üçün yeni jurnal açın.
+          </p>
+          {onOpenNewCourseModal && (
+            <button
+              onClick={onOpenNewCourseModal}
+              className="px-6 py-3 bg-[#5300b7] hover:bg-[#430094] text-white rounded-xl font-semibold text-sm shadow-md transition-all flex items-center gap-2 mx-auto cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Yeni Qiymətləndirmə Jurnalı Aç</span>
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-4 md:p-8 flex-1 max-w-7xl mx-auto w-full pb-28">
       {/* Toast Notification */}
@@ -197,7 +267,35 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {onOpenNewCourseModal && (
+            <button
+              onClick={onOpenNewCourseModal}
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-[#5300b7] hover:bg-[#430094] text-white rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Yeni Jurnal Aç</span>
+            </button>
+          )}
+
+          {currentCourse && onDeleteCourse && (
+            <button
+              onClick={() => {
+                if (
+                  window.confirm(
+                    `"${currentCourse.group} - ${currentCourse.subject}" jurnalını silmək istədiyinizdən əminsiniz?`
+                  )
+                ) {
+                  onDeleteCourse(currentCourse.id);
+                }
+              }}
+              className="p-2 text-slate-400 hover:text-rose-600 rounded-xl hover:bg-rose-50 border border-[#ccc3d7] transition-colors cursor-pointer"
+              title="Bu Jurnalı Sil"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+
           <button
             onClick={handleExportGradesCSV}
             className="flex items-center gap-2 px-3.5 py-2 bg-white border border-[#ccc3d7] rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-xs"
@@ -362,15 +460,22 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
               </tr>
             </thead>
             <tbody className="text-sm text-[#121c2a] divide-y divide-[#e2e8f0]">
-              {gradesList.map((grade, index) => {
-                const total = calculateTotal(grade);
-                const isPassing = total >= 17; // General admission threshold
+              {gradesList.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="p-8 text-center text-slate-400 text-sm">
+                    Bu qrup üzrə jurnalda hələ heç bir tələbə qeydiyyatda deyil. Tələbələr bölməsindən bu qrupa tələbə əlavə edildikdə avtomatik burada əks olunacaq.
+                  </td>
+                </tr>
+              ) : (
+                gradesList.map((grade, index) => {
+                  const total = calculateTotal(grade);
+                  const isPassing = total >= 17; // General admission threshold
 
-                return (
-                  <tr
-                    key={grade.studentId || index}
-                    className="hover:bg-[#f8f9ff] transition-colors"
-                  >
+                  return (
+                    <tr
+                      key={grade.studentId || index}
+                      className="hover:bg-[#f8f9ff] transition-colors"
+                    >
                     {/* Index */}
                     <td className="p-4 text-center text-xs text-[#7b7486] font-medium">
                       {index + 1}
@@ -474,7 +579,7 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
                     </td>
                   </tr>
                 );
-              })}
+              }))}
             </tbody>
           </table>
         </div>

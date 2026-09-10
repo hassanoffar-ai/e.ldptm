@@ -172,9 +172,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 1. İmtahan Protokolu
               </h3>
               <p className="text-xs text-[#64748b] leading-relaxed mb-4">
-                Veb Proqramlaşdırma əsasları (İT-21) və digər qruplar üçün rəsmi
-                imtahan cədvəli, bilet təyinatları, PC nömrələri və çap/ixrac
-                imkanı.
+                Qruplar üzrə rəsmi imtahan cədvəli, bilet təyinatları, PC nömrələri və çap/ixrac imkanı.
               </p>
             </div>
             <div className="flex items-center gap-2 text-xs font-bold text-[#5300b7] group-hover:translate-x-1 transition-transform">
@@ -196,8 +194,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 2. İmtahan Zalı Paneli
               </h3>
               <p className="text-xs text-[#64748b] leading-relaxed mb-4">
-                Tələbə ID-si ilə axtarış (Məs: ST-2023-4012), rəsmi imtahan bileti
-                kartı, QR kod, otaq/kompüter bölgüsü və operativ çap.
+                Tələbə ID-si ilə axtarış, rəsmi imtahan bileti kartı, QR kod, otaq/kompüter bölgüsü və operativ çap.
               </p>
             </div>
             <div className="flex items-center gap-2 text-xs font-bold text-[#5300b7] group-hover:translate-x-1 transition-transform">
@@ -219,9 +216,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 3. Qiymət Daxiletmə
               </h3>
               <p className="text-xs text-[#64748b] leading-relaxed mb-4">
-                IT-201 Proqramlaşdırma Əsasları və digər fənlər üzrə Seminar,
-                Laboratoriya, Sərbəst İş, Kollokvium ballarının canlı hesablanması
-                və dərc edilməsi.
+                Fənlər üzrə Seminar, Laboratoriya, Sərbəst İş və Kollokvium ballarının canlı hesablanması və dərc edilməsi.
               </p>
             </div>
             <div className="flex items-center gap-2 text-xs font-bold text-[#5300b7] group-hover:translate-x-1 transition-transform">
@@ -245,46 +240,52 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
           <button
             onClick={() => setActiveTab('exams')}
-            className="text-xs font-semibold text-[#5300b7] hover:underline"
+            className="text-xs font-semibold text-[#5300b7] hover:underline cursor-pointer"
           >
             Hamısını göstər ({sessions.length})
           </button>
         </div>
 
         <div className="divide-y divide-slate-100">
-          {sessions.map((sess) => (
-            <div
-              key={sess.id}
-              className="py-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-slate-50/70 rounded-xl px-2 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-purple-100/70 text-[#5300b7] flex items-center justify-center font-bold text-xs">
-                  {sess.group}
-                </div>
-                <div>
-                  <h4 className="text-sm font-semibold text-[#121c2a]">
-                    {sess.subject}
-                  </h4>
-                  <p className="text-xs text-[#64748b]">
-                    {sess.date} • {sess.time} • Otaq: {sess.room} • Nəzarətçi:{' '}
-                    {sess.supervisor}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="text-xs px-2.5 py-1 bg-purple-50 text-[#5300b7] rounded-full font-medium">
-                  {sess.items.length} Tələbə
-                </span>
-                <button
-                  onClick={() => setActiveTab('exams')}
-                  className="p-1.5 text-slate-400 hover:text-[#5300b7] transition-colors"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
+          {sessions.length === 0 ? (
+            <div className="py-8 text-center text-slate-400 text-sm">
+              Hələ ki, heç bir aktiv imtahan sessiyası yoxdur. İmtahan protokolu bölməsindən yeni sessiya əlavə edə bilərsiniz.
             </div>
-          ))}
+          ) : (
+            sessions.map((sess) => (
+              <div
+                key={sess.id}
+                className="py-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-slate-50/70 rounded-xl px-2 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-purple-100/70 text-[#5300b7] flex items-center justify-center font-bold text-xs">
+                    {sess.group}
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-[#121c2a]">
+                      {sess.subject}
+                    </h4>
+                    <p className="text-xs text-[#64748b]">
+                      {sess.date} • {sess.time} • Otaq: {sess.room} • Nəzarətçi:{' '}
+                      {sess.supervisor}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-xs px-2.5 py-1 bg-purple-50 text-[#5300b7] rounded-full font-medium">
+                    {sess.items.length} Tələbə
+                  </span>
+                  <button
+                    onClick={() => setActiveTab('exams')}
+                    className="p-1.5 text-slate-400 hover:text-[#5300b7] transition-colors"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
