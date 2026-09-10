@@ -1,4 +1,4 @@
-import { AdminPermissions, AdminUser, UserRole } from '../types';
+import { AdminPermissions, AdminUser, StudentUser, UserRole } from '../types';
 
 export interface AccountCredentials {
   username: string;
@@ -98,3 +98,28 @@ export const saveStoredSession = (user: AdminUser | null) => {
     console.error(e);
   }
 };
+
+export const getStoredStudentSession = (): StudentUser | null => {
+  try {
+    const raw = localStorage.getItem('eldptm_student_session');
+    if (raw) {
+      return JSON.parse(raw);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  return null;
+};
+
+export const saveStoredStudentSession = (user: StudentUser | null) => {
+  try {
+    if (user) {
+      localStorage.setItem('eldptm_student_session', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('eldptm_student_session');
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
+

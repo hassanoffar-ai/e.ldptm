@@ -16,10 +16,12 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
 }) => {
   const [name, setName] = useState('');
   const [studentId, setStudentId] = useState('');
+  const [finCode, setFinCode] = useState('');
   const [group, setGroup] = useState(GROUPS_LIST[0]);
   const [specialty, setSpecialty] = useState(SPECIALTIES_LIST[0]);
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('123456');
 
   if (!isOpen) return null;
 
@@ -30,19 +32,23 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
     const student: Student = {
       id: `std-${Date.now()}`,
       studentId: studentId.trim(),
+      finCode: finCode.trim().toUpperCase() || undefined,
       name: name.trim(),
       group,
       specialty,
       email: email || `${studentId.toLowerCase()}@eldptm.edu.az`,
       phone: phone || '+994 50 000 00 00',
+      passwordHash: password.trim() || '123456',
       status: 'active',
     };
 
     onAddStudent(student);
     setName('');
     setStudentId('');
+    setFinCode('');
     setEmail('');
     setPhone('');
+    setPassword('123456');
     onClose();
   };
 
@@ -91,21 +97,37 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-                Tələbə ID / Bilet Kodu *
+                Tələbə ID *
               </label>
               <div className="relative">
                 <Hash className="w-4 h-4 absolute left-3 top-3 text-[#7b7486]" />
                 <input
                   type="text"
                   required
-                  placeholder="STD-10045 və ya 203955"
+                  placeholder="Məs: YTP-2024-001"
                   value={studentId}
-                  onChange={(e) => setStudentId(e.target.value)}
+                  onChange={(e) => setStudentId(e.target.value.toUpperCase())}
                   className="w-full pl-9 pr-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm font-mono outline-none focus:ring-2 focus:ring-[#5300b7]"
                 />
               </div>
             </div>
 
+            <div>
+              <label className="block text-xs font-semibold text-[#4a4455] mb-1">
+                FİN Kod (Şəxsiyyət vəsiqəsi)
+              </label>
+              <input
+                type="text"
+                maxLength={7}
+                placeholder="7 simvol (məs: 5ABC123)"
+                value={finCode}
+                onChange={(e) => setFinCode(e.target.value.toUpperCase())}
+                className="w-full px-3.5 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm font-mono outline-none focus:ring-2 focus:ring-[#5300b7]"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-[#4a4455] mb-1">
                 Qrup *
@@ -122,23 +144,23 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
                 ))}
               </select>
             </div>
-          </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-              İxtisas
-            </label>
-            <select
-              value={specialty}
-              onChange={(e) => setSpecialty(e.target.value)}
-              className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
-            >
-              {SPECIALTIES_LIST.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
+            <div>
+              <label className="block text-xs font-semibold text-[#4a4455] mb-1">
+                İxtisas (YTP)
+              </label>
+              <select
+                value={specialty}
+                onChange={(e) => setSpecialty(e.target.value)}
+                className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
+              >
+                {SPECIALTIES_LIST.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -173,6 +195,19 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
                 />
               </div>
             </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-[#4a4455] mb-1">
+              Portal üçün Şifrə
+            </label>
+            <input
+              type="text"
+              placeholder="Standart: 123456"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-3.5 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm font-mono outline-none focus:ring-2 focus:ring-[#5300b7]"
+            />
           </div>
 
           {/* Modal Footer */}

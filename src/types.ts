@@ -1,13 +1,26 @@
 export interface Student {
   id: string;
   studentId: string;
+  finCode?: string;
   name: string;
   group: string;
   specialty: string;
   avatar?: string;
   email?: string;
   phone?: string;
+  passwordHash?: string;
   status: 'active' | 'suspended' | 'graduated';
+}
+
+export interface StudentUser {
+  id: string;
+  studentId: string;
+  finCode: string;
+  name: string;
+  group: string;
+  specialty: string;
+  email?: string;
+  phone?: string;
 }
 
 export interface ExamProtocolItem {

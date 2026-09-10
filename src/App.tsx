@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { ActiveTab, AdminPermissions, AdminUser, ExamSession, GradeBookCourse, Student } from './types';
+import { ActiveTab, AdminPermissions, AdminUser, ExamSession, GradeBookCourse, Student, StudentUser } from './types';
 import {
   INITIAL_STUDENTS,
   INITIAL_EXAM_SESSIONS,
@@ -13,7 +13,9 @@ import {
 import {
   getStoredPermissions,
   getStoredSession,
+  getStoredStudentSession,
   saveStoredSession,
+  saveStoredStudentSession,
 } from './data/auth';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
@@ -26,6 +28,7 @@ import { GroupsAndOtherViews } from './components/GroupsAndOtherViews';
 import { AdminPermissionsView } from './components/AdminPermissionsView';
 import { AdminLoginView } from './components/AdminLoginView';
 import { PublicPortalView } from './components/PublicPortalView';
+import { StudentAuthView } from './components/StudentAuthView';
 import { NewStudentModal } from './components/NewStudentModal';
 import { NewExamSessionModal } from './components/NewExamSessionModal';
 import { NewGradeCourseModal } from './components/NewGradeCourseModal';
@@ -57,6 +60,20 @@ export default function App() {
   // Authentication & permissions
   const [currentUser, setCurrentUser] = useState<AdminUser | null>(getStoredSession);
   const [permissions, setPermissions] = useState<AdminPermissions>(getStoredPermissions);
+
+  // Student authentication for production / student portal
+  const [currentStudentUser, setCurrentStudentUser] = useState<StudentUser | null>(
+    getStoredStudentSession
+  );
+
+  const handleStudentLoginSuccess = (studentUser: StudentUser) => {
+    setCurrentStudentUser(studentUser);
+  };
+
+  const handleStudentLogout = () => {
+    saveStoredStudentSession(null);
+    setCurrentStudentUser(null);
+  };
 
   const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -253,13 +270,24 @@ export default function App() {
     return true;
   };
 
-  // 1. PUBLIC SITE ROUTE (/)
+  // 1. PUBLIC SITE ROUTE (/) - YTP TƏLƏBƏ PORTALI VƏ ŞƏXSİ KABİNET
   if (currentRoute === 'public') {
+    if (!currentStudentUser) {
+      return (
+        <StudentAuthView
+          students={students}
+          onRegisterStudent={handleAddStudent}
+          onLoginSuccess={handleStudentLoginSuccess}
+        />
+      );
+    }
+
     return (
       <PublicPortalView
-        students={students}
-        sessions={sessions}
+        student={currentStudentUser}
         courses={courses}
+        sessions={sessions}
+        onLogout={handleStudentLogout}
       />
     );
   }
