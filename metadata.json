@@ -1,0 +1,6 @@
+{
+  "name": "E-LDPTM İdarəetmə Sistemi",
+  "description": "E-LDPTM Tədris və İmtahan İdarəetmə Portalı - İmtahan Protokolu, İmtahan Zalı Bilet Çapı və Qiymət Daxiletmə",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
