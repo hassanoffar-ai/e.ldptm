@@ -9,6 +9,7 @@ import {
   Eye,
   EyeOff,
   ArrowRight,
+  ArrowLeft,
   CheckCircle2,
   AlertCircle,
   Sparkles,
@@ -216,18 +217,19 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
       <main className="flex-1 flex items-center justify-center p-4 sm:p-6 relative z-10 my-4">
         <div className="w-full max-w-xl bg-slate-900/85 backdrop-blur-2xl border border-slate-700/60 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-purple-950/60 relative">
           {/* Header Banner */}
+          {/* Header Banner */}
           <div className="text-center mb-6">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/25 text-purple-300 text-xs font-bold mb-3 shadow-inner">
               <Sparkles className="w-3.5 h-3.5 text-purple-400" />
               <span>YTP Subbakalavr Təhsili</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              {authMode === 'login' ? 'Tələbə Şəxsi Kabineti' : 'Tələbə Qeydiyyatı'}
+              {authMode === 'login' ? 'Tələbə Girişi' : 'Tələbə Qeydiyyatı'}
             </h2>
             <p className="text-xs sm:text-sm text-slate-400 mt-1.5 max-w-md mx-auto">
               {authMode === 'login'
-                ? 'Semestr ballarınızı, fənlərinizi və akademik fəaliyyətinizi izləmək üçün daxil olun'
-                : 'Lənkəran DPTM YTP tələbəsi olaraq sistemdə şəxsi kabinetinizi yaradın'}
+                ? 'Semestr ballarınızı və fəaliyyətinizi izləmək üçün hesabınıza daxil olun'
+                : 'Yüksək Texniki Peşə tələbəsi olaraq portalda şəxsi hesabınızı yaradın'}
             </p>
           </div>
 
@@ -241,41 +243,6 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
               </div>
             </div>
           )}
-
-          {/* Mode Switch Tabs */}
-          <div className="grid grid-cols-2 gap-2 p-1 bg-slate-800/80 border border-slate-700/50 rounded-2xl mb-6">
-            <button
-              type="button"
-              onClick={() => {
-                setAuthMode('login');
-                setLoginError(null);
-              }}
-              className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                authMode === 'login'
-                  ? 'bg-[#5300b7] text-white shadow-md'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <KeyRound className="w-4 h-4" />
-              <span>Giriş (Login)</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setAuthMode('register');
-                setRegisterError(null);
-                setRegisterSuccessMsg(null);
-              }}
-              className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                authMode === 'register'
-                  ? 'bg-[#5300b7] text-white shadow-md'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <User className="w-4 h-4" />
-              <span>Qeydiyyatdan Keç</span>
-            </button>
-          </div>
 
           {/* TAB 1: LOGIN FORM */}
           {authMode === 'login' && (
@@ -341,17 +308,21 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
               </button>
 
               {/* Bottom prompt for registration */}
-              <div className="mt-5 pt-4 border-t border-slate-800 text-center text-xs text-slate-400">
-                Hesabınız yoxdur?{' '}
+              <div className="mt-6 pt-5 border-t border-slate-800/80 text-center space-y-2">
+                <span className="text-xs text-slate-400 block">
+                  Sistemdə hesabınız yoxdur?
+                </span>
                 <button
                   type="button"
                   onClick={() => {
                     setAuthMode('register');
                     setRegisterError(null);
+                    setRegisterSuccessMsg(null);
                   }}
-                  className="text-purple-400 hover:text-purple-300 font-bold hover:underline cursor-pointer"
+                  className="w-full py-3 px-4 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-purple-300 hover:text-white border border-slate-700 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  Buradan qeydiyyatdan keçin
+                  <User className="w-4 h-4 text-purple-400" />
+                  <span>Qeydiyyatdan Keçin</span>
                 </button>
               </div>
             </form>
@@ -360,6 +331,17 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
           {/* TAB 2: REGISTRATION FORM */}
           {authMode === 'register' && (
             <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode('login');
+                  setRegisterError(null);
+                }}
+                className="inline-flex items-center gap-1.5 text-xs text-purple-400 hover:text-purple-300 font-semibold mb-1 transition-colors cursor-pointer"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Giriş səhifəsinə qayıt</span>
+              </button>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1">
@@ -499,17 +481,17 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
                 <CheckCircle2 className="w-4 h-4" />
               </button>
 
-              <div className="mt-3 text-center text-xs text-slate-400">
-                Artıq qeydiyyatdan keçmisiniz?{' '}
+              <div className="mt-4 pt-4 border-t border-slate-800 text-center text-xs text-slate-400">
+                Artıq hesabınız var?{' '}
                 <button
                   type="button"
                   onClick={() => {
                     setAuthMode('login');
                     setRegisterError(null);
                   }}
-                  className="text-purple-400 hover:text-purple-300 font-bold hover:underline cursor-pointer"
+                  className="text-purple-400 hover:text-purple-300 font-bold hover:underline cursor-pointer ml-1"
                 >
-                  Daxil olun
+                  Giriş səhifəsinə qayıt
                 </button>
               </div>
             </form>
