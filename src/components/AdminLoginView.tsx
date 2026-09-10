@@ -12,22 +12,10 @@ export const AdminLoginView: React.FC<AdminLoginViewProps> = ({
   onLoginSuccess,
   onNavigateHome,
 }) => {
-  const [username, setUsername] = useState('superadmin');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [selectedRolePreset, setSelectedRolePreset] = useState<UserRole>('super_admin');
-
-  const handleRoleSelect = (role: UserRole) => {
-    setSelectedRolePreset(role);
-    if (role === 'super_admin') {
-      setUsername('superadmin');
-    } else {
-      setUsername('admin');
-    }
-    setPassword('');
-    setErrorMessage(null);
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,13 +26,8 @@ export const AdminLoginView: React.FC<AdminLoginViewProps> = ({
       (a) => a.username.toLowerCase() === username.trim().toLowerCase()
     );
 
-    if (!userMatch) {
-      setErrorMessage('Belə bir istifadəçi adı mövcud deyil.');
-      return;
-    }
-
-    if (userMatch.passwordHash !== password) {
-      setErrorMessage('Daxil edilmiş şifrə yanlışdır.');
+    if (!userMatch || userMatch.passwordHash !== password.trim()) {
+      setErrorMessage('Daxil edilmiş istifadəçi adı və ya şifrə yanlışdır.');
       return;
     }
 
@@ -103,36 +86,8 @@ export const AdminLoginView: React.FC<AdminLoginViewProps> = ({
               Admin Panelinə Giriş
             </h2>
             <p className="text-xs text-slate-400 mt-1.5">
-              Daxil olmaq üçün rolunuzu seçin və şifrənizi qeyd edin
+              Hesabınıza daxil olmaq üçün istifadəçi adınızı və şifrənizi qeyd edin
             </p>
-          </div>
-
-          {/* Role selector buttons */}
-          <div className="grid grid-cols-2 gap-2 p-1 bg-slate-800/80 border border-slate-700/50 rounded-2xl mb-6">
-            <button
-              type="button"
-              onClick={() => handleRoleSelect('super_admin')}
-              className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                selectedRolePreset === 'super_admin'
-                  ? 'bg-[#6d28d9] text-white shadow-md'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <ShieldCheck className="w-4 h-4" />
-              <span>Super Admin</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleRoleSelect('admin')}
-              className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                selectedRolePreset === 'admin'
-                  ? 'bg-[#5300b7] text-white shadow-md'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <User className="w-4 h-4" />
-              <span>Admin</span>
-            </button>
           </div>
 
           {/* Form */}
