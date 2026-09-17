@@ -12,11 +12,9 @@ import {
   ArrowLeft,
   CheckCircle2,
   AlertCircle,
-  Sparkles,
   ShieldCheck,
   Building2,
   BookOpen,
-  Shield
 } from 'lucide-react';
 import { Student, StudentUser } from '../types';
 import { saveStoredStudentSession } from '../data/auth';
@@ -215,19 +213,6 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
             <Building2 className="w-3.5 h-3.5 text-purple-400" />
             <span>Lənkəran Dövlət Peşə Təhsil Mərkəzi</span>
           </div>
-
-          {onNavigateToAdmin && (
-            <button
-              type="button"
-              onClick={onNavigateToAdmin}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 hover:text-white border border-purple-500/30 text-xs font-semibold backdrop-blur-md transition-all cursor-pointer"
-              title="Mərkəzi İnzibatçı / Admin Panelinə Keçid"
-            >
-              <Shield className="w-3.5 h-3.5 text-purple-400" />
-              <span className="hidden sm:inline">İnzibatçı Paneli</span>
-              <span className="sm:hidden">Admin</span>
-            </button>
-          )}
         </div>
       </header>
 
@@ -236,10 +221,6 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
         <div className="w-full max-w-xl bg-slate-900/85 backdrop-blur-2xl border border-slate-700/60 rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-2xl shadow-purple-950/60 relative">
           {/* Header Banner */}
           <div className="text-center mb-5 sm:mb-6">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/25 text-purple-300 text-xs font-bold mb-3 shadow-inner">
-              <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-              <span>YTP Subbakalavr Təhsili</span>
-            </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
               {authMode === 'login' ? 'Tələbə Girişi' : 'Tələbə Qeydiyyatı'}
             </h2>
@@ -520,19 +501,6 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
       <footer className="w-full py-4 text-center text-xs text-slate-500 relative z-10 px-4">
         <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
           <span>Lənkəran Dövlət Peşə Təhsil Mərkəzi — Yüksək Texniki Peşə (YTP) © 2026</span>
-          {onNavigateToAdmin && (
-            <>
-              <span className="hidden sm:inline">•</span>
-              <button
-                type="button"
-                onClick={onNavigateToAdmin}
-                className="inline-flex items-center gap-1 text-slate-400 hover:text-purple-300 transition-colors font-medium cursor-pointer"
-              >
-                <Shield className="w-3.5 h-3.5 text-purple-400" />
-                <span>İnzibatçı Paneli (/admin)</span>
-              </button>
-            </>
-          )}
         </div>
       </footer>
     </div>
