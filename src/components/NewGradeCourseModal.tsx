@@ -47,11 +47,15 @@ export const NewGradeCourseModal: React.FC<NewGradeCourseModalProps> = ({
     return SUBJECTS_LIST;
   }, [specialtyModules, specialty]);
 
+  const sortedSpecialties = React.useMemo(() => {
+    return [...specialties].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'az'));
+  }, [specialties]);
+
   useEffect(() => {
-    if (specialties.length > 0 && !specialty) {
-      setSpecialty(specialties[0].name);
+    if (sortedSpecialties.length > 0 && !specialty) {
+      setSpecialty(sortedSpecialties[0].name);
     }
-  }, [specialties, specialty]);
+  }, [sortedSpecialties, specialty]);
 
   if (!isOpen) return null;
 
@@ -203,7 +207,7 @@ export const NewGradeCourseModal: React.FC<NewGradeCourseModalProps> = ({
                     onChange={(e) => setSpecialty(e.target.value)}
                     className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
                   >
-                    {specialties.map((s) => (
+                    {sortedSpecialties.map((s) => (
                       <option key={s.id} value={s.name}>
                         {s.name} ({s.code})
                       </option>

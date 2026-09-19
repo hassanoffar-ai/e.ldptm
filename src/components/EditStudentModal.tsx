@@ -40,8 +40,9 @@ export const EditStudentModal: React.FC<EditStudentModalProps> = ({
       setStudentId(student.studentId || student.finCode || '');
       setGroup(student.group || GROUPS_LIST[0] || '');
 
-      const specList =
-        specialties.length > 0 ? specialties.map((s) => s.name) : SPECIALTIES_LIST;
+      const specList = (
+        specialties.length > 0 ? specialties.map((s) => s.name) : SPECIALTIES_LIST
+      ).slice().sort((a, b) => a.localeCompare(b, 'az'));
 
       if (specList.includes(student.specialty)) {
         setSpecialty(student.specialty);
@@ -57,8 +58,9 @@ export const EditStudentModal: React.FC<EditStudentModalProps> = ({
 
   if (!isOpen || !student) return null;
 
-  const availableSpecialties =
-    specialties.length > 0 ? specialties.map((s) => s.name) : SPECIALTIES_LIST;
+  const availableSpecialties = (
+    specialties.length > 0 ? specialties.map((s) => s.name) : SPECIALTIES_LIST
+  ).slice().sort((a, b) => a.localeCompare(b, 'az'));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

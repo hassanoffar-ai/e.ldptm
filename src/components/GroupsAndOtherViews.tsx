@@ -76,8 +76,12 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
   // Modules and Syllabuses Management States
   const [modulesList, setModulesList] = useState<SpecialtyModule[]>(() => getStoredModules());
 
+  const sortedSpecialties = React.useMemo(() => {
+    return [...specialties].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'az'));
+  }, [specialties]);
+
   const [selectedModuleSpecialty, setSelectedModuleSpecialty] = useState<string>(
-    specialties[0]?.name || 'Kompüter sistemlərində proqramlaşdırma'
+    sortedSpecialties[0]?.name || 'Kompüter sistemlərində proqramlaşdırma'
   );
   const [selectedModuleSemester, setSelectedModuleSemester] = useState<string>('all');
   const [isModuleModalOpen, setIsModuleModalOpen] = useState(false);
@@ -85,7 +89,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
 
   // Form states for Add/Edit Module
   const [modSpecialty, setModSpecialty] = useState(
-    specialties[0]?.name || 'Kompüter sistemlərində proqramlaşdırma'
+    sortedSpecialties[0]?.name || 'Kompüter sistemlərində proqramlaşdırma'
   );
   const [modSemester, setModSemester] = useState('I Semestr');
   const [modName, setModName] = useState('');
@@ -238,17 +242,19 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
 
   // İxtisaslar View
   if (activeTab === 'specialties') {
-    const rawList = specialties && specialties.length > 0 ? specialties : INITIAL_SPECIALTIES;
-    const safeSpecialties = rawList.map((spec, idx) => ({
-      ...spec,
-      id: spec.id || `spec-${idx}`,
-      name: spec.name || 'İxtisas',
-      code: spec.code || '',
-      direction: spec.direction || 'Yüksək Texniki Peşə (YTP)',
-      duration: spec.duration || '3 illik',
-      educationType: spec.educationType || 'Əyani',
-      description: spec.description || '',
-    }));
+    const rawList = sortedSpecialties.length > 0 ? sortedSpecialties : INITIAL_SPECIALTIES;
+    const safeSpecialties = rawList
+      .map((spec, idx) => ({
+        ...spec,
+        id: spec.id || `spec-${idx}`,
+        name: spec.name || 'İxtisas',
+        code: spec.code || '',
+        direction: spec.direction || 'Yüksək Texniki Peşə (YTP)',
+        duration: spec.duration || '3 illik',
+        educationType: spec.educationType || 'Əyani',
+        description: spec.description || '',
+      }))
+      .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'az'));
 
     const filteredSpecialties = safeSpecialties
       .filter((spec) => {
@@ -636,7 +642,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                 className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer"
               >
                 <option value="all">Bütün İxtisaslar ({modulesList.length} modul)</option>
-                {specialties.map((s) => (
+                {sortedSpecialties.map((s) => (
                   <option key={s.id} value={s.name}>
                     {s.name} ({s.code})
                   </option>
@@ -795,7 +801,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                     onChange={(e) => setModSpecialty(e.target.value)}
                     className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer"
                   >
-                    {specialties.map((s) => (
+                    {sortedSpecialties.map((s) => (
                       <option key={s.id} value={s.name}>
                         {s.name} ({s.code})
                       </option>

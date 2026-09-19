@@ -31,8 +31,12 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
   const [selectedGroupId, setSelectedGroupId] = useState<string>(
     courses[0]?.group || GROUPS_LIST[0] || '1-ci kurs'
   );
+  const sortedSpecialties = React.useMemo(() => {
+    return [...specialties].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'az'));
+  }, [specialties]);
+
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>(
-    courses[0]?.specialty || specialties[0]?.name || ''
+    courses[0]?.specialty || sortedSpecialties[0]?.name || ''
   );
   const [selectedSubject, setSelectedSubject] = useState<string>(
     courses[0]?.subject || ''
@@ -430,8 +434,8 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
                 onChange={(e) => setSelectedSpecialty(e.target.value)}
                 className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7] focus:border-[#5300b7] transition-all cursor-pointer"
               >
-                {specialties.length > 0 ? (
-                  specialties.map((s) => (
+                {sortedSpecialties.length > 0 ? (
+                  sortedSpecialties.map((s) => (
                     <option key={s.id} value={s.name}>
                       {s.name} ({s.code})
                     </option>

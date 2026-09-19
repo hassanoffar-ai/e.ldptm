@@ -59,7 +59,7 @@ export const INITIAL_SPECIALTIES: SpecialtyItem[] = [
     educationType: 'Əyani',
     description: 'Yüksək Texniki Peşə (Subbakalavr) təhsil pilləsi',
   },
-];
+].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'az'));
 
 export const SPECIALTIES_LIST: string[] = [
   'Kibertəhlükəsizlik',
@@ -67,7 +67,7 @@ export const SPECIALTIES_LIST: string[] = [
   'Kompüter şəbəkələri və şəbəkə inzibatçılığı',
   'Mehmanxana və restoran işinin təşkili və idarə edilməsi',
   'Mühasibat uçotu',
-];
+].sort((a, b) => a.localeCompare(b, 'az'));
 
 export const SEMESTERS_LIST = [
   'I Semestr',

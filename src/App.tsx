@@ -84,17 +84,20 @@ const loadSpecialtiesFromStorage = (): SpecialtyItem[] => {
                 'Kompüter sistemlərində proqramlaşdırma',
               ].includes(s.name)
           );
-          const migrated = [...INITIAL_SPECIALTIES, ...customOnes];
+          const migrated = [...INITIAL_SPECIALTIES, ...customOnes].sort((a, b) =>
+            (a.name || '').localeCompare(b.name || '', 'az')
+          );
           localStorage.setItem('eldptm_specialties', JSON.stringify(migrated));
           return migrated;
         }
-        return parsed;
+        const sorted = [...parsed].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'az'));
+        return sorted;
       }
     }
   } catch (e) {
     console.error(e);
   }
-  return INITIAL_SPECIALTIES;
+  return [...INITIAL_SPECIALTIES].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'az'));
 };
 
 const getInitialRoute = (): 'public' | 'admin' => {
@@ -284,7 +287,9 @@ export default function App() {
             setSpecialties(INITIAL_SPECIALTIES);
             INITIAL_SPECIALTIES.forEach((s) => upsertSpecialtyToDb(s));
           } else {
-            setSpecialties(dbSpecialties);
+            setSpecialties(
+              [...dbSpecialties].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'az'))
+            );
           }
         } else if (specialties.length > 0) {
           specialties.forEach((s) => upsertSpecialtyToDb(s));
@@ -328,7 +333,11 @@ export default function App() {
         { event: '*', schema: 'public', table: 'specialties' },
         async () => {
           const fresh = await fetchSpecialtiesFromDb();
-          if (isMounted && fresh.length > 0) setSpecialties(fresh);
+          if (isMounted && fresh.length > 0) {
+            setSpecialties(
+              [...fresh].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'az'))
+            );
+          }
         }
       )
       .subscribe();
@@ -340,13 +349,17 @@ export default function App() {
   }, []);
 
   const handleAddSpecialty = (newSpecialty: SpecialtyItem) => {
-    setSpecialties((prev) => [newSpecialty, ...prev]);
+    setSpecialties((prev) =>
+      [...prev, newSpecialty].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'az'))
+    );
     upsertSpecialtyToDb(newSpecialty);
   };
 
   const handleUpdateSpecialty = (updatedSpecialty: SpecialtyItem) => {
     setSpecialties((prev) =>
-      prev.map((s) => (s.id === updatedSpecialty.id ? updatedSpecialty : s))
+      prev
+        .map((s) => (s.id === updatedSpecialty.id ? updatedSpecialty : s))
+        .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'az'))
     );
     upsertSpecialtyToDb(updatedSpecialty);
   };
