@@ -6,7 +6,6 @@ import {
   Users,
   AlertCircle,
   KeyRound,
-  Sparkles,
 } from 'lucide-react';
 import { SpecialtyItem, Student } from '../types';
 import { GROUPS_LIST, SPECIALTIES_LIST } from '../data/mockData';
@@ -40,19 +39,6 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
         }))
     ).slice().sort((a, b) => a.name.localeCompare(b.name, 'az'));
 
-  const generateSuggestedId = () => {
-    const numbers = existingStudents
-      .map((s) => {
-        const match = s.studentId?.match(/\d+/);
-        return match ? parseInt(match[0], 10) : null;
-      })
-      .filter((n): n is number => n !== null);
-
-    const maxNum = numbers.length > 0 ? Math.max(...numbers) : 1000;
-    const nextNum = maxNum < 1000 ? 1001 : maxNum + 1;
-    return `TLB-${nextNum}`;
-  };
-
   const [name, setName] = useState('');
   const [studentId, setStudentId] = useState('');
   const [group, setGroup] = useState(defaultGroup || GROUPS_LIST[0] || '1-ci kurs');
@@ -64,9 +50,6 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      if (!studentId) {
-        setStudentId(generateSuggestedId());
-      }
       if (defaultGroup) setGroup(defaultGroup);
       if (defaultSpecialty) {
         setSpecialty(defaultSpecialty);
@@ -182,19 +165,9 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
 
           {/* Tələbə ID Input */}
           <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="block text-xs font-semibold text-[#4a4455]">
-                Tələbə ID (Sistem İdentifikatoru)
-              </label>
-              <button
-                type="button"
-                onClick={() => setStudentId(generateSuggestedId())}
-                className="text-[11px] font-medium text-[#5300b7] hover:underline flex items-center gap-1 cursor-pointer"
-              >
-                <Sparkles className="w-3 h-3" />
-                <span>Yeni ID təklif et</span>
-              </button>
-            </div>
+            <label className="block text-xs font-semibold text-[#4a4455] mb-1">
+              Tələbə ID
+            </label>
             <div className="relative">
               <KeyRound className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
@@ -209,9 +182,6 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
                 className="w-full pl-10 pr-4 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm font-mono outline-none focus:ring-2 focus:ring-[#5300b7]"
               />
             </div>
-            <span className="text-[11px] text-slate-500 mt-1 block">
-              Tələbə bu Tələbə ID ilə portala daxil olaraq müstəqil qeydiyyatdan keçəcək
-            </span>
           </div>
 
           {/* Qrup və İxtisas */}

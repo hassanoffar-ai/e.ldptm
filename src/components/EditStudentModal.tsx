@@ -164,7 +164,7 @@ export const EditStudentModal: React.FC<EditStudentModalProps> = ({
           {/* Tələbə ID */}
           <div>
             <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-              Tələbə ID (Sistem İdentifikatoru) <span className="text-rose-500">*</span>
+              Tələbə ID <span className="text-rose-500">*</span>
             </label>
             <div className="relative">
               <KeyRound className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
