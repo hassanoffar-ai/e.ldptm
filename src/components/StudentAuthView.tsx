@@ -585,30 +585,6 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
                 </div>
               </div>
 
-              {/* Password security checklist */}
-              <div className="p-2.5 rounded-xl bg-slate-800/40 border border-slate-700/60 text-[11px] space-y-1.5">
-                <span className="font-semibold text-slate-300 block">
-                  Təhlükəsiz şifrə tələbləri:
-                </span>
-                <div className="grid grid-cols-2 gap-x-2 gap-y-1">
-                  <div className={`flex items-center gap-1.5 transition-colors ${password.length >= 8 ? 'text-emerald-400 font-medium' : 'text-slate-400'}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${password.length >= 8 ? 'bg-emerald-400' : 'bg-slate-500'}`} />
-                    <span>Ən azı 8 simvol</span>
-                  </div>
-                  <div className={`flex items-center gap-1.5 transition-colors ${/[A-ZƏÇŞĞÖÜIİ]/.test(password) ? 'text-emerald-400 font-medium' : 'text-slate-400'}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${/[A-ZƏÇŞĞÖÜIİ]/.test(password) ? 'bg-emerald-400' : 'bg-slate-500'}`} />
-                    <span>1 böyük hərf</span>
-                  </div>
-                  <div className={`flex items-center gap-1.5 transition-colors ${/[0-9]/.test(password) ? 'text-emerald-400 font-medium' : 'text-slate-400'}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${/[0-9]/.test(password) ? 'bg-emerald-400' : 'bg-slate-500'}`} />
-                    <span>1 rəqəm (0-9)</span>
-                  </div>
-                  <div className={`flex items-center gap-1.5 transition-colors ${/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~`]/.test(password) ? 'text-emerald-400 font-medium' : 'text-slate-400'}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~`]/.test(password) ? 'bg-emerald-400' : 'bg-slate-500'}`} />
-                    <span>1 durğu işarəsi (!@#...)</span>
-                  </div>
-                </div>
-              </div>
 
               {registerError && (
                 <div className="p-3 bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs rounded-xl flex items-center gap-2">
