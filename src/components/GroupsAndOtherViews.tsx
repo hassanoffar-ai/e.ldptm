@@ -89,13 +89,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
   );
   const [modSemester, setModSemester] = useState('I Semestr');
   const [modName, setModName] = useState('');
-  const [modHours, setModHours] = useState(60);
-  const [modCredits, setModCredits] = useState(5);
-  const [modInstructor, setModInstructor] = useState('');
-  const [modSyllabusTopics, setModSyllabusTopics] = useState('');
-  const [modDescription, setModDescription] = useState('');
   const [modError, setModError] = useState<string | null>(null);
-  const [expandedSyllabusId, setExpandedSyllabusId] = useState<string | null>(null);
 
   const saveModules = (updated: SpecialtyModule[]) => {
     setModulesList(updated);
@@ -115,11 +109,6 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
     );
     setModSemester(selectedModuleSemester !== 'all' ? selectedModuleSemester : 'I Semestr');
     setModName('');
-    setModHours(60);
-    setModCredits(5);
-    setModInstructor('');
-    setModSyllabusTopics('');
-    setModDescription('');
     setModError(null);
     setIsModuleModalOpen(true);
   };
@@ -129,11 +118,6 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
     setModSpecialty(m.specialtyName);
     setModSemester(m.semester);
     setModName(m.name);
-    setModHours(m.creditHours || 60);
-    setModCredits(m.credits || 5);
-    setModInstructor(m.instructor || '');
-    setModSyllabusTopics(m.syllabusTopics || '');
-    setModDescription(m.description || '');
     setModError(null);
     setIsModuleModalOpen(true);
   };
@@ -153,11 +137,6 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
               specialtyName: modSpecialty,
               semester: modSemester,
               name: modName.trim(),
-              creditHours: Number(modHours) || 60,
-              credits: Number(modCredits) || 5,
-              instructor: modInstructor.trim(),
-              syllabusTopics: modSyllabusTopics.trim(),
-              description: modDescription.trim(),
             }
           : m
       );
@@ -168,11 +147,6 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
         specialtyName: modSpecialty,
         semester: modSemester,
         name: modName.trim(),
-        creditHours: Number(modHours) || 60,
-        credits: Number(modCredits) || 5,
-        instructor: modInstructor.trim(),
-        syllabusTopics: modSyllabusTopics.trim(),
-        description: modDescription.trim(),
         createdAt: new Date().toISOString(),
       };
       saveModules([newMod, ...modulesList]);
@@ -182,7 +156,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
   };
 
   const handleDeleteModule = (id: string, name: string) => {
-    if (window.confirm(`"${name}" modulunu və tədris sillabusunu silmək istədiyinizdən əminsiniz?`)) {
+    if (window.confirm(`"${name}" modulunu silmək istədiyinizdən əminsiniz?`)) {
       const updated = modulesList.filter((m) => m.id !== id);
       saveModules(updated);
     }
@@ -610,7 +584,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
     );
   }
 
-  // Fənlər / Modullar və Sillabuslar View
+  // Modullar View
   if (activeTab === 'subjects') {
     const filteredModules = modulesList.filter((m) => {
       const matchesSpecialty =
@@ -631,11 +605,11 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                 <BookOpen className="w-5 h-5" />
               </div>
               <h2 className="text-2xl md:text-3xl font-bold text-[#121c2a]">
-                Modullar və Sillabuslar
+                Modullar
               </h2>
             </div>
             <p className="text-sm text-[#64748b]">
-              İxtisaslar və semestrlər üzrə tədris modulları, saatlar və tədris planı
+              İxtisaslar və semestrlər üzrə tədris olunan modullar
             </p>
           </div>
 
@@ -644,7 +618,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
             className="flex items-center gap-2 px-4 py-2.5 bg-[#5300b7] hover:bg-[#430094] text-white rounded-xl text-xs font-semibold shadow-xs transition-all cursor-pointer w-fit"
           >
             <Plus className="w-4 h-4" />
-            <span>Yeni Modul və Sillabus Əlavə Et</span>
+            <span>Yeni Modul Əlavə Et</span>
           </button>
         </div>
 
@@ -714,7 +688,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
               Bu seçim üzrə heç bir modul tapılmadı
             </h3>
             <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-              Seçilmiş ixtisas və ya semestr üçün yeni modul və sillabus əlavə edə bilərsiniz.
+              Seçilmiş ixtisas və ya semestr üçün yeni modul əlavə edə bilərsiniz.
             </p>
             <button
               onClick={openAddModuleModal}
@@ -726,15 +700,14 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredModules.map((m) => {
-              const isExpanded = expandedSyllabusId === m.id;
               return (
                 <div
                   key={m.id}
                   className="bg-white p-5 rounded-2xl border border-[#ccc3d7] hover:border-[#6d28d9] transition-all flex flex-col justify-between shadow-xs hover:shadow-md"
                 >
                   <div className="space-y-3">
-                    {/* Badges */}
-                    <div className="flex flex-wrap items-center justify-between gap-2">
+                    {/* Badge */}
+                    <div className="flex items-center justify-between gap-2">
                       <span className="text-xs font-bold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
                         {m.semester}
                       </span>
@@ -749,51 +722,6 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                     <h3 className="font-bold text-base text-[#121c2a] leading-snug">
                       {m.name}
                     </h3>
-
-                    {m.description && (
-                      <p className="text-xs text-[#64748b] leading-relaxed line-clamp-2">
-                        {m.description}
-                      </p>
-                    )}
-
-                    {/* Metadata chips */}
-                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-xs text-slate-600">
-                      <div className="flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5 text-purple-600 shrink-0" />
-                        <span>{m.creditHours || 60} saat ({m.credits || 5} kredit)</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <User className="w-3.5 h-3.5 text-purple-600 shrink-0" />
-                        <span className="truncate">{m.instructor || 'Müəllim təyin olunmayıb'}</span>
-                      </div>
-                    </div>
-
-                    {/* Syllabus Accordion / Topics */}
-                    {m.syllabusTopics && (
-                      <div className="pt-2">
-                        <button
-                          type="button"
-                          onClick={() => setExpandedSyllabusId(isExpanded ? null : m.id)}
-                          className="w-full flex items-center justify-between px-3 py-2 bg-slate-50 hover:bg-purple-50 text-slate-700 hover:text-[#5300b7] rounded-xl text-xs font-bold transition-colors cursor-pointer"
-                        >
-                          <span className="flex items-center gap-1.5">
-                            <FileText className="w-3.5 h-3.5 text-purple-600" />
-                            <span>Sillabus Planı və Mövzuları</span>
-                          </span>
-                          {isExpanded ? (
-                            <ChevronUp className="w-3.5 h-3.5" />
-                          ) : (
-                            <ChevronDown className="w-3.5 h-3.5" />
-                          )}
-                        </button>
-
-                        {isExpanded && (
-                          <div className="mt-2 p-3 bg-purple-50/60 border border-purple-100 rounded-xl text-xs text-slate-700 whitespace-pre-line leading-relaxed max-h-48 overflow-y-auto">
-                            {m.syllabusTopics}
-                          </div>
-                        )}
-                      </div>
-                    )}
                   </div>
 
                   {/* Actions Footer */}
@@ -838,7 +766,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                     <BookOpen className="w-4 h-4" />
                   </div>
                   <h3 className="font-bold text-base text-[#121c2a]">
-                    {editingModule ? 'Modulu Redaktə Et' : 'Yeni Modul və Sillabus Əlavə Et'}
+                    {editingModule ? 'Modulu Redaktə Et' : 'Yeni Modul Əlavə Et'}
                   </h3>
                 </div>
                 <button
@@ -860,7 +788,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                 {/* Specialty */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    İxtisas
+                    İxtisas *
                   </label>
                   <select
                     value={modSpecialty}
@@ -878,7 +806,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                 {/* Semester */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Semestr
+                    Semestr *
                   </label>
                   <select
                     value={modSemester}
@@ -896,10 +824,11 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                 {/* Name */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Modulun Adı
+                    Modulun Adı *
                   </label>
                   <input
                     type="text"
+                    required
                     placeholder="Məs: Proqramlaşdırmanın Əsasları"
                     value={modName}
                     onChange={(e) => setModName(e.target.value)}
@@ -907,88 +836,17 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                   />
                 </div>
 
-                {/* Hours, Credits, Teacher */}
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Tədris Saatı
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={modHours}
-                      onChange={(e) => setModHours(Number(e.target.value))}
-                      className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Kredit Sayı
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={modCredits}
-                      onChange={(e) => setModCredits(Number(e.target.value))}
-                      className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Tədris Edən Müəllim
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Məs: Əliyev V."
-                      value={modInstructor}
-                      onChange={(e) => setModInstructor(e.target.value)}
-                      className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7]"
-                    />
-                  </div>
-                </div>
-
-                {/* Syllabus Topics */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Sillabus Mövzuları və Tədris Planı
-                  </label>
-                  <textarea
-                    rows={4}
-                    placeholder="Hər mövzunu yeni sətirdən daxil edin (məs: 1. Giriş və anlayışlar&#10;2. Şərt operatorları&#10;3. Funksiyalar...)"
-                    value={modSyllabusTopics}
-                    onChange={(e) => setModSyllabusTopics(e.target.value)}
-                    className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl p-3 text-xs font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7]"
-                  />
-                </div>
-
-                {/* Description */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Qısa Təsvir / Qeydlər
-                  </label>
-                  <textarea
-                    rows={2}
-                    placeholder="Modul haqqında qısa izahat..."
-                    value={modDescription}
-                    onChange={(e) => setModDescription(e.target.value)}
-                    className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl p-3 text-xs font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7]"
-                  />
-                </div>
-
-                {/* Modal Footer */}
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                <div className="flex gap-3 pt-3">
                   <button
                     type="button"
                     onClick={() => setIsModuleModalOpen(false)}
-                    className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 cursor-pointer"
+                    className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-semibold transition-colors cursor-pointer"
                   >
-                    Ləğv Et
+                    Ləğv et
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2.5 rounded-xl bg-[#5300b7] hover:bg-[#430094] text-white text-xs font-bold shadow-xs cursor-pointer"
+                    className="flex-1 py-2.5 bg-[#5300b7] hover:bg-[#430093] text-white rounded-xl text-sm font-semibold transition-colors shadow-md shadow-purple-900/15 cursor-pointer"
                   >
                     {editingModule ? 'Yadda Saxla' : 'Modulu Əlavə Et'}
                   </button>

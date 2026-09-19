@@ -38,7 +38,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             Lənkəran Dövlət Peşə Təhsil Mərkəzi
           </h1>
           <p className="text-purple-100 text-xs sm:text-sm leading-relaxed max-w-xl">
-            Yüksək Texniki Peşə (YTP) tələbələrinin idarəetməsi, modullar, sillabuslar, kollokvium və imtahan nəticələri sistemi.
+            Yüksək Texniki Peşə (YTP) tələbələrinin idarəetməsi, modullar, kollokvium və imtahan nəticələri sistemi.
           </p>
         </div>
 
@@ -74,7 +74,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
           </div>
 
-          {/* Card 2: Modullar və Sillabuslar */}
+          {/* Card 2: Modullar */}
           <div
             onClick={() => setActiveTab('subjects')}
             className="group bg-white p-5 rounded-2xl border border-[#ccc3d7] hover:border-[#6d28d9] shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
@@ -84,10 +84,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <BookOpen className="w-5 h-5" />
               </div>
               <h3 className="text-base font-bold text-[#121c2a] mb-1.5">
-                Modullar və Sillabuslar
+                Modullar
               </h3>
               <p className="text-xs text-[#64748b] leading-relaxed mb-3">
-                İxtisaslar və semestrlər üzrə tədris modulları, saatlar və mövzular.
+                İxtisaslar və semestrlər üzrə tədris olunan modullar.
               </p>
             </div>
             <div className="flex items-center gap-1.5 text-xs font-bold text-[#5300b7] group-hover:translate-x-1 transition-transform pt-2 border-t border-slate-100">

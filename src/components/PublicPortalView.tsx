@@ -9,14 +9,11 @@ import {
   User,
   CheckCircle2,
   AlertCircle,
-  FileText,
   BarChart3,
   Shield,
   Building2,
   Check,
   Sparkles,
-  ChevronDown,
-  ChevronUp,
 } from 'lucide-react';
 import { ExamSession, GradeBookCourse, SpecialtyModule, StudentGrade, StudentUser } from '../types';
 import { getStoredModules, SEMESTERS_LIST } from '../data/mockData';
@@ -40,7 +37,6 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
     'grades' | 'modules' | 'schedule' | 'attendance' | 'rules'
   >('grades');
   const [selectedSemesterForModules, setSelectedSemesterForModules] = useState<string>('all');
-  const [expandedSyllabusId, setExpandedSyllabusId] = useState<string | null>(null);
 
   // Load modules list from localStorage or fallback
   const allModules: SpecialtyModule[] = React.useMemo(() => {
@@ -336,7 +332,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
             }`}
           >
             <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span>Modullar və Sillabuslar</span>
+            <span>Modullar</span>
           </button>
 
           <button
@@ -592,10 +588,10 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h2 className="text-xl font-bold text-slate-900">
-                  {student.specialty} — Tədris Modulları və Sillabuslar
+                  {student.specialty} — Tədris Modulları
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Semestrlər üzrə tədris planı, fənn saatları, kreditlər və mühazirə mövzuları
+                  Semestrlər üzrə tədris olunan modulların siyahısı
                 </p>
               </div>
 
@@ -634,7 +630,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                   İxtisasınız üzrə modullar hələ admin tərəfindən daxil edilməyib
                 </h3>
                 <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-                  Admin panelindən modullar və sillabuslar yerləşdirildikdə burada görünəcək.
+                  Admin panelindən modullar yerləşdirildikdə burada görünəcək.
                 </p>
               </div>
             ) : (
@@ -646,62 +642,21 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                       m.semester === selectedSemesterForModules
                   )
                   .map((m) => {
-                    const isExpanded = expandedSyllabusId === m.id;
                     return (
                       <div
                         key={m.id}
-                        className="bg-white p-5 rounded-2xl sm:rounded-3xl border border-slate-200 hover:border-[#5300b7] transition-all shadow-xs space-y-3"
+                        className="bg-white p-5 rounded-2xl sm:rounded-3xl border border-slate-200 hover:border-[#5300b7] transition-all shadow-xs space-y-2.5"
                       >
-                        <div className="flex items-start justify-end gap-2">
-                          <span className="text-xs font-bold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs font-semibold text-slate-500 truncate">
+                            {m.specialtyName}
+                          </span>
+                          <span className="text-xs font-bold text-purple-800 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-200 shrink-0">
                             {m.semester}
                           </span>
                         </div>
 
                         <h3 className="font-bold text-base text-slate-900">{m.name}</h3>
-
-                        {m.description && (
-                          <p className="text-xs text-slate-600 leading-relaxed">
-                            {m.description}
-                          </p>
-                        )}
-
-                        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-xs text-slate-600">
-                          <div className="flex items-center gap-1.5">
-                            <Clock className="w-3.5 h-3.5 text-purple-600 shrink-0" />
-                            <span>{m.creditHours || 60} saat ({m.credits || 5} kredit)</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <User className="w-3.5 h-3.5 text-purple-600 shrink-0" />
-                            <span className="truncate">{m.instructor || 'Müəllim təyin olunmayıb'}</span>
-                          </div>
-                        </div>
-
-                        {m.syllabusTopics && (
-                          <div className="pt-2">
-                            <button
-                              type="button"
-                              onClick={() => setExpandedSyllabusId(isExpanded ? null : m.id)}
-                              className="w-full flex items-center justify-between px-3 py-2 bg-purple-50/70 hover:bg-purple-100 text-purple-900 rounded-xl text-xs font-bold transition-colors cursor-pointer"
-                            >
-                              <span className="flex items-center gap-1.5">
-                                <FileText className="w-3.5 h-3.5 text-[#5300b7]" />
-                                <span>Sillabus Planı və Mövzularını Gör</span>
-                              </span>
-                              {isExpanded ? (
-                                <ChevronUp className="w-3.5 h-3.5" />
-                              ) : (
-                                <ChevronDown className="w-3.5 h-3.5" />
-                              )}
-                            </button>
-
-                            {isExpanded && (
-                              <div className="mt-2 p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 whitespace-pre-line leading-relaxed max-h-56 overflow-y-auto">
-                                {m.syllabusTopics}
-                              </div>
-                            )}
-                          </div>
-                        )}
                       </div>
                     );
                   })}

@@ -49,7 +49,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'dashboard', label: 'Panel', icon: LayoutDashboard, requiredPerm: null },
     { id: 'students', label: 'Tələbələr', icon: Users, requiredPerm: 'canManageStudents' as const },
     { id: 'specialties', label: 'İxtisaslar', icon: GraduationCap, requiredPerm: 'canManageSpecialties' as const },
-    { id: 'subjects', label: 'Modullar və Sillabuslar', icon: BookOpen, requiredPerm: 'canManageSubjects' as const },
+    { id: 'subjects', label: 'Modullar', icon: BookOpen, requiredPerm: 'canManageSubjects' as const },
     { id: 'grades', label: 'Kollokvium və Qiymətlər', icon: Award, requiredPerm: 'canManageGrades' as const },
     { id: 'exams', label: 'İmtahanlar', icon: FileText, requiredPerm: 'canManageExams' as const },
     { id: 'rooms', label: 'Otaqlar', icon: DoorClosed, requiredPerm: 'canAccessRooms' as const },
