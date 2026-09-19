@@ -2,15 +2,12 @@ import React, { useState } from 'react';
 import {
   FileText,
   Filter,
-  Save,
-  Send,
   Info,
   CheckCircle2,
   AlertCircle,
   Plus,
   Trash2,
   Download,
-  Check,
   Award
 } from 'lucide-react';
 import { GradeBookCourse, SpecialtyItem, SpecialtyModule, StudentGrade } from '../types';
@@ -55,12 +52,6 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
   const [gradesList, setGradesList] = useState<StudentGrade[]>(
     currentCourse?.grades || []
   );
-  const [lastSavedTime, setLastSavedTime] = useState<string | null>(
-    currentCourse?.lastSaved || null
-  );
-  const [isPublished, setIsPublished] = useState<boolean>(
-    currentCourse?.isPublished || false
-  );
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Load modules list from localStorage or fallback
@@ -102,8 +93,6 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
         setSelectedSubject(active.subject);
         setSelectedSemester(active.semester);
         setGradesList(active.grades);
-        setLastSavedTime(active.lastSaved || null);
-        setIsPublished(active.isPublished || false);
       }
     } else {
       setGradesList([]);
@@ -119,8 +108,6 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
       setSelectedSpecialty(match.specialty);
       setSelectedSemester(match.semester);
       setGradesList(match.grades);
-      setLastSavedTime(match.lastSaved || null);
-      setIsPublished(match.isPublished || false);
     }
   };
 
@@ -155,6 +142,25 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
       newGrades[index][field] = num;
     }
     setGradesList(newGrades);
+
+    // Auto-save immediately to course state
+    const now = new Date();
+    const timeStr = `${now.toLocaleDateString('az-AZ', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })}, ${now.toLocaleTimeString('az-AZ', {
+      hour: '2-digit',
+      minute: '2-digit',
+    })}`;
+
+    const updatedCourses = courses.map((c) =>
+      c.id === currentCourse.id
+        ? { ...c, grades: newGrades, lastSaved: timeStr, isPublished: true }
+        : c
+    );
+
+    onUpdateCourses(updatedCourses);
   };
 
   const calculateEntryTotal = (grade: StudentGrade) => {
@@ -235,53 +241,6 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
     };
   };
 
-  const handleSaveDraft = () => {
-    if (!currentCourse) return;
-    const now = new Date();
-    const timeStr = `${now.toLocaleDateString('az-AZ', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    })}, ${now.toLocaleTimeString('az-AZ', {
-      hour: '2-digit',
-      minute: '2-digit',
-    })}`;
-
-    const updatedCourses = courses.map((c) =>
-      c.id === currentCourse.id
-        ? { ...c, grades: gradesList, lastSaved: timeStr }
-        : c
-    );
-
-    onUpdateCourses(updatedCourses);
-    setLastSavedTime(timeStr);
-    showToast('Qiymətlər qaralama olaraq saxlanıldı.');
-  };
-
-  const handlePublishGrades = () => {
-    if (!currentCourse) return;
-    const now = new Date();
-    const timeStr = `${now.toLocaleDateString('az-AZ', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    })}, ${now.toLocaleTimeString('az-AZ', {
-      hour: '2-digit',
-      minute: '2-digit',
-    })}`;
-
-    const updatedCourses = courses.map((c) =>
-      c.id === currentCourse.id
-        ? { ...c, grades: gradesList, lastSaved: timeStr, isPublished: true }
-        : c
-    );
-
-    onUpdateCourses(updatedCourses);
-    setLastSavedTime(timeStr);
-    setIsPublished(true);
-    showToast('Ballar rəsmi olaraq dərc edildi.');
-  };
-
   const handleExportGradesCSV = () => {
     if (!currentCourse) return;
     const headers = [
@@ -338,9 +297,6 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
     showToast('Qiymət cədvəli ixrac edildi.');
   };
 
-  const handleSave = handleSaveDraft;
-  const handlePublish = handlePublishGrades;
-
   if (!currentCourse) {
     return (
       <div className="p-4 md:p-8 flex-1 max-w-7xl mx-auto w-full flex flex-col items-center justify-center min-h-[60vh]">
@@ -369,7 +325,7 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
   }
 
   return (
-    <div className="p-4 md:p-8 flex-1 max-w-7xl mx-auto w-full pb-28">
+    <div className="p-4 md:p-8 flex-1 max-w-7xl mx-auto w-full pb-12">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-24 right-6 bg-[#121c2a] text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 z-50 animate-bounce duration-300">
@@ -506,8 +462,6 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
                     setSelectedSpecialty(match.specialty);
                     setSelectedSemester(match.semester);
                     setGradesList(match.grades);
-                    setLastSavedTime(match.lastSaved || null);
-                    setIsPublished(match.isPublished || false);
                   }
                 }}
                 className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7] focus:border-[#5300b7] transition-all cursor-pointer"
@@ -784,50 +738,6 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
               )}
             </tbody>
           </table>
-        </div>
-      </div>
-
-      {/* Floating Bottom Bar (Matching Screen 3) */}
-      <div className="fixed bottom-5 left-4 right-4 md:left-80 md:right-8 z-40">
-        <div className="bg-white/95 backdrop-blur-md border border-[#ccc3d7] rounded-2xl shadow-xl p-3 md:p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          {/* Status info */}
-          <div className="flex items-center gap-2 text-xs md:text-sm text-[#4a4455]">
-            <div className="w-5 h-5 rounded-full bg-purple-100 text-[#5300b7] flex items-center justify-center shrink-0">
-              <CheckCircle2 className="w-4 h-4" />
-            </div>
-            <span>
-              Son yadda saxlanma:{' '}
-              <strong className="text-[#121c2a]">
-                {lastSavedTime || 'Qeyd edilməyib'}
-              </strong>
-            </span>
-            {isPublished && (
-              <span className="ml-2 px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full text-[11px] font-semibold">
-                Dərc Edilib
-              </span>
-            )}
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <button
-              id="grades-save-btn"
-              onClick={handleSave}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-[#ccc3d7] text-[#121c2a] hover:bg-[#f8f9ff] text-sm font-semibold transition-all active:scale-95 shadow-xs cursor-pointer"
-            >
-              <Save className="w-4 h-4 text-slate-700" />
-              <span>Yadda Saxla</span>
-            </button>
-
-            <button
-              id="grades-publish-btn"
-              onClick={handlePublish}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#5300b7] hover:bg-[#430094] text-white text-sm font-semibold shadow-[0_4px_12px_rgba(83,0,183,0.25)] transition-all active:scale-95 cursor-pointer"
-            >
-              <Send className="w-4 h-4" />
-              <span>Tələbə Kabinetində Dərc Et</span>
-            </button>
-          </div>
         </div>
       </div>
     </div>
