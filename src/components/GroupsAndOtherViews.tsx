@@ -60,9 +60,8 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
   // Form states for Add/Edit Specialty
   const [specName, setSpecName] = useState('');
   const [specCode, setSpecCode] = useState('');
-  const [specDirection, setSpecDirection] = useState('Yüksək Texniki Peşə (YTP) Subbakalavr');
-  const [specCustomDirection, setSpecCustomDirection] = useState('');
-  const [specDuration, setSpecDuration] = useState('2 il (4 semestr)');
+  const [specDirection, setSpecDirection] = useState('Yüksək Texniki Peşə (YTP)');
+  const [specDuration, setSpecDuration] = useState('3 illik');
   const [specEducationType, setSpecEducationType] = useState<'Əyani' | 'Qiyabi'>('Əyani');
   const [specDescription, setSpecDescription] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
@@ -71,9 +70,8 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
     setEditingSpecialty(null);
     setSpecName('');
     setSpecCode('');
-    setSpecDirection('Yüksək Texniki Peşə (YTP) Subbakalavr');
-    setSpecCustomDirection('');
-    setSpecDuration('2 il (4 semestr)');
+    setSpecDirection('Yüksək Texniki Peşə (YTP)');
+    setSpecDuration('3 illik');
     setSpecEducationType('Əyani');
     setSpecDescription('');
     setFormError(null);
@@ -83,21 +81,9 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
   const openEditSpecialtyModal = (item: SpecialtyItem) => {
     setEditingSpecialty(item);
     setSpecName(item.name);
-    setSpecCode(item.code);
-    const standardDirections = [
-      'Yüksək Texniki Peşə (YTP) Subbakalavr',
-      'Texniki Peşə',
-      'İlk Peşə',
-      'Qısamüddətli Peşə Təlimi',
-    ];
-    if (standardDirections.includes(item.direction)) {
-      setSpecDirection(item.direction);
-      setSpecCustomDirection('');
-    } else {
-      setSpecDirection('Digər');
-      setSpecCustomDirection(item.direction);
-    }
-    setSpecDuration(item.duration || '2 il (4 semestr)');
+    setSpecCode(item.code || '');
+    setSpecDirection('Yüksək Texniki Peşə (YTP)');
+    setSpecDuration(item.duration === '4 illik' ? '4 illik' : '3 illik');
     setSpecEducationType(item.educationType || 'Əyani');
     setSpecDescription(item.description || '');
     setFormError(null);
@@ -110,21 +96,15 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
       setFormError('İxtisasın adını qeyd edin');
       return;
     }
-    if (!specCode.trim()) {
-      setFormError('İxtisas kodunu qeyd edin');
-      return;
-    }
 
-    const finalDirection =
-      specDirection === 'Digər'
-        ? specCustomDirection.trim() || 'Xüsusi Peşə İstiqaməti'
-        : specDirection;
+    const finalDirection = 'Yüksək Texniki Peşə (YTP)';
+    const finalCode = specCode.trim() || 'YTP';
 
     if (editingSpecialty) {
       const updated: SpecialtyItem = {
         ...editingSpecialty,
         name: specName.trim(),
-        code: specCode.trim(),
+        code: finalCode,
         direction: finalDirection,
         duration: specDuration,
         educationType: specEducationType,
@@ -135,7 +115,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
       const newSpecialty: SpecialtyItem = {
         id: `spec-${Date.now()}`,
         name: specName.trim(),
-        code: specCode.trim(),
+        code: finalCode,
         direction: finalDirection,
         duration: specDuration,
         educationType: specEducationType,
@@ -154,87 +134,10 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
     }
   };
 
-  // Qruplar View
-  if (activeTab === 'groups') {
-    return (
-      <div className="p-4 md:p-8 flex-1 max-w-7xl mx-auto w-full space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center text-[#5300b7]">
-                <Grid className="w-5 h-5" />
-              </div>
-              <h2 className="text-2xl md:text-3xl font-bold text-[#121c2a]">
-                Akademik Qruplar
-              </h2>
-            </div>
-            <p className="text-sm text-[#64748b]">
-              E-LDPTM üzrə tədris olunan bütün qrupların siyahısı
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-          {GROUPS_LIST.map((group) => {
-            const groupStudents = students.filter((s) => s.group === group);
-            const groupExams = sessions.filter((e) => e.group === group);
-
-            return (
-              <div
-                key={group}
-                className="bg-white p-5 rounded-2xl border border-[#ccc3d7] shadow-xs hover:border-[#6d28d9] transition-all"
-              >
-                <div className="flex justify-between items-start mb-3">
-                  <div className="w-12 h-12 rounded-xl bg-purple-50 text-[#5300b7] font-bold text-base flex items-center justify-center border border-purple-100">
-                    {group}
-                  </div>
-                  <span className="text-xs px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full font-medium">
-                    Aktiv Qrup
-                  </span>
-                </div>
-
-                <h3 className="text-base font-bold text-[#121c2a] mb-1">
-                  Qrup {group}
-                </h3>
-                <p className="text-xs text-[#64748b] mb-4">
-                  İnformasiya Texnologiyaları Şöbəsi
-                </p>
-
-                <div className="space-y-2 pt-3 border-t border-slate-100 text-xs text-slate-600">
-                  <div className="flex justify-between">
-                    <span>Tələbə sayı:</span>
-                    <strong className="text-slate-900">
-                      {groupStudents.length} nəfər
-                    </strong>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Təyin olunmuş imtahanlar:</span>
-                    <strong className="text-[#5300b7]">
-                      {groupExams.length} fənn
-                    </strong>
-                  </div>
-                </div>
-
-                <div className="mt-4 pt-3 flex gap-2">
-                  <button
-                    onClick={() => setActiveTab('exams')}
-                    className="flex-1 py-1.5 bg-purple-50 hover:bg-purple-100 text-[#5300b7] rounded-lg text-xs font-semibold transition-colors"
-                  >
-                    Protokola Keç
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('grades')}
-                    className="flex-1 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-semibold transition-colors"
-                  >
-                    Jurnal / Ballar
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
+  // Qruplar və Davamiyyət ləğv edildiyi üçün fallback
+  if (activeTab === 'groups' || activeTab === 'attendance' || activeTab === 'journal') {
+    setActiveTab('specialties');
+    return null;
   }
 
   // İxtisaslar View
@@ -381,17 +284,10 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                 >
                   <div>
                     <div className="flex items-start justify-between gap-2 mb-2.5">
-                      <span className="text-xs px-2.5 py-1 bg-purple-50 text-[#5300b7] rounded-lg font-mono font-bold border border-purple-100">
-                        KOD: {spec.code}
-                      </span>
                       <span
-                        className={`text-xs px-2.5 py-0.5 rounded-full font-medium border ${
-                          isYtp
-                            ? 'bg-purple-100/60 text-purple-900 border-purple-200'
-                            : 'bg-blue-50 text-blue-800 border-blue-200'
-                        }`}
+                        className="text-xs px-2.5 py-0.5 rounded-full font-medium border bg-purple-100/60 text-purple-900 border-purple-200"
                       >
-                        {spec.direction}
+                        {spec.direction || 'Yüksək Texniki Peşə (YTP)'}
                       </span>
                     </div>
 
@@ -491,15 +387,13 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-                      İxtisas Kodu *
+                      Peşə İstiqaməti / Təhsil Səviyyəsi *
                     </label>
                     <input
                       type="text"
-                      required
-                      placeholder="məs: 040501 və ya IT-01"
-                      value={specCode}
-                      onChange={(e) => setSpecCode(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7] focus:border-[#5300b7]"
+                      readOnly
+                      value="Yüksək Texniki Peşə (YTP)"
+                      className="w-full px-3.5 py-2.5 bg-purple-50/60 border border-purple-200 text-[#5300b7] font-semibold rounded-xl text-sm outline-none cursor-default"
                     />
                   </div>
 
@@ -520,52 +414,15 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
 
                 <div>
                   <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-                    Peşə İstiqaməti / Təhsil Səviyyəsi *
-                  </label>
-                  <select
-                    value={specDirection}
-                    onChange={(e) => setSpecDirection(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
-                  >
-                    <option value="Yüksək Texniki Peşə (YTP) Subbakalavr">
-                      Yüksək Texniki Peşə (YTP) Subbakalavr
-                    </option>
-                    <option value="Texniki Peşə">Texniki Peşə</option>
-                    <option value="İlk Peşə">İlk Peşə</option>
-                    <option value="Qısamüddətli Peşə Təlimi">Qısamüddətli Peşə Təlimi</option>
-                    <option value="Digər">Digər (Fərdi İstiqamət)</option>
-                  </select>
-                </div>
-
-                {specDirection === 'Digər' && (
-                  <div>
-                    <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-                      İstiqamətin Adını Qeyd Edin
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="məs: İxtisasartırma kursu"
-                      value={specCustomDirection}
-                      onChange={(e) => setSpecCustomDirection(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
-                    />
-                  </div>
-                )}
-
-                <div>
-                  <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-                    Təhsil Müddəti
+                    Təhsil Müddəti *
                   </label>
                   <select
                     value={specDuration}
                     onChange={(e) => setSpecDuration(e.target.value)}
                     className="w-full px-3.5 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
                   >
-                    <option value="2 il (4 semestr)">2 il (4 semestr)</option>
-                    <option value="1.5 il (3 semestr)">1.5 il (3 semestr)</option>
-                    <option value="3 il (6 semestr)">3 il (6 semestr)</option>
-                    <option value="1 il (2 semestr)">1 il (2 semestr)</option>
-                    <option value="6 ay">6 ay</option>
+                    <option value="3 illik">3 illik</option>
+                    <option value="4 illik">4 illik</option>
                   </select>
                 </div>
 
@@ -745,69 +602,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
     );
   }
 
-  // Davamiyyət & Jurnal View
-  if (activeTab === 'attendance' || activeTab === 'journal') {
-    return (
-      <div className="p-4 md:p-8 flex-1 max-w-7xl mx-auto w-full space-y-6">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center text-[#5300b7]">
-              <CheckSquare className="w-5 h-5" />
-            </div>
-            <h2 className="text-2xl md:text-3xl font-bold text-[#121c2a]">
-              {activeTab === 'attendance' ? 'Davamiyyət Jurnalı' : 'Elektron Jurnal'}
-            </h2>
-          </div>
-          <p className="text-sm text-[#64748b]">
-            Dərslərdə iştirak və cari qiymətləndirmə monitorinqi
-          </p>
-        </div>
 
-        <div className="bg-white rounded-2xl border border-[#ccc3d7] p-6 shadow-xs">
-          {students.length === 0 ? (
-            <div className="p-8 text-center text-slate-400 text-sm">
-              Jurnalda göstərmək üçün sistemdə hələ heç bir tələbə qeydiyyatda deyil. Əvvəlcə tələbələr əlavə edin.
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-200 bg-slate-50 text-slate-600">
-                    <th className="p-3">Tələbə</th>
-                    <th className="p-3">Qrup</th>
-                    <th className="p-3">İxtisas</th>
-                    <th className="p-3 text-center">Status</th>
-                    <th className="p-3 text-center">İştirak Payı</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {students.map((s) => (
-                    <tr key={s.id} className="hover:bg-slate-50/60">
-                      <td className="p-3 font-semibold text-slate-800">
-                        {s.name} ({s.studentId})
-                      </td>
-                      <td className="p-3 text-slate-600 font-medium">
-                        {s.group}
-                      </td>
-                      <td className="p-3 text-slate-500">
-                        {s.specialty}
-                      </td>
-                      <td className="p-3 text-center text-emerald-600 font-bold">
-                        Aktiv
-                      </td>
-                      <td className="p-3 text-center font-semibold text-purple-700">
-                        100%
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
 
   // Hesabatlar, İstifadəçilər, Ayarlar Fallback Views
   return (

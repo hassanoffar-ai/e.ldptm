@@ -132,7 +132,7 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
 
     if (!matched) {
       setRegisterError(
-        `Daxil edilən FİN kod (${cleanFin}) mərkəzin tələbə bazasında tapılmadı. Yalnız Lənkəran Dövlət Peşə Təhsil Mərkəzində qeydiyyatda olan tələbələr qeydiyyatdan keçə bilər.`
+        `Daxil edilən FİN kod (${cleanFin}) mərkəzin bazasında tapılmadı. Yalnız admin və ya super admin tərəfindən bazaya daxil edilmiş rəsmi tələbələr qeydiyyatdan keçə bilər. Kənar şəxslərin qeydiyyatına icazə verilmir.`
       );
       return;
     }
@@ -362,7 +362,7 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
                   />
                 </div>
                 <p className="text-[11px] text-slate-400 mt-1.5">
-                  Qeydiyyat yalnız mərkəzdə təhsil alan tələbənin öz 7 simvollu FİN kodu ilə aparılır.
+                  Qeydiyyat yalnız admin və ya super admin tərəfindən sistemə FİN kodu daxil edilmiş tələbələr üçün aktivdir. Kənar şəxslər qeydiyyatdan keçə bilməz.
                 </p>
               </div>
 
@@ -372,10 +372,10 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
                   <AlertCircle className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
                   <div className="space-y-1">
                     <span className="font-semibold block text-rose-200">
-                      FİN kod ({cleanRegisterFin}) tələbə bazasında tapılmadı!
+                      Girişə icazə verilmir: FİN kod ({cleanRegisterFin}) sistemdə tapılmadı!
                     </span>
                     <p className="text-rose-300/90 leading-relaxed text-[11px]">
-                      Yalnız Lənkəran Dövlət Peşə Təhsil Mərkəzində qeydiyyatda olan tələbələr portala qeydiyyatdan keçə bilər. Əgər bu mərkəzin tələbəsisinizsə, zəhmət olmasa tədris hissəsinə müraciət edin.
+                      Yalnız sistemə admin və ya super admin tərəfindən FİN kodu daxil edilmiş rəsmi tələbələr qeydiyyatdan keçə bilər. Kənar şəxslərin qeydiyyatı qadağandır. Əgər bu mərkəzin tələbəsisinizsə, zəhmət olmasa tədris hissəsinə müraciət edin.
                     </p>
                   </div>
                 </div>

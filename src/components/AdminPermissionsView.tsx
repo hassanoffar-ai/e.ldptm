@@ -338,57 +338,7 @@ export const AdminPermissionsView: React.FC<AdminPermissionsViewProps> = ({
             </button>
           </div>
 
-          {/* Permission 4: Journal */}
-          <div className="p-4 rounded-xl border border-slate-200 flex items-center justify-between hover:bg-slate-50 transition-colors">
-            <div>
-              <h4 className="text-sm font-bold text-slate-800">
-                Jurnal və Fənn Qeydiyyatı
-              </h4>
-              <p className="text-xs text-slate-500">
-                Fənn jurnallarının açılması və semestr jurnallarına giriş
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => handleTogglePermission('canAccessJournal')}
-              className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${
-                permissions.canAccessJournal ? 'bg-[#5300b7]' : 'bg-slate-300'
-              }`}
-            >
-              <div
-                className={`w-5 h-5 rounded-full bg-white transition-transform absolute top-0.5 ${
-                  permissions.canAccessJournal ? 'right-0.5' : 'left-0.5'
-                }`}
-              />
-            </button>
-          </div>
-
-          {/* Permission 5: Groups */}
-          <div className="p-4 rounded-xl border border-slate-200 flex items-center justify-between hover:bg-slate-50 transition-colors">
-            <div>
-              <h4 className="text-sm font-bold text-slate-800">
-                Qrupların İdarə Edilməsi
-              </h4>
-              <p className="text-xs text-slate-500">
-                Akademik qrupların siyahısı və qrup tələbələrinin idarəsi
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => handleTogglePermission('canManageGroups')}
-              className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${
-                permissions.canManageGroups ? 'bg-[#5300b7]' : 'bg-slate-300'
-              }`}
-            >
-              <div
-                className={`w-5 h-5 rounded-full bg-white transition-transform absolute top-0.5 ${
-                  permissions.canManageGroups ? 'right-0.5' : 'left-0.5'
-                }`}
-              />
-            </button>
-          </div>
-
-          {/* Permission 6: Specialties */}
+          {/* Permission: Specialties */}
           <div className="p-4 rounded-xl border border-slate-200 flex items-center justify-between hover:bg-slate-50 transition-colors">
             <div>
               <h4 className="text-sm font-bold text-slate-800">
@@ -413,7 +363,7 @@ export const AdminPermissionsView: React.FC<AdminPermissionsViewProps> = ({
             </button>
           </div>
 
-          {/* Permission 7: Subjects */}
+          {/* Permission: Subjects */}
           <div className="p-4 rounded-xl border border-slate-200 flex items-center justify-between hover:bg-slate-50 transition-colors">
             <div>
               <h4 className="text-sm font-bold text-slate-800">
@@ -433,31 +383,6 @@ export const AdminPermissionsView: React.FC<AdminPermissionsViewProps> = ({
               <div
                 className={`w-5 h-5 rounded-full bg-white transition-transform absolute top-0.5 ${
                   permissions.canManageSubjects ? 'right-0.5' : 'left-0.5'
-                }`}
-              />
-            </button>
-          </div>
-
-          {/* Permission 8: Attendance */}
-          <div className="p-4 rounded-xl border border-slate-200 flex items-center justify-between hover:bg-slate-50 transition-colors">
-            <div>
-              <h4 className="text-sm font-bold text-slate-800">
-                Davamiyyət Monitorinqi
-              </h4>
-              <p className="text-xs text-slate-500">
-                Qayıb limitləri və dərsdə iştirak cədvəllərinin idarəsi
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => handleTogglePermission('canManageAttendance')}
-              className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${
-                permissions.canManageAttendance ? 'bg-[#5300b7]' : 'bg-slate-300'
-              }`}
-            >
-              <div
-                className={`w-5 h-5 rounded-full bg-white transition-transform absolute top-0.5 ${
-                  permissions.canManageAttendance ? 'right-0.5' : 'left-0.5'
                 }`}
               />
             </button>
