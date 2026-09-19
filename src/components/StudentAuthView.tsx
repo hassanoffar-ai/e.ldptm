@@ -35,14 +35,13 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
   // Login form states
-  const [loginIdentifier, setLoginIdentifier] = useState(''); // Student ID or Email
+  const [loginIdentifier, setLoginIdentifier] = useState(''); // Student ID
   const [loginPassword, setLoginPassword] = useState('');
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
 
-  // Register form states (Student ID & Full Name specified by admin)
+  // Register form states (Student ID assigned by admin)
   const [registerStudentId, setRegisterStudentId] = useState('');
-  const [fullName, setFullName] = useState('');
   // Details entered by student
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -52,23 +51,7 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
   const [registerError, setRegisterError] = useState<string | null>(null);
   const [registerSuccessMsg, setRegisterSuccessMsg] = useState<string | null>(null);
 
-  // Normalize string for Azerbaijani diacritics & spacing
-  const normalizeAz = (str: string) =>
-    str
-      .toLowerCase()
-      .replace(/ə/g, 'e')
-      .replace(/i̇/g, 'i')
-      .replace(/ı/g, 'i')
-      .replace(/ç/g, 'c')
-      .replace(/ş/g, 's')
-      .replace(/ğ/g, 'g')
-      .replace(/ö/g, 'o')
-      .replace(/ü/g, 'u')
-      .replace(/\s+/g, ' ')
-      .trim();
-
   const cleanRegisterId = registerStudentId.trim();
-  const cleanEnteredName = fullName.trim();
 
   // Find student in registered DB by Student ID (or finCode for legacy)
   const matchedStudentById =
@@ -81,17 +64,9 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
         ) || null
       : null;
 
-  // Verify whether entered name matches the matched student's name
-  const isNameMatched = Boolean(
-    matchedStudentById &&
-      cleanEnteredName.length >= 2 &&
-      (normalizeAz(matchedStudentById.name).includes(normalizeAz(cleanEnteredName)) ||
-        normalizeAz(cleanEnteredName).includes(normalizeAz(matchedStudentById.name)))
-  );
-
   // Auto-fill existing details if already partially saved
   useEffect(() => {
-    if (matchedStudentById && isNameMatched) {
+    if (matchedStudentById) {
       if (!phone && matchedStudentById.phone && !matchedStudentById.phone.includes('000 00 00')) {
         setPhone(matchedStudentById.phone);
       }
@@ -99,7 +74,7 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
         setEmail(matchedStudentById.email);
       }
     }
-  }, [matchedStudentById, isNameMatched]);
+  }, [matchedStudentById]);
 
   // Handle Student Login
   const handleLoginSubmit = (e: React.FormEvent) => {
@@ -110,21 +85,21 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
     const cleanPass = loginPassword.trim();
 
     if (!cleanId || !cleanPass) {
-      setLoginError('Zəhmət olmasa Tələbə ID və ya Gmail hesabınızı və şifrənizi daxil edin.');
+      setLoginError('Zəhmət olmasa Tələbə ID və şifrənizi daxil edin.');
       return;
     }
 
-    // Match by studentId, email, or legacy finCode
+    // Match by studentId, id, or legacy finCode
     const matched = students.find(
       (s) =>
         s.studentId.toLowerCase() === cleanId ||
-        (s.email && s.email.toLowerCase() === cleanId) ||
+        s.id.toLowerCase() === cleanId ||
         (s.finCode && s.finCode.toLowerCase() === cleanId)
     );
 
     if (!matched) {
       setLoginError(
-        'Daxil edilən Tələbə ID və ya Gmail sistemdə tapılmadı. Əgər qeydiyyatdan keçməmisinizsə, aşağıdakı bölmədən qeydiyyatdan keçin.'
+        'Daxil edilən Tələbə ID sistemdə tapılmadı. Əgər qeydiyyatdan keçməmisinizsə, aşağıdan qeydiyyatdan keçin.'
       );
       return;
     }
@@ -134,7 +109,7 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
     if (cleanPass !== expectedPassword) {
       if (!matched.isRegistered) {
         setLoginError(
-          'Daxil edilmiş şifrə yanlışdır. Əgər portalda ilk dəfəsinizsə, aşağıdakı "Tələbə ID ilə Qeydiyyatdan Keçin" bölməsindən şifrənizi təyin edin.'
+          'Daxil edilmiş şifrə yanlışdır. Əgər portalda ilk dəfəsinizsə, aşağıdakı "Qeydiyyatdan keçin" bölməsindən şifrənizi təyin edin.'
         );
       } else {
         setLoginError('Daxil edilmiş şifrə yanlışdır. Zəhmət olmasa yenidən yoxlayın.');
@@ -167,21 +142,9 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
       return;
     }
 
-    if (!cleanEnteredName) {
-      setRegisterError('Zəhmət olmasa ad və soyadınızı daxil edin.');
-      return;
-    }
-
     if (!matchedStudentById) {
       setRegisterError(
         `Daxil edilən Tələbə ID (${cleanRegisterId}) mərkəzin bazasında tapılmadı. Yalnız admin tərəfindən qeydiyyata alınmış rəsmi tələbələr qeydiyyatdan keçə bilər.`
-      );
-      return;
-    }
-
-    if (!isNameMatched) {
-      setRegisterError(
-        `Daxil edilən Ad və Soyad (${cleanEnteredName}) bu Tələbə ID (${matchedStudentById.studentId}) ilə uyğun gəlmir. Zəhmət olmasa mərkəzdə rəsmi qeyd olunan adınızı daxil edin.`
       );
       return;
     }
@@ -227,7 +190,7 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
 
     // Provide feedback and switch to login page
     setRegisterSuccessMsg(
-      `Hörmətli ${matchedStudentById.name}, qeydiyyatınız uğurla tamamlandı! Tələbə ID (${matchedStudentById.studentId}) və ya Gmail hesabınız və təyin etdiyiniz şifrə ilə daxil ola bilərsiniz.`
+      `Hörmətli ${matchedStudentById.name}, qeydiyyatınız uğurla tamamlandı! Tələbə ID (${matchedStudentById.studentId}) və təyin etdiyiniz şifrə ilə daxil ola bilərsiniz.`
     );
     setLoginIdentifier(matchedStudentById.studentId);
     setLoginPassword('');
@@ -235,7 +198,6 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
 
     // Reset register fields
     setRegisterStudentId('');
-    setFullName('');
     setPassword('');
     setConfirmPassword('');
     setPhone('');
@@ -282,11 +244,11 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
               {authMode === 'login' ? 'Tələbə Girişi' : 'Tələbə Qeydiyyatı'}
             </h2>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1.5 max-w-md mx-auto">
-              {authMode === 'login'
-                ? 'Semestr ballarınızı və fəaliyyətinizi izləmək üçün şəxsi kabinetinizə daxil olun'
-                : 'Mərkəz tərəfindən sizə verilən Tələbə ID və Ad Soyadınız ilə şəxsi kabinetinizi aktivləşdirin'}
-            </p>
+            {authMode === 'register' && (
+              <p className="text-xs sm:text-sm text-slate-400 mt-1.5 max-w-md mx-auto">
+                Mərkəz tərəfindən sizə təqdim edilən Tələbə ID ilə şəxsi kabinetinizi aktivləşdirin
+              </p>
+            )}
           </div>
 
           {/* Registration Success Notification (when redirected to login) */}
@@ -305,14 +267,14 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  Tələbə ID və ya Gmail / E-poçt
+                  Tələbə ID
                 </label>
                 <div className="relative">
                   <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     type="text"
                     required
-                    placeholder="Məs: TLB-1001 və ya telebe@gmail.com"
+                    placeholder="Məs: TLB-1001"
                     value={loginIdentifier}
                     onChange={(e) => setLoginIdentifier(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 bg-slate-800/60 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all font-mono"
@@ -364,27 +326,26 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
               </button>
 
               {/* Bottom prompt for registration */}
-              <div className="mt-6 pt-5 border-t border-slate-800/80 text-center space-y-2">
-                <span className="text-xs text-slate-400 block">
-                  Sistemdə ilk dəfəsiniz və hesabınız yoxdur?
-                </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAuthMode('register');
-                    setRegisterError(null);
-                    setRegisterSuccessMsg(null);
-                  }}
-                  className="w-full py-3 px-4 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-purple-300 hover:text-white border border-slate-700 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <KeyRound className="w-4 h-4 text-purple-400" />
-                  <span>Tələbə ID ilə Qeydiyyatdan Keçin</span>
-                </button>
+              <div className="mt-6 pt-5 border-t border-slate-800/80 text-center">
+                <p className="text-xs sm:text-sm text-slate-400">
+                  Hesabınız yoxdur?{' '}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAuthMode('register');
+                      setRegisterError(null);
+                      setRegisterSuccessMsg(null);
+                    }}
+                    className="text-purple-400 hover:text-purple-300 font-bold hover:underline cursor-pointer ml-1"
+                  >
+                    Qeydiyyatdan keçin
+                  </button>
+                </p>
               </div>
             </form>
           )}
 
-          {/* TAB 2: REGISTRATION FORM - STUDENT ID + NAME VERIFICATION */}
+          {/* TAB 2: REGISTRATION FORM - STUDENT ID VERIFICATION */}
           {authMode === 'register' && (
             <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
               <button
@@ -399,48 +360,24 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
                 <span>Giriş səhifəsinə qayıt</span>
               </button>
 
-              {/* Part 1: Identification (Admin-assigned ID & Name) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Student ID Input */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    Tələbə ID (Mərkəz tərəfindən verilən)
-                  </label>
-                  <div className="relative">
-                    <KeyRound className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-400" />
-                    <input
-                      type="text"
-                      required
-                      placeholder="Məs: TLB-1001"
-                      value={registerStudentId}
-                      onChange={(e) => {
-                        setRegisterStudentId(e.target.value);
-                        setRegisterError(null);
-                      }}
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all font-mono"
-                    />
-                  </div>
-                </div>
-
-                {/* Full Name Input */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    Ad, Soyad (Mərkəzdə qeydiyyatda olan)
-                  </label>
-                  <div className="relative">
-                    <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-400" />
-                    <input
-                      type="text"
-                      required
-                      placeholder="Məs: Əliyev Tural İlqar"
-                      value={fullName}
-                      onChange={(e) => {
-                        setFullName(e.target.value);
-                        setRegisterError(null);
-                      }}
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
-                    />
-                  </div>
+              {/* Identification: Student ID Input */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  Tələbə ID (Mərkəz tərəfindən verilən)
+                </label>
+                <div className="relative">
+                  <KeyRound className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-400" />
+                  <input
+                    type="text"
+                    required
+                    placeholder="Məs: TLB-1001"
+                    value={registerStudentId}
+                    onChange={(e) => {
+                      setRegisterStudentId(e.target.value);
+                      setRegisterError(null);
+                    }}
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-xs sm:text-sm text-white placeholder-slate-500 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all font-mono"
+                  />
                 </div>
               </div>
 
@@ -454,20 +391,6 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
                     </span>
                     <p className="text-rose-300/90 text-[11px]">
                       Yalnız mərkəz administrasiyası tərəfindən rəsmi Tələbə ID təyin olunmuş tələbələr qeydiyyatdan keçə bilər.
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {matchedStudentById && !isNameMatched && cleanEnteredName.length >= 2 && (
-                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex items-start gap-2.5 animate-in fade-in duration-200">
-                  <AlertCircle className="w-4 h-4 shrink-0 text-amber-400 mt-0.5" />
-                  <div className="space-y-0.5">
-                    <span className="font-semibold block text-amber-100">
-                      Ad və Soyad bu Tələbə ID ilə uyğunlaşmadı
-                    </span>
-                    <p className="text-amber-200/90 text-[11px]">
-                      Zəhmət olmasa mərkəzdə rəsmi qeydiyyatda olan ad və soyadınızı düzgün daxil edin.
                     </p>
                   </div>
                 </div>
@@ -499,12 +422,12 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
                 </div>
               )}
 
-              {matchedStudentById && isNameMatched && !matchedStudentById.isRegistered && (
-                <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-xs text-slate-200 flex items-center justify-between shadow-inner animate-in fade-in">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
+              {matchedStudentById && !matchedStudentById.isRegistered && (
+                <div className="p-3.5 rounded-xl bg-emerald-950/50 border border-emerald-500/40 text-xs text-slate-200 flex items-center justify-between shadow-inner animate-in fade-in">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5 text-emerald-400 font-bold text-sm">
                       <ShieldCheck className="w-4 h-4" />
-                      <span>Tələbə Məlumatları Təsdiqləndi: {matchedStudentById.name}</span>
+                      <span>{matchedStudentById.name}</span>
                     </div>
                     <p className="text-[11px] text-slate-300">
                       İxtisas: <strong className="text-white">{matchedStudentById.specialty}</strong> • Kurs/Qrup: <strong className="text-white">{matchedStudentById.group}</strong>

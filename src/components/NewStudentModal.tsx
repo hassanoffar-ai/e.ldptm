@@ -278,7 +278,7 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
             <div className="space-y-0.5">
               <strong className="block text-[#5300b7] font-semibold">Tələbənin müstəqil qeydiyyatı:</strong>
               <p className="text-slate-600 leading-relaxed text-[11px]">
-                Tələbənin əlaqə nömrəsi, gmail hesabı və şəxsi şifrəsi tələbə tərəfindən portaldan qeydiyyat zamanı təyin olunacaq. Tələbəyə yalnız Ad, Soyad və Tələbə ID-ni təqdim etməyiniz kifayətdir.
+                Tələbənin əlaqə nömrəsi, gmail hesabı və şəxsi şifrəsi tələbə tərəfindən portaldan qeydiyyat zamanı təyin olunacaq. Tələbəyə yalnız Tələbə ID-ni təqdim etməyiniz kifayətdir.
               </p>
             </div>
           </div>
