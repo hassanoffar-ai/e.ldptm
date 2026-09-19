@@ -206,20 +206,23 @@ export async function deleteCourseFromDb(id: string): Promise<void> {
 
 export const mapDbToSpecialty = (row: any): SpecialtyItem => ({
   id: row.id,
-  name: row.name,
-  code: row.code,
-  duration: row.duration || '1 il',
-  department: row.department || 'Texniki',
-  status: row.status || 'active',
+  name: row.name || '',
+  code: row.code || '',
+  direction: row.direction || row.department || 'Yüksək Texniki Peşə (YTP)',
+  duration: row.duration || '3 illik',
+  educationType: (row.education_type || row.educationType || 'Əyani') as 'Əyani' | 'Qiyabi',
+  description: row.description || '',
+  createdAt: row.created_at || row.createdAt,
 });
 
 export const mapSpecialtyToDb = (s: SpecialtyItem) => ({
   id: s.id,
   name: s.name,
-  code: s.code,
-  duration: s.duration || '1 il',
-  department: s.department || 'Texniki',
-  status: s.status || 'active',
+  code: s.code || '',
+  direction: s.direction || 'Yüksək Texniki Peşə (YTP)',
+  duration: s.duration || '3 illik',
+  department: s.direction || 'Texniki',
+  status: 'active',
 });
 
 export async function fetchSpecialtiesFromDb(): Promise<SpecialtyItem[]> {

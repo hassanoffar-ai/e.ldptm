@@ -23,10 +23,11 @@ import {
   Filter,
   X,
   AlertCircle,
-  Briefcase
+  Briefcase,
+  UserPlus,
 } from 'lucide-react';
 import { ActiveTab, ExamSession, GradeBookCourse, SpecialtyItem, Student } from '../types';
-import { GROUPS_LIST, ROOMS_LIST, SUBJECTS_LIST } from '../data/mockData';
+import { GROUPS_LIST, ROOMS_LIST, SUBJECTS_LIST, INITIAL_SPECIALTIES } from '../data/mockData';
 
 interface GroupsAndOtherViewsProps {
   activeTab: ActiveTab;
@@ -38,6 +39,7 @@ interface GroupsAndOtherViewsProps {
   onAddSpecialty?: (specialty: SpecialtyItem) => void;
   onUpdateSpecialty?: (specialty: SpecialtyItem) => void;
   onDeleteSpecialty?: (id: string) => void;
+  onOpenNewStudentModal?: (defaultGroup?: string, defaultSpecialty?: string) => void;
 }
 
 export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
@@ -50,6 +52,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
   onAddSpecialty,
   onUpdateSpecialty,
   onDeleteSpecialty,
+  onOpenNewStudentModal,
 }) => {
   // Specialty management states
   const [specialtySearch, setSpecialtySearch] = useState('');
@@ -142,21 +145,35 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
 
   // İxtisaslar View
   if (activeTab === 'specialties') {
-    const filteredSpecialties = specialties
+    const rawList = specialties && specialties.length > 0 ? specialties : INITIAL_SPECIALTIES;
+    const safeSpecialties = rawList.map((spec, idx) => ({
+      ...spec,
+      id: spec.id || `spec-${idx}`,
+      name: spec.name || 'İxtisas',
+      code: spec.code || '',
+      direction: spec.direction || 'Yüksək Texniki Peşə (YTP)',
+      duration: spec.duration || '3 illik',
+      educationType: spec.educationType || 'Əyani',
+      description: spec.description || '',
+    }));
+
+    const filteredSpecialties = safeSpecialties
       .filter((spec) => {
+        const query = (specialtySearch || '').toLowerCase().trim();
         const matchesSearch =
-          spec.name.toLowerCase().includes(specialtySearch.toLowerCase()) ||
-          spec.code.toLowerCase().includes(specialtySearch.toLowerCase()) ||
-          spec.direction.toLowerCase().includes(specialtySearch.toLowerCase());
+          !query ||
+          (spec.name || '').toLowerCase().includes(query) ||
+          (spec.code || '').toLowerCase().includes(query) ||
+          (spec.direction || '').toLowerCase().includes(query);
 
         if (directionFilter === 'all') return matchesSearch;
         return matchesSearch && spec.direction === directionFilter;
       })
-      .sort((a, b) => a.name.localeCompare(b.name, 'az'));
+      .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'az'));
 
-    const ytpCount = specialties.filter((s) => s.direction.includes('YTP') || s.direction.includes('Yüksək')).length;
-    const vocationalCount = specialties.length - ytpCount;
-    const uniqueDirections = Array.from(new Set(specialties.map((s) => s.direction)));
+    const ytpCount = safeSpecialties.filter((s) => (s.direction || '').includes('YTP') || (s.direction || '').includes('Yüksək')).length;
+    const vocationalCount = safeSpecialties.length - ytpCount;
+    const uniqueDirections = Array.from(new Set(safeSpecialties.map((s) => s.direction || 'Yüksək Texniki Peşə (YTP)')));
 
     return (
       <div className="p-4 md:p-8 flex-1 max-w-7xl mx-auto w-full space-y-6">
@@ -172,7 +189,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
               </h2>
             </div>
             <p className="text-sm text-[#64748b]">
-              E-LDPTM Tədris Mərkəzi üzrə rəsmi ixtisaslar və peşə təhsili istiqamətlərinin idarə edilməsi
+              E-LDPTM Tədris Mərkəzi üzrə rəsmi ixtisaslar və hər ixtisasa uyğun tələbə qeydiyyatı
             </p>
           </div>
 
@@ -192,7 +209,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
               <Briefcase className="w-4 h-4 text-[#5300b7]" />
               <span>Ümumi İxtisaslar</span>
             </div>
-            <div className="text-2xl font-bold text-[#121c2a]">{specialties.length}</div>
+            <div className="text-2xl font-bold text-[#121c2a]">{safeSpecialties.length}</div>
           </div>
           <div className="bg-white p-4 rounded-2xl border border-[#ccc3d7] shadow-xs">
             <div className="flex items-center gap-2 text-[#64748b] text-xs mb-1">
@@ -236,7 +253,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
               onChange={(e) => setDirectionFilter(e.target.value)}
               className="w-full px-3.5 py-2 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer"
             >
-              <option value="all">Bütün İstiqamətlər ({specialties.length})</option>
+              <option value="all">Bütün İstiqamətlər ({safeSpecialties.length})</option>
               {uniqueDirections.map((dir) => (
                 <option key={dir} value={dir}>
                   {dir}
@@ -247,7 +264,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
         </div>
 
         {/* Empty State when no specialties exist */}
-        {specialties.length === 0 ? (
+        {safeSpecialties.length === 0 ? (
           <div className="bg-white rounded-3xl border border-dashed border-[#ccc3d7] p-8 md:p-12 text-center max-w-2xl mx-auto my-6 space-y-4">
             <div className="w-16 h-16 rounded-2xl bg-purple-50 text-[#5300b7] flex items-center justify-center mx-auto border border-purple-100 shadow-sm">
               <GraduationCap className="w-8 h-8" />
@@ -277,12 +294,11 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filteredSpecialties.map((spec) => {
               const enrolledStudents = students.filter((s) => s.specialty === spec.name).length;
-              const isYtp = spec.direction.includes('YTP') || spec.direction.includes('Yüksək');
 
               return (
                 <div
                   key={spec.id}
-                  className="bg-white p-5 rounded-2xl border border-[#ccc3d7] hover:border-purple-300 transition-all flex flex-col justify-between shadow-xs"
+                  className="bg-white p-5 rounded-2xl border border-[#ccc3d7] hover:border-[#5300b7]/50 transition-all flex flex-col justify-between shadow-xs hover:shadow-md"
                 >
                   <div>
                     <div className="flex items-start justify-between gap-2 mb-2.5">
@@ -291,23 +307,28 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                       >
                         {spec.direction || 'Yüksək Texniki Peşə (YTP)'}
                       </span>
+                      {spec.code && (
+                        <span className="text-[11px] font-mono font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                          {spec.code}
+                        </span>
+                      )}
                     </div>
 
-                    <h4 className="font-bold text-base text-[#121c2a] mb-1">
+                    <h4 className="font-bold text-lg text-[#121c2a] mb-1.5 leading-snug">
                       {spec.name}
                     </h4>
 
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-[#64748b] mt-2 mb-3">
+                    <div className="flex flex-wrap items-center gap-2.5 text-xs text-[#64748b] mt-2 mb-3">
                       <span className="flex items-center gap-1">
                         <Clock className="w-3.5 h-3.5 text-slate-400" />
-                        {spec.duration || '2 il'}
+                        {spec.duration || '3 illik'}
                       </span>
                       <span>•</span>
                       <span className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md font-medium">
                         {spec.educationType || 'Əyani'}
                       </span>
                       <span>•</span>
-                      <span className="flex items-center gap-1 text-emerald-700 font-medium">
+                      <span className="flex items-center gap-1 text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
                         <Users className="w-3.5 h-3.5" />
                         {enrolledStudents} tələbə
                       </span>
@@ -320,22 +341,44 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                     )}
                   </div>
 
-                  {/* Card Actions */}
-                  <div className="mt-2 pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                  {/* Card Actions: Dedicated Student Registration & Management */}
+                  <div className="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
                     <button
-                      onClick={() => openEditSpecialtyModal(spec)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-purple-700 hover:bg-purple-50 rounded-lg transition-colors cursor-pointer"
+                      onClick={() => onOpenNewStudentModal?.(undefined, spec.name)}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#5300b7] hover:bg-[#430094] text-white rounded-xl text-xs font-bold transition-all shadow-sm active:scale-[0.98] cursor-pointer"
                     >
-                      <Pencil className="w-3.5 h-3.5" />
-                      <span>Düzəliş et</span>
+                      <UserPlus className="w-3.5 h-3.5" />
+                      <span>+ Bu İxtisasa Tələbə Əlavə Et</span>
                     </button>
-                    <button
-                      onClick={() => handleDeleteSpecialtyClick(spec.id, spec.name)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      <span>Sil</span>
-                    </button>
+
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => {
+                          setActiveTab('students');
+                        }}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-purple-700 hover:bg-purple-50 rounded-lg transition-colors cursor-pointer"
+                        title="Tələbələr siyahısına bax"
+                      >
+                        <Users className="w-3.5 h-3.5" />
+                        <span>Siyahı</span>
+                      </button>
+
+                      <button
+                        onClick={() => openEditSpecialtyModal(spec)}
+                        className="p-1.5 text-slate-500 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors cursor-pointer"
+                        title="Düzəliş et"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+
+                      <button
+                        onClick={() => handleDeleteSpecialtyClick(spec.id, spec.name)}
+                        className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                        title="Sil"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               );

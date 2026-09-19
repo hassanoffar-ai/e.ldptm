@@ -670,6 +670,13 @@ export default function App() {
                   onAddSpecialty={handleAddSpecialty}
                   onUpdateSpecialty={handleUpdateSpecialty}
                   onDeleteSpecialty={handleDeleteSpecialty}
+                  onOpenNewStudentModal={(defaultGroup, defaultSpecialty) => {
+                    setNewStudentDefaults({
+                      group: defaultGroup,
+                      specialty: defaultSpecialty,
+                    });
+                    setIsNewStudentModalOpen(true);
+                  }}
                 />
               )}
             </>

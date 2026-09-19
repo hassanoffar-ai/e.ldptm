@@ -144,10 +144,12 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
             </div>
             <div>
               <h3 className="font-bold text-base text-[#121c2a]">
-                Yeni Tələbə Qeydiyyatı
+                {defaultSpecialty ? `${defaultSpecialty} — Tələbə Qeydiyyatı` : 'Yeni Tələbə Qeydiyyatı'}
               </h3>
               <p className="text-xs text-[#64748b]">
-                Tələbənin ad, soyadını və təyin olunmuş Tələbə ID-sini daxil edin
+                {defaultSpecialty
+                  ? `Bu ixtisasa tələbənin ad, soyadı və Tələbə ID-sini təyin edin`
+                  : 'Tələbənin ad, soyadını və təyin olunmuş Tələbə ID-sini daxil edin'}
               </p>
             </div>
           </div>
