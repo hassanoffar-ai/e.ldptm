@@ -329,9 +329,6 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                 <h2 className="text-xl font-bold text-slate-900">
                   Cari Semestr Fənləri və Qiymətləndirmə Fəaliyyəti
                 </h2>
-                <p className="text-xs text-slate-500">
-                  Admin panel tərəfindən daxil edilən və təsdiqlənən 50 ballıq aralıq qiymətləndirmə göstəriciləri
-                </p>
               </div>
               <div className="text-xs font-medium text-purple-700 bg-purple-50 border border-purple-200 px-3 py-1.5 rounded-xl">
                 Maksimum: 50 Bal Giriş + 50 Bal İmtahan = 100 Bal
