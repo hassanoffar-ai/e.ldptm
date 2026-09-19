@@ -37,10 +37,10 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
     ) || courses[0] || null;
 
   const [selectedGroupId, setSelectedGroupId] = useState(
-    currentCourse?.group || GROUPS_LIST[0] || 'İT-21'
+    currentCourse?.group || GROUPS_LIST[0] || '1-ci kurs'
   );
   const [selectedSpecialty, setSelectedSpecialty] = useState(
-    currentCourse?.specialty || specialties[0]?.name || 'İnformasiya Texnologiyaları'
+    currentCourse?.specialty || specialties[0]?.name || 'Kibertəhlükəsizlik'
   );
   const [selectedSubject, setSelectedSubject] = useState(
     currentCourse?.subject || SUBJECTS_LIST[0] || 'Veb Proqramlaşdırma əsasları'

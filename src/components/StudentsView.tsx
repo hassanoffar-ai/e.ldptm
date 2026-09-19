@@ -39,22 +39,17 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'registered' | 'pending'>('all');
 
-  // Build combined unique specialties
+  // Build combined unique specialties sorted alphabetically
   const allSpecialtyNames = Array.from(
     new Set([
       ...specialties.map((s) => s.name),
       ...SPECIALTIES_LIST,
       ...students.map((s) => s.specialty).filter(Boolean),
     ])
-  );
+  ).sort((a, b) => a.localeCompare(b, 'az'));
 
-  // Build combined unique groups/courses
-  const allGroupNames = Array.from(
-    new Set([
-      ...GROUPS_LIST,
-      ...students.map((s) => s.group).filter(Boolean),
-    ])
-  );
+  // Only 1-ci, 2-ci, 3-cü, 4-cü kurs
+  const allGroupNames = GROUPS_LIST;
 
   const filteredStudents = students.filter((s) => {
     const matchesSearch =

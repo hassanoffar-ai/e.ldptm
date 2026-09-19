@@ -7,30 +7,15 @@ export const INITIAL_EXAM_SESSIONS: ExamSession[] = [];
 export const INITIAL_GRADE_COURSES: GradeBookCourse[] = [];
 
 export const GROUPS_LIST = [
-  '2-ci kurs',
   '1-ci kurs',
+  '2-ci kurs',
   '3-cü kurs',
   '4-cü kurs',
-  'İT-21',
-  'IT-04',
-  'IT-201',
-  'TK-12',
-  'DI-15',
-  'CS-101',
 ];
 
 export const INITIAL_SPECIALTIES: SpecialtyItem[] = [
   {
     id: 'spec-1',
-    name: 'Kompüter şəbəkələri və şəbəkə inzibatçılığı',
-    code: 'KŞŞİ',
-    direction: 'Yüksək Texniki Peşə (YTP)',
-    duration: '3 illik',
-    educationType: 'Əyani',
-    description: 'Yüksək Texniki Peşə (Subbakalavr) təhsil pilləsi',
-  },
-  {
-    id: 'spec-2',
     name: 'Kibertəhlükəsizlik',
     code: 'KT',
     direction: 'Yüksək Texniki Peşə (YTP)',
@@ -39,9 +24,18 @@ export const INITIAL_SPECIALTIES: SpecialtyItem[] = [
     description: 'Yüksək Texniki Peşə (Subbakalavr) təhsil pilləsi',
   },
   {
-    id: 'spec-3',
+    id: 'spec-2',
     name: 'Kompüter sistemlərində proqramlaşdırma',
     code: 'KSP',
+    direction: 'Yüksək Texniki Peşə (YTP)',
+    duration: '3 illik',
+    educationType: 'Əyani',
+    description: 'Yüksək Texniki Peşə (Subbakalavr) təhsil pilləsi',
+  },
+  {
+    id: 'spec-3',
+    name: 'Kompüter şəbəkələri və şəbəkə inzibatçılığı',
+    code: 'KŞŞİ',
     direction: 'Yüksək Texniki Peşə (YTP)',
     duration: '3 illik',
     educationType: 'Əyani',
@@ -68,9 +62,9 @@ export const INITIAL_SPECIALTIES: SpecialtyItem[] = [
 ];
 
 export const SPECIALTIES_LIST: string[] = [
-  'Kompüter şəbəkələri və şəbəkə inzibatçılığı',
   'Kibertəhlükəsizlik',
   'Kompüter sistemlərində proqramlaşdırma',
+  'Kompüter şəbəkələri və şəbəkə inzibatçılığı',
   'Mehmanxana və restoran işinin təşkili və idarə edilməsi',
   'Mühasibat uçotu',
 ];

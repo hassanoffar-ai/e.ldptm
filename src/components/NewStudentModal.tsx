@@ -23,17 +23,18 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
   defaultSpecialty,
 }) => {
   const effectiveSpecialties: Array<{ id: string; name: string; code: string }> =
-    specialties.length > 0
+    (specialties.length > 0
       ? specialties
       : SPECIALTIES_LIST.map((name, idx) => ({
           id: `spec-default-${idx}`,
           name,
           code: `YTP-${idx + 1}`,
-        }));
+        }))
+    ).slice().sort((a, b) => a.name.localeCompare(b.name, 'az'));
 
   const [name, setName] = useState('');
   const [finCode, setFinCode] = useState('');
-  const [group, setGroup] = useState(defaultGroup || GROUPS_LIST[0] || '2-ci kurs');
+  const [group, setGroup] = useState(defaultGroup || GROUPS_LIST[0] || '1-ci kurs');
   const [specialty, setSpecialty] = useState(defaultSpecialty || effectiveSpecialties[0]?.name || '');
   const [customSpecialty, setCustomSpecialty] = useState('');
   const [email, setEmail] = useState('');

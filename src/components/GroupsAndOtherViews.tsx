@@ -142,15 +142,17 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
 
   // İxtisaslar View
   if (activeTab === 'specialties') {
-    const filteredSpecialties = specialties.filter((spec) => {
-      const matchesSearch =
-        spec.name.toLowerCase().includes(specialtySearch.toLowerCase()) ||
-        spec.code.toLowerCase().includes(specialtySearch.toLowerCase()) ||
-        spec.direction.toLowerCase().includes(specialtySearch.toLowerCase());
+    const filteredSpecialties = specialties
+      .filter((spec) => {
+        const matchesSearch =
+          spec.name.toLowerCase().includes(specialtySearch.toLowerCase()) ||
+          spec.code.toLowerCase().includes(specialtySearch.toLowerCase()) ||
+          spec.direction.toLowerCase().includes(specialtySearch.toLowerCase());
 
-      if (directionFilter === 'all') return matchesSearch;
-      return matchesSearch && spec.direction === directionFilter;
-    });
+        if (directionFilter === 'all') return matchesSearch;
+        return matchesSearch && spec.direction === directionFilter;
+      })
+      .sort((a, b) => a.name.localeCompare(b.name, 'az'));
 
     const ytpCount = specialties.filter((s) => s.direction.includes('YTP') || s.direction.includes('Yüksək')).length;
     const vocationalCount = specialties.length - ytpCount;
