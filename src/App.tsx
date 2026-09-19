@@ -34,6 +34,21 @@ import { NewStudentModal } from './components/NewStudentModal';
 import { NewExamSessionModal } from './components/NewExamSessionModal';
 import { NewGradeCourseModal } from './components/NewGradeCourseModal';
 import { ShieldAlert } from 'lucide-react';
+import {
+  supabase,
+  fetchStudentsFromDb,
+  upsertStudentToDb,
+  deleteStudentFromDb,
+  fetchSessionsFromDb,
+  upsertSessionToDb,
+  deleteSessionFromDb,
+  fetchCoursesFromDb,
+  upsertCourseToDb,
+  deleteCourseFromDb,
+  fetchSpecialtiesFromDb,
+  upsertSpecialtyToDb,
+  deleteSpecialtyFromDb,
+} from './lib/supabase';
 
 const loadFromStorage = <T,>(key: string, fallback: T): T => {
   try {
@@ -185,18 +200,111 @@ export default function App() {
     }
   }, [specialties]);
 
+  // Load from Supabase on start and subscribe to Realtime changes across devices
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadDataFromSupabase() {
+      try {
+        const [dbStudents, dbSessions, dbCourses, dbSpecialties] = await Promise.all([
+          fetchStudentsFromDb(),
+          fetchSessionsFromDb(),
+          fetchCoursesFromDb(),
+          fetchSpecialtiesFromDb(),
+        ]);
+
+        if (!isMounted) return;
+
+        if (dbStudents.length > 0) {
+          setStudents(dbStudents);
+        } else if (students.length > 0) {
+          // Sync any existing local students to Supabase
+          students.forEach((s) => upsertStudentToDb(s));
+        }
+
+        if (dbSessions.length > 0) {
+          setSessions(dbSessions);
+          setSelectedSessionId((prev) => prev || dbSessions[0]?.id || '');
+        } else if (sessions.length > 0) {
+          sessions.forEach((s) => upsertSessionToDb(s));
+        }
+
+        if (dbCourses.length > 0) {
+          setCourses(dbCourses);
+        } else if (courses.length > 0) {
+          courses.forEach((c) => upsertCourseToDb(c));
+        }
+
+        if (dbSpecialties.length > 0) {
+          setSpecialties(dbSpecialties);
+        } else if (specialties.length > 0) {
+          specialties.forEach((s) => upsertSpecialtyToDb(s));
+        }
+      } catch (err) {
+        console.error('Failed to load data from Supabase:', err);
+      }
+    }
+
+    loadDataFromSupabase();
+
+    // Live Realtime updates across devices
+    const channel = supabase
+      .channel('eldptm-db-sync')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'students' },
+        async () => {
+          const fresh = await fetchStudentsFromDb();
+          if (isMounted && fresh.length > 0) setStudents(fresh);
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'exam_sessions' },
+        async () => {
+          const fresh = await fetchSessionsFromDb();
+          if (isMounted && fresh.length > 0) setSessions(fresh);
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'gradebook_courses' },
+        async () => {
+          const fresh = await fetchCoursesFromDb();
+          if (isMounted && fresh.length > 0) setCourses(fresh);
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'specialties' },
+        async () => {
+          const fresh = await fetchSpecialtiesFromDb();
+          if (isMounted && fresh.length > 0) setSpecialties(fresh);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      isMounted = false;
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   const handleAddSpecialty = (newSpecialty: SpecialtyItem) => {
     setSpecialties((prev) => [newSpecialty, ...prev]);
+    upsertSpecialtyToDb(newSpecialty);
   };
 
   const handleUpdateSpecialty = (updatedSpecialty: SpecialtyItem) => {
     setSpecialties((prev) =>
       prev.map((s) => (s.id === updatedSpecialty.id ? updatedSpecialty : s))
     );
+    upsertSpecialtyToDb(updatedSpecialty);
   };
 
   const handleDeleteSpecialty = (id: string) => {
     setSpecialties((prev) => prev.filter((s) => s.id !== id));
+    deleteSpecialtyFromDb(id);
   };
 
   // Quick ticket kiosk student selection
@@ -213,11 +321,13 @@ export default function App() {
     setSessions((prev) =>
       prev.map((s) => (s.id === updated.id ? updated : s))
     );
+    upsertSessionToDb(updated);
   };
 
   const handleCreateSession = (newSession: ExamSession) => {
     setSessions((prev) => [newSession, ...prev]);
     setSelectedSessionId(newSession.id);
+    upsertSessionToDb(newSession);
   };
 
   const handleDeleteSession = (id: string) => {
@@ -228,14 +338,22 @@ export default function App() {
       }
       return remaining;
     });
+    deleteSessionFromDb(id);
   };
 
   const handleCreateCourse = (newCourse: GradeBookCourse) => {
     setCourses((prev) => [newCourse, ...prev]);
+    upsertCourseToDb(newCourse);
   };
 
   const handleDeleteCourse = (id: string) => {
     setCourses((prev) => prev.filter((c) => c.id !== id));
+    deleteCourseFromDb(id);
+  };
+
+  const handleUpdateCourses = (updatedCourses: GradeBookCourse[]) => {
+    setCourses(updatedCourses);
+    updatedCourses.forEach((c) => upsertCourseToDb(c));
   };
 
   const handleAddStudent = (newStudent: Student) => {
@@ -253,6 +371,8 @@ export default function App() {
       return [newStudent, ...prev];
     });
 
+    upsertStudentToDb(newStudent);
+
     // Also optionally append to gradebook of their group if course exists
     setCourses((prevCourses) =>
       prevCourses.map((c) => {
@@ -268,7 +388,7 @@ export default function App() {
             .map((n) => n[0])
             .slice(0, 2)
             .join('');
-          return {
+          const updatedCourse = {
             ...c,
             grades: [
               ...c.grades,
@@ -284,6 +404,8 @@ export default function App() {
               },
             ],
           };
+          upsertCourseToDb(updatedCourse);
+          return updatedCourse;
         }
         return c;
       })
@@ -292,6 +414,7 @@ export default function App() {
 
   const handleDeleteStudent = (id: string) => {
     setStudents((prev) => prev.filter((s) => s.id !== id));
+    deleteStudentFromDb(id);
   };
 
   const handleOpenTicketKioskForStudent = (studentId: string) => {
@@ -454,7 +577,7 @@ export default function App() {
               {activeTab === 'grades' && (
                 <GradeEntryView
                   courses={courses}
-                  onUpdateCourses={setCourses}
+                  onUpdateCourses={handleUpdateCourses}
                   onOpenNewCourseModal={() => setIsNewCourseModalOpen(true)}
                   onDeleteCourse={handleDeleteCourse}
                   specialties={specialties}
