@@ -201,7 +201,7 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
               <input
                 type="text"
                 required
-                placeholder="Məs: TLB-1001"
+                placeholder=" "
                 value={studentId}
                 onChange={(e) => {
                   setStudentId(e.target.value);

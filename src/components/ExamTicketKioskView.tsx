@@ -237,7 +237,7 @@ export const ExamTicketKioskView: React.FC<ExamTicketKioskViewProps> = ({
                       setStudentIdInput(e.target.value);
                       if (errorMessage) setErrorMessage(null);
                     }}
-                    placeholder="Məs: TLB-1001 və ya 5ABC123"
+                    placeholder=" "
                     className="w-full pl-12 pr-4 py-3.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl focus:ring-2 focus:ring-[#5300b7] focus:border-[#5300b7] text-base md:text-lg font-medium text-[#121c2a] transition-all outline-none uppercase"
                     required
                   />
