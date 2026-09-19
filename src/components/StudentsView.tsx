@@ -263,10 +263,17 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                       {student.specialty}
                     </td>
                     <td className="p-4 text-xs text-[#64748b]">
-                      <div>{student.email}</div>
-                      <div className="text-[11px] text-slate-400">
-                        {student.phone}
-                      </div>
+                      {student.email && !student.email.includes('@eldptm.edu.az') ? (
+                        <div>{student.email}</div>
+                      ) : null}
+                      {student.phone ? (
+                        <div className="text-[11px] text-slate-400">
+                          {student.phone}
+                        </div>
+                      ) : null}
+                      {!student.phone && (!student.email || student.email.includes('@eldptm.edu.az')) && (
+                        <span className="text-slate-400 text-xs italic">—</span>
+                      )}
                     </td>
                     <td className="p-4">
                       {student.isRegistered ? (

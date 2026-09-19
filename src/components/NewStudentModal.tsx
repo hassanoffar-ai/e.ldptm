@@ -6,7 +6,6 @@ import {
   Users,
   AlertCircle,
   KeyRound,
-  ShieldCheck,
   Sparkles,
 } from 'lucide-react';
 import { SpecialtyItem, Student } from '../types';
@@ -119,7 +118,7 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
       name: name.trim(),
       group,
       specialty: resolvedSpecialty,
-      email: `${cleanId.toLowerCase()}@eldptm.edu.az`,
+      email: '',
       phone: '',
       passwordHash: '123456',
       status: 'active',
@@ -271,17 +270,6 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
                   className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
                 />
               )}
-            </div>
-          </div>
-
-          {/* Info card regarding student self-registration */}
-          <div className="p-3.5 rounded-xl bg-purple-50/70 border border-purple-200/80 text-xs text-purple-900 flex items-start gap-2.5">
-            <ShieldCheck className="w-4 h-4 text-[#5300b7] shrink-0 mt-0.5" />
-            <div className="space-y-0.5">
-              <strong className="block text-[#5300b7] font-semibold">Tələbənin müstəqil qeydiyyatı:</strong>
-              <p className="text-slate-600 leading-relaxed text-[11px]">
-                Tələbənin əlaqə nömrəsi, gmail hesabı və şəxsi şifrəsi tələbə tərəfindən portaldan qeydiyyat zamanı təyin olunacaq. Tələbəyə yalnız Tələbə ID-ni təqdim etməyiniz kifayətdir.
-              </p>
             </div>
           </div>
 

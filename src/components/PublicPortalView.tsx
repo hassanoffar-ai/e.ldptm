@@ -314,7 +314,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
               </p>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600 pt-0.5">
                 <span>Tələbə ID: <strong className="font-mono text-[#5300b7]">{student.studentId || student.finCode}</strong></span>
-                {student.email && <span>E-poçt: <strong className="text-slate-800">{student.email}</strong></span>}
+                {student.email && !student.email.includes('@eldptm.edu.az') && <span>E-poçt: <strong className="text-slate-800">{student.email}</strong></span>}
                 {student.phone && <span>Əlaqə: <strong className="text-slate-800">{student.phone}</strong></span>}
               </div>
             </div>
