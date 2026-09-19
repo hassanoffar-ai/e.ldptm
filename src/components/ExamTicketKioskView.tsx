@@ -86,12 +86,14 @@ export const ExamTicketKioskView: React.FC<ExamTicketKioskViewProps> = ({
     }
 
     const foundStudent = students.find(
-      (s) => s.studentId.toLowerCase() === trimmedId.toLowerCase()
+      (s) =>
+        s.studentId.toLowerCase() === trimmedId.toLowerCase() ||
+        (s.finCode && s.finCode.toLowerCase() === trimmedId.toLowerCase())
     );
 
     if (!foundItem && !foundStudent) {
       setErrorMessage(
-        `"${trimmedId}" nömrəli tələbə ID-si üzrə sistemdə tələbə və ya aktiv imtahan tapılmadı. Zəhmət olmasa ID-ni dəqiqləşdirin və ya administratora müraciət edin.`
+        `"${trimmedId}" üzrə sistemdə tələbə və ya aktiv imtahan tapılmadı. Zəhmət olmasa FİN kodunuzu dəqiqləşdirin və ya administratora müraciət edin.`
       );
       return;
     }
@@ -219,7 +221,7 @@ export const ExamTicketKioskView: React.FC<ExamTicketKioskViewProps> = ({
                   htmlFor="studentIdInput"
                   className="text-sm font-semibold text-[#4a4455]"
                 >
-                  Tələbə ID-sini daxil edin
+                  FİN kodunuzu daxil edin
                 </label>
                 <div className="relative">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#7b7486]">
@@ -235,8 +237,8 @@ export const ExamTicketKioskView: React.FC<ExamTicketKioskViewProps> = ({
                       setStudentIdInput(e.target.value);
                       if (errorMessage) setErrorMessage(null);
                     }}
-                    placeholder="Məs: ST-2023-4012"
-                    className="w-full pl-12 pr-4 py-3.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl focus:ring-2 focus:ring-[#5300b7] focus:border-[#5300b7] text-base md:text-lg font-medium text-[#121c2a] transition-all outline-none"
+                    placeholder="Məs: 5ABC123"
+                    className="w-full pl-12 pr-4 py-3.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl focus:ring-2 focus:ring-[#5300b7] focus:border-[#5300b7] text-base md:text-lg font-medium text-[#121c2a] transition-all outline-none uppercase"
                     required
                   />
                 </div>

@@ -194,7 +194,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 2. İmtahan Zalı Paneli
               </h3>
               <p className="text-xs text-[#64748b] leading-relaxed mb-4">
-                Tələbə ID-si ilə axtarış, rəsmi imtahan bileti kartı, QR kod, otaq/kompüter bölgüsü və operativ çap.
+                Tələbə FİN kodu ilə axtarış, rəsmi imtahan bileti kartı, QR kod, otaq/kompüter bölgüsü və operativ çap.
               </p>
             </div>
             <div className="flex items-center gap-2 text-xs font-bold text-[#5300b7] group-hover:translate-x-1 transition-transform">

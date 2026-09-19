@@ -74,7 +74,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#7b7486]" />
           <input
             type="text"
-            placeholder="Ad, FİN, ID və ya ixtisas üzrə axtar..."
+            placeholder="Ad, FİN kod və ya ixtisas üzrə axtar..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
@@ -105,7 +105,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
             <thead>
               <tr className="border-b border-[#e2e8f0] bg-white text-xs font-semibold text-[#4a4455]">
                 <th className="p-4">Tələbə</th>
-                <th className="p-4">Tələbə ID və FİN</th>
+                <th className="p-4">FİN Kod</th>
                 <th className="p-4">Qrup</th>
                 <th className="p-4">İxtisas</th>
                 <th className="p-4">Əlaqə</th>
@@ -133,16 +133,9 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                       </div>
                     </td>
                     <td className="p-4 font-mono text-xs">
-                      <div className="text-[#5300b7] font-bold">{student.studentId}</div>
-                      {student.finCode ? (
-                        <div className="text-[11px] text-slate-500 font-medium tracking-wider mt-0.5">
-                          FİN: <span className="text-slate-800 font-semibold">{student.finCode}</span>
-                        </div>
-                      ) : (
-                        <div className="text-[10px] text-amber-600 font-medium mt-0.5">
-                          FİN qeyd olunmayıb
-                        </div>
-                      )}
+                      <span className="font-bold text-[#5300b7] tracking-wider px-2.5 py-1 bg-purple-50 border border-purple-100 rounded-md inline-block">
+                        {student.finCode || student.studentId}
+                      </span>
                     </td>
                     <td className="p-4">
                       <span className="px-2.5 py-1 bg-slate-100 rounded-lg text-xs font-semibold text-slate-800">

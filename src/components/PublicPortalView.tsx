@@ -189,11 +189,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
 
               <div className="flex flex-wrap items-center gap-x-3 sm:gap-x-4 gap-y-1 text-xs text-purple-100/90 font-medium">
                 <span>
-                  Tələbə ID: <strong className="font-mono text-white">{student.studentId}</strong>
-                </span>
-                <span>•</span>
-                <span>
-                  FİN Kod: <strong className="font-mono text-white">{student.finCode || 'Qeyd olunub'}</strong>
+                  FİN Kod: <strong className="font-mono text-white">{student.finCode || student.studentId}</strong>
                 </span>
                 <span>•</span>
                 <span>

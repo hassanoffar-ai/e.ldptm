@@ -423,8 +423,8 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
                         <strong className="text-white text-sm">{matchedRegisterStudent.name}</strong>
                       </div>
                       <div>
-                        <span className="text-slate-400 block text-[11px]">Tələbə ID:</span>
-                        <strong className="text-purple-300 font-mono">{matchedRegisterStudent.studentId}</strong>
+                        <span className="text-slate-400 block text-[11px]">FİN Kod:</span>
+                        <strong className="text-purple-300 font-mono">{matchedRegisterStudent.finCode || matchedRegisterStudent.studentId}</strong>
                       </div>
                       <div>
                         <span className="text-slate-400 block text-[11px]">Qrup:</span>
