@@ -9,7 +9,6 @@ import {
   Eye,
   EyeOff,
   ArrowRight,
-  ArrowLeft,
   CheckCircle2,
   AlertCircle,
   ShieldCheck,
@@ -343,17 +342,6 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
           {/* TAB 2: REGISTRATION FORM - STUDENT ID VERIFICATION */}
           {authMode === 'register' && (
             <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
-              <button
-                type="button"
-                onClick={() => {
-                  setAuthMode('login');
-                  setRegisterError(null);
-                }}
-                className="inline-flex items-center gap-1.5 text-xs text-purple-400 hover:text-purple-300 font-semibold mb-1 transition-colors cursor-pointer"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </button>
-
               {/* Identification: Student ID Input */}
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1.5">
