@@ -119,7 +119,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   {currentUser.username}
                 </div>
                 <div className="text-[10px] text-slate-500">
-                  {isSuperAdmin ? 'Baş İdarəçi' : 'Köməkçi İnzibatçı'}
+                  {isSuperAdmin ? 'Baş İdarəçi' : 'Köməkçi Admin'}
                 </div>
               </div>
             </div>

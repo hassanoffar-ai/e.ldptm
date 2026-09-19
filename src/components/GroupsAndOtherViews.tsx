@@ -530,7 +530,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
             </h2>
           </div>
           <p className="text-sm text-[#64748b]">
-            Laboratoriyalar, PC nömrələri və zal təchizatı
+            Laboratoriyalar, PC nömrələri və otaq təchizatı
           </p>
         </div>
 
@@ -587,7 +587,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                   <span className="text-slate-500">
                     {activeSession
                       ? `Cari İmtahan: ${activeSession.subject} (${activeSession.group})`
-                      : 'Hazırda bu zalda imtahan təyin edilməyib'}
+                      : 'Hazırda bu otaqda imtahan təyin edilməyib'}
                   </span>
                   <button
                     onClick={() => setActiveTab('exams')}

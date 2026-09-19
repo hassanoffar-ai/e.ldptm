@@ -10,7 +10,6 @@ import {
   ArrowRight,
   TrendingUp,
   ShieldCheck,
-  DoorClosed,
   ChevronRight
 } from 'lucide-react';
 import { ActiveTab, ExamSession, GradeBookCourse, Student } from '../types';
@@ -77,7 +76,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </div>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-[#ccc3d7] shadow-[0_1px_2px_rgba(0,0,0,0.02)] flex items-center justify-between">
           <div>
             <span className="text-xs font-semibold text-[#64748b] block mb-1">
@@ -126,21 +125,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
           <div className="w-12 h-12 rounded-2xl bg-purple-50 text-[#5300b7] flex items-center justify-center">
             <Award className="w-6 h-6" />
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-2xl border border-[#ccc3d7] shadow-[0_1px_2px_rgba(0,0,0,0.02)] flex items-center justify-between">
-          <div>
-            <span className="text-xs font-semibold text-[#64748b] block mb-1">
-              İmtahan Zalları
-            </span>
-            <div className="text-2xl font-extrabold text-[#121c2a]">4 Lab</div>
-            <span className="text-[11px] text-[#64748b] font-medium flex items-center gap-1 mt-1">
-              <DoorClosed className="w-3 h-3" /> Lab-1, Lab-2, Lab-3, Lab-4
-            </span>
-          </div>
-          <div className="w-12 h-12 rounded-2xl bg-purple-50 text-[#5300b7] flex items-center justify-center">
-            <DoorClosed className="w-6 h-6" />
           </div>
         </div>
       </div>
