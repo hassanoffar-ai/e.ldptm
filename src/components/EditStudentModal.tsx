@@ -185,7 +185,7 @@ export const EditStudentModal: React.FC<EditStudentModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-                Qrup <span className="text-rose-500">*</span>
+                Kurs <span className="text-rose-500">*</span>
               </label>
               <select
                 value={group}

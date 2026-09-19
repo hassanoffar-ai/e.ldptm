@@ -404,7 +404,7 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
                       <span>{matchedStudentById.name}</span>
                     </div>
                     <p className="text-[11px] text-slate-300">
-                      İxtisas: <strong className="text-white">{matchedStudentById.specialty}</strong> • Kurs/Qrup: <strong className="text-white">{matchedStudentById.group}</strong>
+                      İxtisas: <strong className="text-white">{matchedStudentById.specialty}</strong> • Kurs: <strong className="text-white">{matchedStudentById.group}</strong>
                     </p>
                   </div>
                   <Check className="w-5 h-5 text-emerald-400 shrink-0" />
