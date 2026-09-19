@@ -32,7 +32,6 @@ export const EditStudentModal: React.FC<EditStudentModalProps> = ({
   const [group, setGroup] = useState('');
   const [specialty, setSpecialty] = useState('');
   const [customSpecialty, setCustomSpecialty] = useState('');
-  const [status, setStatus] = useState<'active' | 'suspended' | 'graduated'>('active');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -52,7 +51,6 @@ export const EditStudentModal: React.FC<EditStudentModalProps> = ({
         setCustomSpecialty(student.specialty || '');
       }
 
-      setStatus(student.status || 'active');
       setError(null);
     }
   }, [student, specialties, isOpen]);
@@ -104,7 +102,7 @@ export const EditStudentModal: React.FC<EditStudentModalProps> = ({
       finCode: cleanId,
       group: group || student.group,
       specialty: resolvedSpecialty,
-      status,
+      status: student.status || 'active',
       // Əlaqə nömrəsi, gmail və şifrə tələbənin portaldakı öz qeydiyyatı ilə idarə olunur
       phone: student.phone || '',
       email: student.email || '',
@@ -181,39 +179,22 @@ export const EditStudentModal: React.FC<EditStudentModalProps> = ({
             </div>
           </div>
 
-          {/* Qrup və Status */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-                Kurs <span className="text-rose-500">*</span>
-              </label>
-              <select
-                value={group}
-                onChange={(e) => setGroup(e.target.value)}
-                className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
-              >
-                {GROUPS_LIST.map((g) => (
-                  <option key={g} value={g}>
-                    {g}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-                Status
-              </label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value as any)}
-                className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
-              >
-                <option value="active">Aktiv</option>
-                <option value="suspended">Dayandırılıb / Akademik məzuniyyət</option>
-                <option value="graduated">Məzun</option>
-              </select>
-            </div>
+          {/* Kurs */}
+          <div>
+            <label className="block text-xs font-semibold text-[#4a4455] mb-1">
+              Kurs <span className="text-rose-500">*</span>
+            </label>
+            <select
+              value={group}
+              onChange={(e) => setGroup(e.target.value)}
+              className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
+            >
+              {GROUPS_LIST.map((g) => (
+                <option key={g} value={g}>
+                  {g}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* İxtisas */}
