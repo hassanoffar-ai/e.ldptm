@@ -579,24 +579,10 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
 
               <button
                 type="submit"
-                disabled={
-                  cleanRegisterFin.length !== 7 ||
-                  !matchedRegisterStudent ||
-                  !!matchedRegisterStudent?.isRegistered
-                }
+                disabled={cleanRegisterFin.length === 7 && !!matchedRegisterStudent?.isRegistered}
                 className="w-full py-3.5 bg-gradient-to-r from-[#5300b7] to-[#7c3aed] disabled:opacity-50 disabled:cursor-not-allowed hover:from-[#430094] hover:to-[#6d28d9] text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg shadow-purple-950/50 transition-all flex items-center justify-center gap-2 active:scale-[0.99] cursor-pointer mt-3"
               >
-                <span>
-                  {cleanRegisterFin.length === 0
-                    ? 'FİN Kod Daxil Edin (7 Simvol)'
-                    : cleanRegisterFin.length < 7
-                    ? `FİN Kod: ${cleanRegisterFin.length}/7 simvol`
-                    : !matchedRegisterStudent
-                    ? 'FİN Kod Bazada Tapılmadı (Qeydiyyat Bloklanıb)'
-                    : matchedRegisterStudent.isRegistered
-                    ? 'Artıq Qeydiyyatdan Keçilib'
-                    : 'Qeydiyyatdan Keç və Şifrəni Təsdiqlə'}
-                </span>
+                <span>Qeydiyyatdan keçin</span>
                 <CheckCircle2 className="w-4 h-4" />
               </button>
 
