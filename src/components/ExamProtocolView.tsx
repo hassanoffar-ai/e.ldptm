@@ -207,6 +207,11 @@ export const ExamProtocolView: React.FC<ExamProtocolViewProps> = ({
 
   const handleDeleteStudentItem = (itemId: string) => {
     if (!currentSession) return;
+    const item = currentSession.items.find((i) => i.id === itemId);
+    const studentName = item?.studentName || 'bu tələbə';
+    if (!window.confirm(`"${studentName}" tələbəsini protokoldan çıxarmaq istədiyinizdən əminsiniz?`)) {
+      return;
+    }
     const updatedItems = currentSession.items.filter((i) => i.id !== itemId);
     onUpdateSession({ ...currentSession, items: updatedItems });
     showToast('Tələbə protokoldan çıxarıldı.');

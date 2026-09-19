@@ -40,6 +40,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+  const [studentToDelete, setStudentToDelete] = useState<Student | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<string>('all');
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'registered' | 'pending'>('all');
@@ -305,7 +306,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => onDeleteStudent(student.id)}
+                          onClick={() => setStudentToDelete(student)}
                           className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer"
                           title="Sil"
                         >
@@ -359,6 +360,48 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
           setEditingStudent(null);
         }}
       />
+
+      {/* Delete Confirmation Modal */}
+      {studentToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl border border-[#e2e8f0] w-full max-w-md p-6 animate-in zoom-in-95 duration-200">
+            <div className="flex items-start gap-3.5 mb-5">
+              <div className="w-11 h-11 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-bold text-base text-[#121c2a]">
+                  Tələbəni silmək istəyirsiniz?
+                </h3>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  <strong className="text-slate-800">{studentToDelete.name}</strong> (Tələbə ID: <span className="font-mono text-[#5300b7] font-semibold">{studentToDelete.studentId || studentToDelete.finCode}</span>) sistemdən və bazadan tamamilə silinəcək. Bu əməliyyat geri qaytarılmır.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setStudentToDelete(null)}
+                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                Ləğv et
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onDeleteStudent(studentToDelete.id);
+                  setStudentToDelete(null);
+                }}
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Bəli, Sil</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
