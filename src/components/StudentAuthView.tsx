@@ -68,7 +68,7 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
     const cleanPass = loginPassword.trim();
 
     if (!cleanId || !cleanPass) {
-      setLoginError('Zəhmət olmasa FİN kod və ya Tələbə ID və şifrənizi daxil edin.');
+      setLoginError('Zəhmət olmasa FİN kod və şifrənizi daxil edin.');
       return;
     }
 
@@ -81,7 +81,7 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
 
     if (!matched) {
       setLoginError(
-        'Daxil edilən FİN kod və ya Tələbə ID sistemdə tapılmadı. Əgər qeydiyyatdan keçməmisinizsə, aşağıdan qeydiyyatdan keçin.'
+        'Daxil edilən FİN kod sistemdə tapılmadı. Əgər qeydiyyatdan keçməmisinizsə, aşağıdan qeydiyyatdan keçin.'
       );
       return;
     }
@@ -244,14 +244,14 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  FİN Kod (və ya Tələbə ID)
+                  FİN Kod
                 </label>
                 <div className="relative">
                   <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     type="text"
                     required
-                    placeholder="7 simvollu FİN kodunuz (məs: 5ABC123)"
+                    placeholder="Məs: 5ABC123"
                     value={loginIdentifier}
                     onChange={(e) => setLoginIdentifier(e.target.value.toUpperCase())}
                     className="w-full pl-10 pr-4 py-3 bg-slate-800/60 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all font-mono uppercase"
