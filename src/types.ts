@@ -10,6 +10,7 @@ export interface Student {
   phone?: string;
   passwordHash?: string;
   status: 'active' | 'suspended' | 'graduated';
+  isRegistered?: boolean;
 }
 
 export interface StudentUser {

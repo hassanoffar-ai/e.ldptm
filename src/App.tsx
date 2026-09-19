@@ -239,12 +239,30 @@ export default function App() {
   };
 
   const handleAddStudent = (newStudent: Student) => {
-    setStudents((prev) => [newStudent, ...prev]);
+    setStudents((prev) => {
+      const existingIdx = prev.findIndex(
+        (s) =>
+          s.id === newStudent.id ||
+          (s.finCode && newStudent.finCode && s.finCode.toUpperCase() === newStudent.finCode.toUpperCase())
+      );
+      if (existingIdx >= 0) {
+        const next = [...prev];
+        next[existingIdx] = { ...next[existingIdx], ...newStudent };
+        return next;
+      }
+      return [newStudent, ...prev];
+    });
 
     // Also optionally append to gradebook of their group if course exists
     setCourses((prevCourses) =>
       prevCourses.map((c) => {
         if (c.group === newStudent.group) {
+          const alreadyInCourse = c.grades.some(
+            (g) => g.studentId === newStudent.id || g.idNumber === newStudent.studentId
+          );
+          if (alreadyInCourse) {
+            return c;
+          }
           const initials = newStudent.name
             .split(' ')
             .map((n) => n[0])
@@ -487,6 +505,7 @@ export default function App() {
         onClose={() => setIsNewStudentModalOpen(false)}
         onAddStudent={handleAddStudent}
         specialties={specialties}
+        existingStudents={students}
       />
 
       {/* New Exam Session Modal */}

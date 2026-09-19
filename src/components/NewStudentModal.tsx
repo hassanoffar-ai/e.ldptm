@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, UserPlus, GraduationCap, Users, Mail, Phone, Hash } from 'lucide-react';
+import { X, UserPlus, GraduationCap, Users, Mail, Phone, Hash, AlertCircle } from 'lucide-react';
 import { SpecialtyItem, Student } from '../types';
 import { GROUPS_LIST } from '../data/mockData';
 
@@ -8,6 +8,7 @@ interface NewStudentModalProps {
   onClose: () => void;
   onAddStudent: (newStudent: Student) => void;
   specialties?: SpecialtyItem[];
+  existingStudents?: Student[];
 }
 
 export const NewStudentModal: React.FC<NewStudentModalProps> = ({
@@ -15,6 +16,7 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
   onClose,
   onAddStudent,
   specialties = [],
+  existingStudents = [],
 }) => {
   const [name, setName] = useState('');
   const [studentId, setStudentId] = useState('');
@@ -25,6 +27,7 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('123456');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (specialties.length > 0 && !specialty) {
@@ -36,7 +39,42 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !studentId) return;
+    setError(null);
+
+    const cleanFin = finCode.trim().toUpperCase();
+    const cleanId = studentId.trim().toUpperCase();
+
+    if (!name.trim()) {
+      setError('Tələbənin ad, soyad və ata adını daxil edin.');
+      return;
+    }
+
+    if (!cleanId) {
+      setError('Tələbə ID daxil edilməlidir (məsələn: YTP-2024-001).');
+      return;
+    }
+
+    if (cleanFin.length !== 7) {
+      setError('FİN kod mütləq şəxsiyyət vəsiqəsindən 7 simvol olmalıdır.');
+      return;
+    }
+
+    // Check uniqueness
+    const duplicateFin = existingStudents.find(
+      (s) => s.finCode && s.finCode.toUpperCase() === cleanFin
+    );
+    if (duplicateFin) {
+      setError(`Bu FİN kod artıq başqa bir tələbəyə (${duplicateFin.name}) aiddir.`);
+      return;
+    }
+
+    const duplicateId = existingStudents.find(
+      (s) => s.studentId.toUpperCase() === cleanId
+    );
+    if (duplicateId) {
+      setError(`Bu Tələbə ID artıq bazada mövcuddur (${duplicateId.name}).`);
+      return;
+    }
 
     const resolvedSpecialty =
       specialty === '__custom__' || !specialty
@@ -45,15 +83,16 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
 
     const student: Student = {
       id: `std-${Date.now()}`,
-      studentId: studentId.trim(),
-      finCode: finCode.trim().toUpperCase() || undefined,
+      studentId: cleanId,
+      finCode: cleanFin,
       name: name.trim(),
       group,
       specialty: resolvedSpecialty,
-      email: email || `${studentId.toLowerCase()}@eldptm.edu.az`,
+      email: email || `${cleanId.toLowerCase()}@eldptm.edu.az`,
       phone: phone || '+994 50 000 00 00',
       passwordHash: password.trim() || '123456',
       status: 'active',
+      isRegistered: false,
     };
 
     onAddStudent(student);
@@ -63,6 +102,7 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
     setEmail('');
     setPhone('');
     setPassword('123456');
+    setError(null);
     onClose();
   };
 
@@ -128,16 +168,23 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-                FİN Kod (Şəxsiyyət vəsiqəsi)
+                FİN Kod (Şəxsiyyət vəsiqəsi) *
               </label>
               <input
                 type="text"
+                required
                 maxLength={7}
                 placeholder="7 simvol (məs: 5ABC123)"
                 value={finCode}
-                onChange={(e) => setFinCode(e.target.value.toUpperCase())}
-                className="w-full px-3.5 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm font-mono outline-none focus:ring-2 focus:ring-[#5300b7]"
+                onChange={(e) => {
+                  setFinCode(e.target.value.toUpperCase());
+                  setError(null);
+                }}
+                className="w-full px-3.5 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm font-mono outline-none focus:ring-2 focus:ring-[#5300b7] uppercase"
               />
+              <span className="text-[11px] text-slate-500 mt-1 block">
+                Tələbə portala yalnız bu FİN kod ilə qeydiyyatdan keçə biləcək
+              </span>
             </div>
           </div>
 
@@ -245,6 +292,13 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
               className="w-full px-3.5 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm font-mono outline-none focus:ring-2 focus:ring-[#5300b7]"
             />
           </div>
+
+          {error && (
+            <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
+              <span>{error}</span>
+            </div>
+          )}
 
           {/* Modal Footer */}
           <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">

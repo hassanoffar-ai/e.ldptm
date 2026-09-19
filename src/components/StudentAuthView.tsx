@@ -41,17 +41,23 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
   const [loginError, setLoginError] = useState<string | null>(null);
 
   // Register form states
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
   const [finCode, setFinCode] = useState('');
-  const [studentId, setStudentId] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const [registerError, setRegisterError] = useState<string | null>(null);
   const [registerSuccessMsg, setRegisterSuccessMsg] = useState<string | null>(null);
+
+  // Live lookup of student by FIN code
+  const cleanRegisterFin = finCode.trim().toUpperCase();
+  const matchedRegisterStudent =
+    cleanRegisterFin.length === 7
+      ? students.find(
+          (s) => s.finCode && s.finCode.trim().toUpperCase() === cleanRegisterFin
+        ) || null
+      : null;
 
   // Handle Student Login
   const handleLoginSubmit = (e: React.FormEvent) => {
@@ -62,20 +68,20 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
     const cleanPass = loginPassword.trim();
 
     if (!cleanId || !cleanPass) {
-      setLoginError('Zəhmət olmasa Tələbə ID / FİN və şifrənizi daxil edin.');
+      setLoginError('Zəhmət olmasa FİN kod və ya Tələbə ID və şifrənizi daxil edin.');
       return;
     }
 
-    // Match by studentId or finCode
+    // Match by finCode or studentId
     const matched = students.find(
       (s) =>
-        s.studentId.toLowerCase() === cleanId ||
-        (s.finCode && s.finCode.toLowerCase() === cleanId)
+        (s.finCode && s.finCode.toLowerCase() === cleanId) ||
+        s.studentId.toLowerCase() === cleanId
     );
 
     if (!matched) {
       setLoginError(
-        'Daxil edilən Tələbə ID və ya FİN kod sistemdə tapılmadı. Əgər qeydiyyatdan keçməmisinizsə, aşağıdan qeydiyyatdan keçin.'
+        'Daxil edilən FİN kod və ya Tələbə ID sistemdə tapılmadı. Əgər qeydiyyatdan keçməmisinizsə, aşağıdan qeydiyyatdan keçin.'
       );
       return;
     }
@@ -83,7 +89,13 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
     // Check password if set, or default fallback
     const expectedPassword = matched.passwordHash || '123456';
     if (cleanPass !== expectedPassword) {
-      setLoginError('Daxil edilmiş şifrə yanlışdır. Zəhmət olmasa yenidən yoxlayın.');
+      if (!matched.isRegistered) {
+        setLoginError(
+          'Daxil edilmiş şifrə yanlışdır. Əgər portalda ilk dəfəsinizsə, aşağıdakı "Qeydiyyatdan Keçin" bölməsindən FİN kodunuzla şifrənizi təyin edin.'
+        );
+      } else {
+        setLoginError('Daxil edilmiş şifrə yanlışdır. Zəhmət olmasa yenidən yoxlayın.');
+      }
       return;
     }
 
@@ -102,38 +114,32 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
     onLoginSuccess(sessionUser);
   };
 
-  // Handle Student Registration
+  // Handle Student Registration using solely their FIN code
   const handleRegisterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setRegisterError(null);
 
-    if (!firstName.trim() || !lastName.trim()) {
-      setRegisterError('Ad və soyadınızı daxil edin.');
-      return;
-    }
-
     const cleanFin = finCode.trim().toUpperCase();
-    if (cleanFin.length < 5) {
-      setRegisterError('FİN kod düzgün daxil edilməlidir (şəxsiyyət vəsiqəsindən 7 simvol).');
+    if (cleanFin.length !== 7) {
+      setRegisterError('FİN kod şəxsiyyət vəsiqəsindən dəqiq 7 simvol olmalıdır.');
       return;
     }
 
-    const cleanStudentId = studentId.trim().toUpperCase();
-    if (!cleanStudentId) {
-      setRegisterError('Tələbə ID daxil edilməlidir (məsələn: YTP-2024-001).');
-      return;
-    }
-
-    // Check duplicate studentId
-    const existing = students.find(
-      (s) =>
-        s.studentId.toUpperCase() === cleanStudentId ||
-        (s.finCode && s.finCode.toUpperCase() === cleanFin)
+    // Match against students in database
+    const matched = students.find(
+      (s) => s.finCode && s.finCode.trim().toUpperCase() === cleanFin
     );
 
-    if (existing) {
+    if (!matched) {
       setRegisterError(
-        'Bu Tələbə ID və ya FİN kod artıq sistemdə qeydiyyatdan keçib. Zəhmət olmasa birbaşa login olun.'
+        `Daxil edilən FİN kod (${cleanFin}) mərkəzin tələbə bazasında tapılmadı. Yalnız Lənkəran Dövlət Peşə Təhsil Mərkəzində qeydiyyatda olan tələbələr qeydiyyatdan keçə bilər.`
+      );
+      return;
+    }
+
+    if (matched.isRegistered) {
+      setRegisterError(
+        `Bu FİN kod (${cleanFin} — ${matched.name}) artıq qeydiyyatdan keçib. Zəhmət olmasa birbaşa daxil olun.`
       );
       return;
     }
@@ -148,40 +154,31 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
       return;
     }
 
-    const fullName = `${lastName.trim()} ${firstName.trim()}`;
-    const newStudent: Student = {
-      id: `std_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
-      studentId: cleanStudentId,
-      finCode: cleanFin,
-      name: fullName,
-      group: 'YTP',
-      specialty: 'Yüksək Texniki Peşə',
-      phone: phone.trim(),
-      email: email.trim(),
+    const updatedStudent: Student = {
+      ...matched,
       passwordHash: password,
-      status: 'active',
+      phone: phone.trim() || matched.phone,
+      email: email.trim() || matched.email,
+      isRegistered: true,
     };
 
-    // Save student to global database
-    onRegisterStudent(newStudent);
+    // Save updated student to database
+    onRegisterStudent(updatedStudent);
 
     // Provide feedback and switch to login page
     setRegisterSuccessMsg(
-      `Qeydiyyatınız uğurla tamamlandı! Zəhmət olmasa ID: "${cleanStudentId}" və təyin etdiyiniz şifrə ilə daxil olun.`
+      `Hörmətli ${matched.name}, qeydiyyatınız uğurla tamamlandı! Təyin etdiyiniz şifrə ilə daxil ola bilərsiniz.`
     );
-    setLoginIdentifier(cleanStudentId);
+    setLoginIdentifier(cleanFin);
     setLoginPassword('');
     setAuthMode('login');
 
     // Reset register fields
-    setFirstName('');
-    setLastName('');
     setFinCode('');
-    setStudentId('');
-    setPhone('');
-    setEmail('');
     setPassword('');
     setConfirmPassword('');
+    setPhone('');
+    setEmail('');
   };
 
   return (
@@ -247,17 +244,17 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  Tələbə ID və ya FİN Kod
+                  FİN Kod (və ya Tələbə ID)
                 </label>
                 <div className="relative">
                   <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     type="text"
                     required
-                    placeholder="Məs: YTP-2024-001 və ya FİN kod"
+                    placeholder="7 simvollu FİN kodunuz (məs: 5ABC123)"
                     value={loginIdentifier}
-                    onChange={(e) => setLoginIdentifier(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-slate-800/60 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all font-mono"
+                    onChange={(e) => setLoginIdentifier(e.target.value.toUpperCase())}
+                    className="w-full pl-10 pr-4 py-3 bg-slate-800/60 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all font-mono uppercase"
                   />
                 </div>
               </div>
@@ -320,13 +317,13 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
                   className="w-full py-3 px-4 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-purple-300 hover:text-white border border-slate-700 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <User className="w-4 h-4 text-purple-400" />
-                  <span>Qeydiyyatdan Keçin</span>
+                  <span>FİN Kod ilə Qeydiyyatdan Keçin</span>
                 </button>
               </div>
             </form>
           )}
 
-          {/* TAB 2: REGISTRATION FORM */}
+          {/* TAB 2: REGISTRATION FORM - FIN CODE ONLY */}
           {authMode === 'register' && (
             <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
               <button
@@ -340,129 +337,186 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
                 <ArrowLeft className="w-4 h-4" />
                 <span>Giriş səhifəsinə qayıt</span>
               </button>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    Adınız *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Məsələn: Əli"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 outline-none focus:border-purple-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    Soyadınız *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Məsələn: Məmmədov"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 outline-none focus:border-purple-500"
-                  />
-                </div>
-              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    FİN Kod (Şəxsiyyət vəsiqəsi) *
-                  </label>
+              {/* FIN Code Input */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
+                  <span>FİN Kod (Şəxsiyyət vəsiqəsi) *</span>
+                  <span className="text-[11px] font-mono text-purple-400 font-semibold">
+                    {cleanRegisterFin.length}/7 simvol
+                  </span>
+                </label>
+                <div className="relative">
+                  <KeyRound className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-400" />
                   <input
                     type="text"
                     required
                     maxLength={7}
-                    placeholder="7 simvol (məs: 5ABC123)"
+                    placeholder="Məs: 5ABC123"
                     value={finCode}
-                    onChange={(e) => setFinCode(e.target.value.toUpperCase())}
-                    className="w-full px-3.5 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 outline-none focus:border-purple-500 font-mono"
+                    onChange={(e) => {
+                      setFinCode(e.target.value.toUpperCase());
+                      setRegisterError(null);
+                    }}
+                    className="w-full pl-10 pr-4 py-3 bg-slate-800/60 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all font-mono uppercase tracking-wider"
                   />
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    Tələbə ID-si *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Məs: YTP-2024-001"
-                    value={studentId}
-                    onChange={(e) => setStudentId(e.target.value.toUpperCase())}
-                    className="w-full px-3.5 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 outline-none focus:border-purple-500 font-mono"
-                  />
-                </div>
+                <p className="text-[11px] text-slate-400 mt-1.5">
+                  Qeydiyyat yalnız mərkəzdə təhsil alan tələbənin öz 7 simvollu FİN kodu ilə aparılır.
+                </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    Əlaqə Nömrəsi *
-                  </label>
-                  <div className="relative">
-                    <Phone className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                      type="tel"
-                      required
-                      placeholder="+994 (50) 000-00-00"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 outline-none focus:border-purple-500"
-                    />
+              {/* Status 1: 7 chars entered but not found in students database */}
+              {cleanRegisterFin.length === 7 && !matchedRegisterStudent && (
+                <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-2.5 animate-in fade-in duration-200">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
+                  <div className="space-y-1">
+                    <span className="font-semibold block text-rose-200">
+                      FİN kod ({cleanRegisterFin}) tələbə bazasında tapılmadı!
+                    </span>
+                    <p className="text-rose-300/90 leading-relaxed text-[11px]">
+                      Yalnız Lənkəran Dövlət Peşə Təhsil Mərkəzində qeydiyyatda olan tələbələr portala qeydiyyatdan keçə bilər. Əgər bu mərkəzin tələbəsisinizsə, zəhmət olmasa tədris hissəsinə müraciət edin.
+                    </p>
                   </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    E-poçt Ünvanı
-                  </label>
-                  <div className="relative">
-                    <Mail className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                      type="email"
-                      placeholder="telebe@mail.ru"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 outline-none focus:border-purple-500"
-                    />
+              )}
+
+              {/* Status 2: Found but already registered */}
+              {matchedRegisterStudent && matchedRegisterStudent.isRegistered && (
+                <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex items-start gap-2.5 animate-in fade-in duration-200">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-amber-400 mt-0.5" />
+                  <div className="flex-1 space-y-1">
+                    <span className="font-semibold block text-amber-100">
+                      Bu FİN kod üzrə hesab artıq qeydiyyatdan keçib
+                    </span>
+                    <p className="leading-relaxed text-[11px]">
+                      Hörmətli <strong className="text-white">{matchedRegisterStudent.name}</strong>, portalda hesabınız artıq aktivdir. Birbaşa daxil ola bilərsiniz.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLoginIdentifier(cleanRegisterFin);
+                        setAuthMode('login');
+                        setRegisterError(null);
+                      }}
+                      className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/40 text-xs font-semibold cursor-pointer transition-colors"
+                    >
+                      <span>Giriş səhifəsinə keç</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </div>
-              </div>
+              )}
 
+              {/* Status 3: Found and eligible to register */}
+              {matchedRegisterStudent && !matchedRegisterStudent.isRegistered && (
+                <div className="space-y-3.5 animate-in fade-in duration-200">
+                  {/* Verified Card */}
+                  <div className="p-4 rounded-2xl bg-purple-950/40 border border-purple-500/30 text-xs text-slate-200 space-y-2.5 shadow-inner">
+                    <div className="flex items-center gap-2 text-emerald-400 font-bold">
+                      <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                      <span>Tələbə Məlumatları Təsdiqləndi</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1 border-t border-purple-500/20">
+                      <div>
+                        <span className="text-slate-400 block text-[11px]">Ad, Soyad:</span>
+                        <strong className="text-white text-sm">{matchedRegisterStudent.name}</strong>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block text-[11px]">Tələbə ID:</span>
+                        <strong className="text-purple-300 font-mono">{matchedRegisterStudent.studentId}</strong>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block text-[11px]">Qrup:</span>
+                        <span className="px-2 py-0.5 rounded bg-purple-500/20 border border-purple-500/30 text-purple-200 font-semibold text-[11px] inline-block mt-0.5">
+                          {matchedRegisterStudent.group}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block text-[11px]">İxtisas:</span>
+                        <span className="text-slate-300 text-[11px]">{matchedRegisterStudent.specialty}</span>
+                      </div>
+                    </div>
+                  </div>
 
+                  {/* Password setup */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1">
+                        Şəxsi Şifrə Təyin Edin *
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showRegisterPassword ? 'text' : 'password'}
+                          required
+                          placeholder="Ən azı 4 simvol"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="w-full pl-3 pr-8 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 outline-none focus:border-purple-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 cursor-pointer"
+                        >
+                          {showRegisterPassword ? (
+                            <EyeOff className="w-3.5 h-3.5" />
+                          ) : (
+                            <Eye className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1">
+                        Şifrənin Təkrarı *
+                      </label>
+                      <input
+                        type={showRegisterPassword ? 'text' : 'password'}
+                        required
+                        placeholder="Təkrar daxil edin"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="w-full px-3.5 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 outline-none focus:border-purple-500"
+                      />
+                    </div>
+                  </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    Şifrə Təyin Edin *
-                  </label>
-                  <input
-                    type={showRegisterPassword ? 'text' : 'password'}
-                    required
-                    placeholder="Ən azı 4 simvol"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 outline-none focus:border-purple-500"
-                  />
+                  {/* Optional Contact Fields */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1">
+                        Əlaqə Nömrəsi <span className="text-[10px] text-slate-400">(İstəyə bağlı)</span>
+                      </label>
+                      <div className="relative">
+                        <Phone className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          type="tel"
+                          placeholder={matchedRegisterStudent.phone || "+994 (50) 000-00-00"}
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          className="w-full pl-9 pr-3 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 outline-none focus:border-purple-500"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1">
+                        E-poçt Ünvanı <span className="text-[10px] text-slate-400">(İstəyə bağlı)</span>
+                      </label>
+                      <div className="relative">
+                        <Mail className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          type="email"
+                          placeholder={matchedRegisterStudent.email || "telebe@mail.ru"}
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className="w-full pl-9 pr-3 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 outline-none focus:border-purple-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    Şifrənin Təkrarı *
-                  </label>
-                  <input
-                    type={showRegisterPassword ? 'text' : 'password'}
-                    required
-                    placeholder="Təkrar daxil edin"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 outline-none focus:border-purple-500"
-                  />
-                </div>
-              </div>
+              )}
 
               {registerError && (
                 <div className="p-3 bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs rounded-xl flex items-center gap-2">
@@ -473,9 +527,16 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
 
               <button
                 type="submit"
-                className="w-full py-3.5 bg-gradient-to-r from-[#5300b7] to-[#7c3aed] hover:from-[#430094] hover:to-[#6d28d9] text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg shadow-purple-950/50 transition-all flex items-center justify-center gap-2 active:scale-[0.99] cursor-pointer mt-3"
+                disabled={cleanRegisterFin.length !== 7 || !matchedRegisterStudent || !!matchedRegisterStudent?.isRegistered}
+                className="w-full py-3.5 bg-gradient-to-r from-[#5300b7] to-[#7c3aed] disabled:opacity-50 disabled:cursor-not-allowed hover:from-[#430094] hover:to-[#6d28d9] text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg shadow-purple-950/50 transition-all flex items-center justify-center gap-2 active:scale-[0.99] cursor-pointer mt-3"
               >
-                <span>Qeydiyyatı Tamamla</span>
+                <span>
+                  {cleanRegisterFin.length === 7 && !matchedRegisterStudent
+                    ? 'FİN Kod Tələbə Bazasında Tapılmadı'
+                    : matchedRegisterStudent?.isRegistered
+                    ? 'Artıq Qeydiyyatdan Keçilib'
+                    : 'Qeydiyyatı Tamamla'}
+                </span>
                 <CheckCircle2 className="w-4 h-4" />
               </button>
 

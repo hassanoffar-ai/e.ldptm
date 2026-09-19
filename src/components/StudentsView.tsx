@@ -35,6 +35,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
     const matchesSearch =
       s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       s.studentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (s.finCode && s.finCode.toLowerCase().includes(searchTerm.toLowerCase())) ||
       s.specialty.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesGroup = selectedGroup === 'all' || s.group === selectedGroup;
     return matchesSearch && matchesGroup;
@@ -60,7 +61,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
 
         <button
           onClick={onOpenNewStudentModal}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#6d28d9] hover:bg-[#581c87] text-white rounded-xl text-sm font-semibold shadow-[0_2px_8px_rgba(109,40,217,0.25)] transition-all active:scale-95"
+          className="flex items-center gap-2 px-4 py-2.5 bg-[#6d28d9] hover:bg-[#581c87] text-white rounded-xl text-sm font-semibold shadow-[0_2px_8px_rgba(109,40,217,0.25)] transition-all active:scale-95 cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>Yeni Tələbə Əlavə Et</span>
@@ -73,7 +74,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#7b7486]" />
           <input
             type="text"
-            placeholder="Ad, ID və ya ixtisas üzrə axtar..."
+            placeholder="Ad, FİN, ID və ya ixtisas üzrə axtar..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
@@ -104,11 +105,11 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
             <thead>
               <tr className="border-b border-[#e2e8f0] bg-white text-xs font-semibold text-[#4a4455]">
                 <th className="p-4">Tələbə</th>
-                <th className="p-4">Tələbə ID</th>
+                <th className="p-4">Tələbə ID və FİN</th>
                 <th className="p-4">Qrup</th>
                 <th className="p-4">İxtisas</th>
                 <th className="p-4">Əlaqə</th>
-                <th className="p-4">Status</th>
+                <th className="p-4">Portal Statusu</th>
                 <th className="p-4 text-right">Əməliyyatlar</th>
               </tr>
             </thead>
@@ -131,8 +132,17 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                         <span>{student.name}</span>
                       </div>
                     </td>
-                    <td className="p-4 font-mono text-xs text-[#5300b7] font-bold">
-                      {student.studentId}
+                    <td className="p-4 font-mono text-xs">
+                      <div className="text-[#5300b7] font-bold">{student.studentId}</div>
+                      {student.finCode ? (
+                        <div className="text-[11px] text-slate-500 font-medium tracking-wider mt-0.5">
+                          FİN: <span className="text-slate-800 font-semibold">{student.finCode}</span>
+                        </div>
+                      ) : (
+                        <div className="text-[10px] text-amber-600 font-medium mt-0.5">
+                          FİN qeyd olunmayıb
+                        </div>
+                      )}
                     </td>
                     <td className="p-4">
                       <span className="px-2.5 py-1 bg-slate-100 rounded-lg text-xs font-semibold text-slate-800">
@@ -149,10 +159,16 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                       </div>
                     </td>
                     <td className="p-4">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        <CheckCircle2 className="w-3 h-3" />
-                        Aktiv
-                      </span>
+                      {student.isRegistered ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <CheckCircle2 className="w-3 h-3" />
+                          Qeydiyyatdan keçib
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200" title="Tələbə hələ FİN kodla portala qeydiyyatdan keçməyib">
+                          Gözləmədə
+                        </span>
+                      )}
                     </td>
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-2">
