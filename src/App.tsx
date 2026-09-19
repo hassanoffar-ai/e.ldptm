@@ -466,6 +466,13 @@ export default function App() {
     );
   };
 
+  const handleUpdateStudent = (updatedStudent: Student) => {
+    setStudents((prev) =>
+      prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s))
+    );
+    upsertStudentToDb(updatedStudent);
+  };
+
   const handleDeleteStudent = (id: string) => {
     setStudents((prev) => prev.filter((s) => s.id !== id));
     deleteStudentFromDb(id);
@@ -645,6 +652,7 @@ export default function App() {
                     });
                     setIsNewStudentModalOpen(true);
                   }}
+                  onUpdateStudent={handleUpdateStudent}
                   onDeleteStudent={handleDeleteStudent}
                 />
               )}

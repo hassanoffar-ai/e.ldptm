@@ -11,6 +11,7 @@ import {
   Filter,
   CheckCircle2,
   Trash2,
+  Edit2,
   BookOpen,
   Sparkles,
   Layers,
@@ -18,12 +19,14 @@ import {
 } from 'lucide-react';
 import { SpecialtyItem, Student } from '../types';
 import { GROUPS_LIST, SPECIALTIES_LIST } from '../data/mockData';
+import { EditStudentModal } from './EditStudentModal';
 
 interface StudentsViewProps {
   students: Student[];
   specialties?: SpecialtyItem[];
   onOpenTicketKioskForStudent: (studentId: string) => void;
   onOpenNewStudentModal: (defaultGroup?: string, defaultSpecialty?: string) => void;
+  onUpdateStudent?: (updatedStudent: Student) => void;
   onDeleteStudent: (id: string) => void;
 }
 
@@ -32,9 +35,11 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
   specialties = [],
   onOpenTicketKioskForStudent,
   onOpenNewStudentModal,
+  onUpdateStudent,
   onDeleteStudent,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<string>('all');
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'registered' | 'pending'>('all');
@@ -291,7 +296,14 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                       )}
                     </td>
                     <td className="p-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => setEditingStudent(student)}
+                          className="p-1.5 text-slate-400 hover:text-[#5300b7] rounded-lg hover:bg-purple-50 transition-colors cursor-pointer"
+                          title="Redaktə et"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
                         <button
                           onClick={() => onDeleteStudent(student.id)}
                           className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer"
@@ -334,6 +346,19 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
           </table>
         </div>
       </div>
+
+      {/* Edit Student Modal */}
+      <EditStudentModal
+        isOpen={!!editingStudent}
+        student={editingStudent}
+        specialties={specialties}
+        existingStudents={students}
+        onClose={() => setEditingStudent(null)}
+        onSave={(updated) => {
+          onUpdateStudent?.(updated);
+          setEditingStudent(null);
+        }}
+      />
     </div>
   );
 };

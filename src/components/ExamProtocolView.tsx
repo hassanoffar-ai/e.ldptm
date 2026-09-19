@@ -13,6 +13,7 @@ import {
   CheckCircle,
   FileSpreadsheet,
   Trash2,
+  X,
 } from 'lucide-react';
 import { ExamSession, ExamProtocolItem, Student } from '../types';
 
@@ -67,6 +68,7 @@ export const ExamProtocolView: React.FC<ExamProtocolViewProps> = ({
   const [showAddStudent, setShowAddStudent] = useState(false);
   const [newStudentName, setNewStudentName] = useState('');
   const [newStudentId, setNewStudentId] = useState('');
+  const [editingStudentItem, setEditingStudentItem] = useState<ExamProtocolItem | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -208,6 +210,22 @@ export const ExamProtocolView: React.FC<ExamProtocolViewProps> = ({
     const updatedItems = currentSession.items.filter((i) => i.id !== itemId);
     onUpdateSession({ ...currentSession, items: updatedItems });
     showToast('Tələbə protokoldan çıxarıldı.');
+  };
+
+  const handleSaveEditedStudentItem = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingStudentItem || !currentSession) return;
+    if (!editingStudentItem.studentName.trim() || !editingStudentItem.studentId.trim()) return;
+
+    const updatedItems = currentSession.items.map((it) =>
+      it.id === editingStudentItem.id ? editingStudentItem : it
+    );
+    onUpdateSession({
+      ...currentSession,
+      items: updatedItems,
+    });
+    setEditingStudentItem(null);
+    showToast('Tələbə məlumatları yeniləndi.');
   };
 
   if (!currentSession) {
@@ -519,11 +537,18 @@ export const ExamProtocolView: React.FC<ExamProtocolViewProps> = ({
                     }`}
                   >
                     <td className="p-4 whitespace-nowrap font-medium text-[#121c2a]">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
                         <span>{item.studentName}</span>
                         <button
+                          onClick={() => setEditingStudentItem({ ...item })}
+                          className="opacity-0 group-hover:opacity-100 hover:opacity-100 text-xs text-[#5300b7] hover:text-[#430094] p-1 rounded hover:bg-purple-50 transition-all no-print cursor-pointer"
+                          title="Tələbə məlumatlarını redaktə et"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
                           onClick={() => handleDeleteStudentItem(item.id)}
-                          className="opacity-0 group-hover:opacity-100 hover:opacity-100 text-xs text-rose-500 hover:text-rose-700 p-1 rounded hover:bg-rose-50 transition-all no-print"
+                          className="opacity-0 group-hover:opacity-100 hover:opacity-100 text-xs text-rose-500 hover:text-rose-700 p-1 rounded hover:bg-rose-50 transition-all no-print cursor-pointer"
                           title="Protokoldan sil"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -660,6 +685,166 @@ export const ExamProtocolView: React.FC<ExamProtocolViewProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Edit Protocol Student Modal */}
+      {editingStudentItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl shadow-2xl border border-[#e2e8f0] w-full max-w-md p-6 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-purple-100 text-[#5300b7] flex items-center justify-center">
+                  <Edit2 className="w-4 h-4" />
+                </div>
+                <h3 className="font-bold text-base text-[#121c2a]">
+                  Tələbə Məlumatlarını Redaktə Et
+                </h3>
+              </div>
+              <button
+                onClick={() => setEditingStudentItem(null)}
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditedStudentItem} className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-semibold text-[#4a4455] mb-1">
+                  Tələbənin Adı və Soyadı <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editingStudentItem.studentName}
+                  onChange={(e) =>
+                    setEditingStudentItem({ ...editingStudentItem, studentName: e.target.value })
+                  }
+                  className="w-full px-3 py-2 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[#4a4455] mb-1">
+                  Tələbə ID <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editingStudentItem.studentId}
+                  onChange={(e) =>
+                    setEditingStudentItem({ ...editingStudentItem, studentId: e.target.value })
+                  }
+                  className="w-full px-3 py-2 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm font-mono outline-none focus:ring-2 focus:ring-[#5300b7]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-[#4a4455] mb-1">
+                    Qrup
+                  </label>
+                  <input
+                    type="text"
+                    value={editingStudentItem.group}
+                    onChange={(e) =>
+                      setEditingStudentItem({ ...editingStudentItem, group: e.target.value })
+                    }
+                    className="w-full px-3 py-2 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-[#4a4455] mb-1">
+                    Saat
+                  </label>
+                  <input
+                    type="text"
+                    value={editingStudentItem.time}
+                    onChange={(e) =>
+                      setEditingStudentItem({ ...editingStudentItem, time: e.target.value })
+                    }
+                    className="w-full px-3 py-2 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-[#4a4455] mb-1">
+                    Otaq
+                  </label>
+                  <input
+                    type="text"
+                    value={editingStudentItem.room}
+                    onChange={(e) =>
+                      setEditingStudentItem({ ...editingStudentItem, room: e.target.value })
+                    }
+                    className="w-full px-3 py-2 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-[#4a4455] mb-1">
+                    Kompüter №
+                  </label>
+                  <input
+                    type="text"
+                    value={editingStudentItem.computerNo}
+                    onChange={(e) =>
+                      setEditingStudentItem({ ...editingStudentItem, computerNo: e.target.value })
+                    }
+                    className="w-full px-3 py-2 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-[#4a4455] mb-1">
+                    Bilet №
+                  </label>
+                  <input
+                    type="text"
+                    value={editingStudentItem.ticketNo}
+                    onChange={(e) =>
+                      setEditingStudentItem({ ...editingStudentItem, ticketNo: e.target.value })
+                    }
+                    className="w-full px-3 py-2 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-[#4a4455] mb-1">
+                    Biletin Vaxtı
+                  </label>
+                  <input
+                    type="text"
+                    value={editingStudentItem.ticketTime}
+                    onChange={(e) =>
+                      setEditingStudentItem({ ...editingStudentItem, ticketTime: e.target.value })
+                    }
+                    className="w-full px-3 py-2 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingStudentItem(null)}
+                  className="px-3.5 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-colors cursor-pointer"
+                >
+                  Ləğv et
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-xl bg-[#6d28d9] hover:bg-[#581c87] text-white text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  <span>Yadda Saxla</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
