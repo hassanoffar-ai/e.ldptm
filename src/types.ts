@@ -74,7 +74,7 @@ export interface SpecialtyModule {
   specialtyId?: string;
   specialtyName: string;
   semester: string; // e.g. "I Semestr", "II Semestr", "III Semestr", "IV Semestr"
-  code: string;
+  code?: string;
   name: string;
   creditHours?: number; // e.g. 60 saat
   credits?: number; // e.g. 4 kredit

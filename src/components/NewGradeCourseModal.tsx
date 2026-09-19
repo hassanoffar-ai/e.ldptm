@@ -161,7 +161,7 @@ export const NewGradeCourseModal: React.FC<NewGradeCourseModalProps> = ({
                     setSubject(e.target.value);
                     const found = specialtyModules.find((m) => m.name === e.target.value);
                     if (found) {
-                      setSubjectCode(found.code);
+                      setSubjectCode(found.code || '');
                       setSemester(found.semester);
                     }
                   } else {

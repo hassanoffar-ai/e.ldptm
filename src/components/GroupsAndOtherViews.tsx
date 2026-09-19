@@ -89,7 +89,6 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
   );
   const [modSemester, setModSemester] = useState('I Semestr');
   const [modName, setModName] = useState('');
-  const [modCode, setModCode] = useState('');
   const [modHours, setModHours] = useState(60);
   const [modCredits, setModCredits] = useState(5);
   const [modInstructor, setModInstructor] = useState('');
@@ -116,7 +115,6 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
     );
     setModSemester(selectedModuleSemester !== 'all' ? selectedModuleSemester : 'I Semestr');
     setModName('');
-    setModCode('');
     setModHours(60);
     setModCredits(5);
     setModInstructor('');
@@ -131,7 +129,6 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
     setModSpecialty(m.specialtyName);
     setModSemester(m.semester);
     setModName(m.name);
-    setModCode(m.code);
     setModHours(m.creditHours || 60);
     setModCredits(m.credits || 5);
     setModInstructor(m.instructor || '');
@@ -143,8 +140,8 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
 
   const handleSaveModule = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!modName.trim() || !modCode.trim()) {
-      setModError('Modulun adı və kodu mütləq daxil edilməlidir.');
+    if (!modName.trim()) {
+      setModError('Modulun adı mütləq daxil edilməlidir.');
       return;
     }
 
@@ -156,7 +153,6 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
               specialtyName: modSpecialty,
               semester: modSemester,
               name: modName.trim(),
-              code: modCode.trim(),
               creditHours: Number(modHours) || 60,
               credits: Number(modCredits) || 5,
               instructor: modInstructor.trim(),
@@ -172,7 +168,6 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
         specialtyName: modSpecialty,
         semester: modSemester,
         name: modName.trim(),
-        code: modCode.trim(),
         creditHours: Number(modHours) || 60,
         credits: Number(modCredits) || 5,
         instructor: modInstructor.trim(),
@@ -740,9 +735,6 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                   <div className="space-y-3">
                     {/* Badges */}
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="text-[11px] font-mono font-extrabold uppercase tracking-wider text-[#5300b7] bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-100">
-                        {m.code}
-                      </span>
                       <span className="text-xs font-bold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
                         {m.semester}
                       </span>
@@ -883,37 +875,22 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                   </select>
                 </div>
 
-                {/* Semester & Code */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Semestr
-                    </label>
-                    <select
-                      value={modSemester}
-                      onChange={(e) => setModSemester(e.target.value)}
-                      className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer"
-                    >
-                      {SEMESTERS_LIST.map((sem) => (
-                        <option key={sem} value={sem}>
-                          {sem}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Modul Kodu
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Məs: KSP-101"
-                      value={modCode}
-                      onChange={(e) => setModCode(e.target.value)}
-                      className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7]"
-                    />
-                  </div>
+                {/* Semester */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Semestr
+                  </label>
+                  <select
+                    value={modSemester}
+                    onChange={(e) => setModSemester(e.target.value)}
+                    className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer"
+                  >
+                    {SEMESTERS_LIST.map((sem) => (
+                      <option key={sem} value={sem}>
+                        {sem}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 {/* Name */}

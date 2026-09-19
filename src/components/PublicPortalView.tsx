@@ -652,10 +652,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                         key={m.id}
                         className="bg-white p-5 rounded-2xl sm:rounded-3xl border border-slate-200 hover:border-[#5300b7] transition-all shadow-xs space-y-3"
                       >
-                        <div className="flex items-start justify-between gap-2">
-                          <span className="px-2.5 py-1 bg-purple-50 text-[#5300b7] rounded-lg font-mono font-bold text-xs">
-                            {m.code}
-                          </span>
+                        <div className="flex items-start justify-end gap-2">
                           <span className="text-xs font-bold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
                             {m.semester}
                           </span>
