@@ -24,14 +24,14 @@ export const DEFAULT_ADMIN_PERMISSIONS: AdminPermissions = {
 const DEFAULT_ACCOUNTS: AccountCredentials[] = [
   {
     username: 'superadmin',
-    passwordHash: 'super123',
+    passwordHash: 'Subhanallah313',
     fullName: 'Baş Administrator (Super Admin)',
     role: 'super_admin',
   },
   {
     username: 'admin',
-    passwordHash: 'admin123',
-    fullName: 'Köməkçi İnzibatçı (Admin)',
+    passwordHash: 'LDPTM2026',
+    fullName: 'Köməkçi Admin',
     role: 'admin',
   },
 ];
@@ -40,7 +40,25 @@ export const getStoredAccounts = (): AccountCredentials[] => {
   try {
     const raw = localStorage.getItem('eldptm_admin_accounts');
     if (raw) {
-      return JSON.parse(raw);
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        let hasOld = false;
+        const migrated = parsed.map((acc: AccountCredentials) => {
+          if (acc.username === 'superadmin' && acc.passwordHash === 'super123') {
+            hasOld = true;
+            return { ...acc, passwordHash: 'Subhanallah313', fullName: 'Baş Administrator (Super Admin)' };
+          }
+          if (acc.username === 'admin' && acc.passwordHash === 'admin123') {
+            hasOld = true;
+            return { ...acc, passwordHash: 'LDPTM2026', fullName: 'Köməkçi Admin' };
+          }
+          return acc;
+        });
+        if (hasOld) {
+          saveStoredAccounts(migrated);
+        }
+        return migrated;
+      }
     }
   } catch (e) {
     console.error(e);

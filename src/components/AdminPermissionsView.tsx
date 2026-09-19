@@ -192,7 +192,7 @@ export const AdminPermissionsView: React.FC<AdminPermissionsViewProps> = ({
               </div>
               <div>
                 <h4 className="font-bold text-base text-[#121c2a]">
-                  Köməkçi İnzibatçı
+                  {accounts.find((a) => a.role === 'admin')?.fullName || 'Köməkçi Admin'}
                 </h4>
                 <span className="text-xs text-[#64748b] font-mono">
                   admin
