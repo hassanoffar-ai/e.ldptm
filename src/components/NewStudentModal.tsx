@@ -210,7 +210,7 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
               />
             </div>
             <span className="text-[11px] text-slate-500 mt-1 block">
-              Tələbə bu Tələbə ID və Ad Soyadı ilə portala daxil olaraq qeydiyyatdan keçəcək
+              Tələbə bu Tələbə ID ilə portala daxil olaraq müstəqil qeydiyyatdan keçəcək
             </span>
           </div>
 

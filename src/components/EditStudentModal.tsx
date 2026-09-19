@@ -5,9 +5,7 @@ import {
   Users,
   AlertCircle,
   KeyRound,
-  Phone,
-  Mail,
-  Shield,
+  GraduationCap,
 } from 'lucide-react';
 import { SpecialtyItem, Student } from '../types';
 import { GROUPS_LIST, SPECIALTIES_LIST } from '../data/mockData';
@@ -34,10 +32,7 @@ export const EditStudentModal: React.FC<EditStudentModalProps> = ({
   const [group, setGroup] = useState('');
   const [specialty, setSpecialty] = useState('');
   const [customSpecialty, setCustomSpecialty] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'active' | 'suspended' | 'graduated'>('active');
-  const [newPassword, setNewPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -57,14 +52,7 @@ export const EditStudentModal: React.FC<EditStudentModalProps> = ({
         setCustomSpecialty(student.specialty || '');
       }
 
-      setPhone(student.phone || '');
-      setEmail(
-        student.email && !student.email.includes('@eldptm.edu.az')
-          ? student.email
-          : ''
-      );
       setStatus(student.status || 'active');
-      setNewPassword('');
       setError(null);
     }
   }, [student, specialties, isOpen]);
@@ -116,10 +104,11 @@ export const EditStudentModal: React.FC<EditStudentModalProps> = ({
       finCode: cleanId,
       group: group || student.group,
       specialty: resolvedSpecialty,
-      phone: phone.trim(),
-      email: email.trim(),
       status,
-      passwordHash: newPassword.trim() ? newPassword.trim() : student.passwordHash || '123456',
+      // Əlaqə nömrəsi, gmail və şifrə tələbənin portaldakı öz qeydiyyatı ilə idarə olunur
+      phone: student.phone || '',
+      email: student.email || '',
+      passwordHash: student.passwordHash || '123456',
     };
 
     onSave(updatedStudent);
@@ -192,7 +181,7 @@ export const EditStudentModal: React.FC<EditStudentModalProps> = ({
             </div>
           </div>
 
-          {/* Qrup və İxtisas */}
+          {/* Qrup və Status */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-[#4a4455] mb-1">
@@ -265,58 +254,6 @@ export const EditStudentModal: React.FC<EditStudentModalProps> = ({
                 className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
               />
             )}
-          </div>
-
-          {/* Əlaqə nömrəsi və E-poçt */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-                Əlaqə Nömrəsi (Telefon)
-              </label>
-              <div className="relative">
-                <Phone className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="+994 (50) 000-00-00"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-                Gmail / E-poçt
-              </label>
-              <div className="relative">
-                <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
-                  type="email"
-                  placeholder="numune@gmail.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Şifrə Dəyişdirilməsi */}
-          <div>
-            <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-              Şəxsi Şifrə (Dəyişmək istədikdə yeni şifrə yazın)
-            </label>
-            <div className="relative">
-              <Shield className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Boş buraxıldıqda cari şifrə qalacaq"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
-              />
-            </div>
           </div>
 
           {error && (
