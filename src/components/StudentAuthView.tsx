@@ -352,7 +352,6 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
                 className="inline-flex items-center gap-1.5 text-xs text-purple-400 hover:text-purple-300 font-semibold mb-1 transition-colors cursor-pointer"
               >
                 <ArrowLeft className="w-4 h-4" />
-                <span>Giriş səhifəsinə qayıt</span>
               </button>
 
               {/* Identification: Student ID Input */}
