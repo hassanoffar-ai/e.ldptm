@@ -373,7 +373,7 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
               {/* Ad, Soyad Input */}
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  Ad, Soyad, Ata adı *
+                  Ad, Soyad, Ata adı
                 </label>
                 <div className="relative">
                   <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-400" />
@@ -394,7 +394,7 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
               {/* FIN Code Input */}
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
-                  <span>FİN Kod (Şəxsiyyət vəsiqəsi) *</span>
+                  <span>FİN Kod (Şəxsiyyət vəsiqəsi)</span>
                   <span className="text-[11px] font-mono text-purple-400 font-semibold">
                     {cleanRegisterFin.length}/7 simvol
                   </span>
@@ -414,9 +414,6 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
                     className="w-full pl-10 pr-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all font-mono uppercase tracking-wider"
                   />
                 </div>
-                <p className="text-[11px] text-slate-400 mt-1">
-                  Yalnız admin paneldə bazaya FİN kodu daxil edilmiş tələbələr qeydiyyatdan keçə bilər.
-                </p>
               </div>
 
               {/* Status 1: 7 chars entered but not found in students database */}
@@ -480,7 +477,7 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    Əlaqə Nömrəsi *
+                    Əlaqə Nömrəsi
                   </label>
                   <div className="relative">
                     <Phone className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-400" />
@@ -500,7 +497,7 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    Mail Hesabı (E-poçt) *
+                    Mail Hesabı (E-poçt)
                   </label>
                   <div className="relative">
                     <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-400" />
@@ -523,7 +520,7 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    Şəxsi Şifrə Təyin Edin *
+                    Şəxsi Şifrə Təyin Edin
                   </label>
                   <div className="relative">
                     <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-400" />
@@ -554,7 +551,7 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    Şifrənin Təkrarı *
+                    Şifrənin Təkrarı
                   </label>
                   <div className="relative">
                     <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-400" />

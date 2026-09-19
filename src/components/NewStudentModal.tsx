@@ -140,7 +140,7 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
             <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-              Ad, Soyad, Ata adı *
+              Ad, Soyad, Ata adı
             </label>
             <input
               type="text"
@@ -154,7 +154,7 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-              FİN Kod (Şəxsiyyət vəsiqəsi) *
+              FİN Kod (Şəxsiyyət vəsiqəsi)
             </label>
             <input
               type="text"
@@ -176,7 +176,7 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-                Qrup *
+                Qrup
               </label>
               <select
                 value={group}
