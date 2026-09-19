@@ -629,7 +629,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
           modulları tam sinxronizasiyada çalışır.
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
           <button
             onClick={() => setActiveTab('exams')}
             className="p-4 bg-slate-50 hover:bg-purple-50 rounded-xl border border-slate-200 text-left transition-colors"
@@ -642,17 +642,6 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
             </p>
           </button>
           <button
-            onClick={() => setActiveTab('tickets')}
-            className="p-4 bg-slate-50 hover:bg-purple-50 rounded-xl border border-slate-200 text-left transition-colors"
-          >
-            <h4 className="font-bold text-sm text-slate-800 mb-1">
-              Bilet Çap Kiosku
-            </h4>
-            <p className="text-xs text-slate-500">
-              Tələbə biletlərinin generasiyası
-            </p>
-          </button>
-          <button
             onClick={() => setActiveTab('grades')}
             className="p-4 bg-slate-50 hover:bg-purple-50 rounded-xl border border-slate-200 text-left transition-colors"
           >
@@ -660,7 +649,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
               Qiymət Daxiletmə
             </h4>
             <p className="text-xs text-slate-500">
-              50 ballıq aralıq qiymətləndirmə
+              Semestr qiymətləndirməsi
             </p>
           </button>
         </div>
