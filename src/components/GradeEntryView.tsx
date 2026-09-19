@@ -31,23 +31,26 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
   onDeleteCourse,
   specialties = [],
 }) => {
+  const [selectedGroupId, setSelectedGroupId] = useState<string>(
+    courses[0]?.group || GROUPS_LIST[0] || '1-ci kurs'
+  );
+  const [selectedSpecialty, setSelectedSpecialty] = useState<string>(
+    courses[0]?.specialty || specialties[0]?.name || ''
+  );
+  const [selectedSubject, setSelectedSubject] = useState<string>(
+    courses[0]?.subject || ''
+  );
+  const [selectedSemester, setSelectedSemester] = useState<string>(
+    courses[0]?.semester || 'I Semestr'
+  );
+
   const currentCourse =
     courses.find(
       (c) => c.group === selectedGroupId && c.subject === selectedSubject
-    ) || courses[0] || null;
-
-  const [selectedGroupId, setSelectedGroupId] = useState(
-    currentCourse?.group || GROUPS_LIST[0] || '1-ci kurs'
-  );
-  const [selectedSpecialty, setSelectedSpecialty] = useState(
-    currentCourse?.specialty || specialties[0]?.name || ''
-  );
-  const [selectedSubject, setSelectedSubject] = useState(
-    currentCourse?.subject || ''
-  );
-  const [selectedSemester, setSelectedSemester] = useState(
-    currentCourse?.semester || 'I Semestr'
-  );
+    ) ||
+    courses.find((c) => c.group === selectedGroupId) ||
+    courses[0] ||
+    null;
 
   const [gradesList, setGradesList] = useState<StudentGrade[]>(
     currentCourse?.grades || []
@@ -83,30 +86,38 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
     if (matched.length > 0) {
       return Array.from(new Set([...matched, ...(currentCourse ? [currentCourse.subject] : [])]));
     }
-    return SUBJECTS_LIST;
+    return currentCourse ? [currentCourse.subject] : SUBJECTS_LIST;
   }, [specialtyModules, selectedSpecialty, selectedSemester, currentCourse]);
 
-  // Sync state whenever currentCourse changes
+  // Sync state whenever courses prop loads or currentCourse changes
   React.useEffect(() => {
-    if (currentCourse) {
-      setSelectedGroupId(currentCourse.group);
-      setSelectedSpecialty(currentCourse.specialty);
-      setSelectedSubject(currentCourse.subject);
-      setSelectedSemester(currentCourse.semester);
-      setGradesList(currentCourse.grades);
-      setLastSavedTime(currentCourse.lastSaved || null);
-      setIsPublished(currentCourse.isPublished || false);
+    if (courses.length > 0) {
+      const active = courses.find(
+        (c) => c.group === selectedGroupId && c.subject === selectedSubject
+      ) || courses[0];
+
+      if (active) {
+        setSelectedGroupId(active.group);
+        setSelectedSpecialty(active.specialty);
+        setSelectedSubject(active.subject);
+        setSelectedSemester(active.semester);
+        setGradesList(active.grades);
+        setLastSavedTime(active.lastSaved || null);
+        setIsPublished(active.isPublished || false);
+      }
     } else {
       setGradesList([]);
     }
-  }, [currentCourse?.id]);
+  }, [courses]);
 
-  // Sync if course changes
+  // Sync if group changes
   const handleGroupChange = (group: string) => {
     setSelectedGroupId(group);
     const match = courses.find((c) => c.group === group);
     if (match) {
       setSelectedSubject(match.subject);
+      setSelectedSpecialty(match.specialty);
+      setSelectedSemester(match.semester);
       setGradesList(match.grades);
       setLastSavedTime(match.lastSaved || null);
       setIsPublished(match.isPublished || false);
@@ -485,7 +496,20 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
               <select
                 id="filter-subject-select"
                 value={selectedSubject}
-                onChange={(e) => setSelectedSubject(e.target.value)}
+                onChange={(e) => {
+                  const newSub = e.target.value;
+                  setSelectedSubject(newSub);
+                  const match = courses.find(
+                    (c) => c.group === selectedGroupId && c.subject === newSub
+                  );
+                  if (match) {
+                    setSelectedSpecialty(match.specialty);
+                    setSelectedSemester(match.semester);
+                    setGradesList(match.grades);
+                    setLastSavedTime(match.lastSaved || null);
+                    setIsPublished(match.isPublished || false);
+                  }
+                }}
                 className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7] focus:border-[#5300b7] transition-all cursor-pointer"
               >
                 {availableSubjectsForFilter.map((sub) => (
@@ -493,6 +517,12 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
                     {sub}
                   </option>
                 ))}
+                {!availableSubjectsForFilter.includes(selectedSubject) && selectedSubject && (
+                  <option value={selectedSubject}>{selectedSubject}</option>
+                )}
+                {availableSubjectsForFilter.length === 0 && !selectedSubject && (
+                  <option value="">Modul seçilməyib</option>
+                )}
               </select>
             </div>
           </div>
