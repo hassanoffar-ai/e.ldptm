@@ -171,8 +171,6 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
       })
       .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'az'));
 
-    const ytpCount = safeSpecialties.filter((s) => (s.direction || '').includes('YTP') || (s.direction || '').includes('Yüksək')).length;
-    const vocationalCount = safeSpecialties.length - ytpCount;
     const uniqueDirections = Array.from(new Set(safeSpecialties.map((s) => s.direction || 'Yüksək Texniki Peşə (YTP)')));
 
     return (
@@ -203,27 +201,13 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
         </div>
 
         {/* Statistics Bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="bg-white p-4 rounded-2xl border border-[#ccc3d7] shadow-xs">
             <div className="flex items-center gap-2 text-[#64748b] text-xs mb-1">
               <Briefcase className="w-4 h-4 text-[#5300b7]" />
               <span>Ümumi İxtisaslar</span>
             </div>
             <div className="text-2xl font-bold text-[#121c2a]">{safeSpecialties.length}</div>
-          </div>
-          <div className="bg-white p-4 rounded-2xl border border-[#ccc3d7] shadow-xs">
-            <div className="flex items-center gap-2 text-[#64748b] text-xs mb-1">
-              <GraduationCap className="w-4 h-4 text-purple-600" />
-              <span>YTP Subbakalavr</span>
-            </div>
-            <div className="text-2xl font-bold text-[#5300b7]">{ytpCount}</div>
-          </div>
-          <div className="bg-white p-4 rounded-2xl border border-[#ccc3d7] shadow-xs">
-            <div className="flex items-center gap-2 text-[#64748b] text-xs mb-1">
-              <Layers className="w-4 h-4 text-blue-600" />
-              <span>Texniki / İlk Peşə</span>
-            </div>
-            <div className="text-2xl font-bold text-blue-700">{vocationalCount}</div>
           </div>
           <div className="bg-white p-4 rounded-2xl border border-[#ccc3d7] shadow-xs">
             <div className="flex items-center gap-2 text-[#64748b] text-xs mb-1">
