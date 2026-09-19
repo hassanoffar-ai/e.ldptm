@@ -22,6 +22,24 @@ export const GROUPS_LIST = [
 export const INITIAL_SPECIALTIES: SpecialtyItem[] = [
   {
     id: 'spec-1',
+    name: 'Kompüter şəbəkələri və şəbəkə inzibatçılığı',
+    code: 'KŞŞİ',
+    direction: 'Yüksək Texniki Peşə (YTP)',
+    duration: '3 illik',
+    educationType: 'Əyani',
+    description: 'Yüksək Texniki Peşə (Subbakalavr) təhsil pilləsi',
+  },
+  {
+    id: 'spec-2',
+    name: 'Kibertəhlükəsizlik',
+    code: 'KT',
+    direction: 'Yüksək Texniki Peşə (YTP)',
+    duration: '3 illik',
+    educationType: 'Əyani',
+    description: 'Yüksək Texniki Peşə (Subbakalavr) təhsil pilləsi',
+  },
+  {
+    id: 'spec-3',
     name: 'Kompüter sistemlərində proqramlaşdırma',
     code: 'KSP',
     direction: 'Yüksək Texniki Peşə (YTP)',
@@ -30,27 +48,9 @@ export const INITIAL_SPECIALTIES: SpecialtyItem[] = [
     description: 'Yüksək Texniki Peşə (Subbakalavr) təhsil pilləsi',
   },
   {
-    id: 'spec-2',
-    name: 'Kompüter sistemlərində proqram təminatı',
-    code: 'KSPT',
-    direction: 'Yüksək Texniki Peşə (YTP)',
-    duration: '4 illik',
-    educationType: 'Əyani',
-    description: 'Yüksək Texniki Peşə (Subbakalavr) təhsil pilləsi',
-  },
-  {
-    id: 'spec-3',
-    name: 'Veb tərtibatı və dizaynı',
-    code: 'VTD',
-    direction: 'Yüksək Texniki Peşə (YTP)',
-    duration: '3 illik',
-    educationType: 'Əyani',
-    description: 'Yüksək Texniki Peşə (Subbakalavr) təhsil pilləsi',
-  },
-  {
     id: 'spec-4',
-    name: 'Kompüter şəbəkələrinin inzibatçılığı',
-    code: 'KŞİ',
+    name: 'Mehmanxana və restoran işinin təşkili və idarə edilməsi',
+    code: 'MRİTİE',
     direction: 'Yüksək Texniki Peşə (YTP)',
     duration: '3 illik',
     educationType: 'Əyani',
@@ -58,21 +58,21 @@ export const INITIAL_SPECIALTIES: SpecialtyItem[] = [
   },
   {
     id: 'spec-5',
-    name: 'Kibertəhlükəsizlik sistemləri',
-    code: 'KT',
+    name: 'Mühasibat uçotu',
+    code: 'MU',
     direction: 'Yüksək Texniki Peşə (YTP)',
-    duration: '4 illik',
+    duration: '3 illik',
     educationType: 'Əyani',
     description: 'Yüksək Texniki Peşə (Subbakalavr) təhsil pilləsi',
   },
 ];
 
 export const SPECIALTIES_LIST: string[] = [
+  'Kompüter şəbəkələri və şəbəkə inzibatçılığı',
+  'Kibertəhlükəsizlik',
   'Kompüter sistemlərində proqramlaşdırma',
-  'Kompüter sistemlərində proqram təminatı',
-  'Veb tərtibatı və dizaynı',
-  'Kompüter şəbəkələrinin inzibatçılığı',
-  'Kibertəhlükəsizlik sistemləri',
+  'Mehmanxana və restoran işinin təşkili və idarə edilməsi',
+  'Mühasibat uçotu',
 ];
 
 export const SUBJECTS_LIST = [

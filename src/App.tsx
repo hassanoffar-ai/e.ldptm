@@ -59,6 +59,44 @@ const loadFromStorage = <T,>(key: string, fallback: T): T => {
   }
 };
 
+const loadSpecialtiesFromStorage = (): SpecialtyItem[] => {
+  try {
+    const item = localStorage.getItem('eldptm_specialties');
+    if (item) {
+      const parsed = JSON.parse(item);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const hasLegacy = parsed.some((s: SpecialtyItem) =>
+          [
+            'Veb tərtibatı və dizaynı',
+            'Kompüter sistemlərində proqram təminatı',
+            'Kompüter şəbəkələrinin inzibatçılığı',
+            'Kibertəhlükəsizlik sistemləri',
+          ].includes(s.name)
+        );
+        if (hasLegacy) {
+          const customOnes = parsed.filter(
+            (s: SpecialtyItem) =>
+              ![
+                'Veb tərtibatı və dizaynı',
+                'Kompüter sistemlərində proqram təminatı',
+                'Kompüter şəbəkələrinin inzibatçılığı',
+                'Kibertəhlükəsizlik sistemləri',
+                'Kompüter sistemlərində proqramlaşdırma',
+              ].includes(s.name)
+          );
+          const migrated = [...INITIAL_SPECIALTIES, ...customOnes];
+          localStorage.setItem('eldptm_specialties', JSON.stringify(migrated));
+          return migrated;
+        }
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  return INITIAL_SPECIALTIES;
+};
+
 const getInitialRoute = (): 'public' | 'admin' => {
   if (typeof window === 'undefined') return 'public';
   const path = window.location.pathname.toLowerCase();
@@ -112,9 +150,7 @@ export default function App() {
   const [courses, setCourses] = useState<GradeBookCourse[]>(() =>
     loadFromStorage('eldptm_courses', INITIAL_GRADE_COURSES)
   );
-  const [specialties, setSpecialties] = useState<SpecialtyItem[]>(() =>
-    loadFromStorage('eldptm_specialties', INITIAL_SPECIALTIES)
-  );
+  const [specialties, setSpecialties] = useState<SpecialtyItem[]>(loadSpecialtiesFromStorage);
 
   // Sync route with URL navigation and history
   useEffect(() => {
@@ -236,7 +272,20 @@ export default function App() {
         }
 
         if (dbSpecialties.length > 0) {
-          setSpecialties(dbSpecialties);
+          const hasDbLegacy = dbSpecialties.some((s) =>
+            [
+              'Veb tərtibatı və dizaynı',
+              'Kompüter sistemlərində proqram təminatı',
+              'Kompüter şəbəkələrinin inzibatçılığı',
+              'Kibertəhlükəsizlik sistemləri',
+            ].includes(s.name)
+          );
+          if (hasDbLegacy) {
+            setSpecialties(INITIAL_SPECIALTIES);
+            INITIAL_SPECIALTIES.forEach((s) => upsertSpecialtyToDb(s));
+          } else {
+            setSpecialties(dbSpecialties);
+          }
         } else if (specialties.length > 0) {
           specialties.forEach((s) => upsertSpecialtyToDb(s));
         }
