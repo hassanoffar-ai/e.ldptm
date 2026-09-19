@@ -58,11 +58,31 @@ export interface StudentGrade {
   studentName: string;
   idNumber: string;
   avatarInitial: string;
-  seminar: number | null; // Max 10
-  laboratory: number | null; // Max 10
-  independentWork: number | null; // Max 10 (Sərbəst iş)
-  colloquium: number | null; // Max 20
-  examScore?: number | null; // Max 50 (if applicable)
+  attendance?: number | null; // Qayıblar / Davamiyyət: Max 10
+  seminar: number | null; // Seminar / Məşğələ: Max 10
+  colloquium1?: number | null; // Kollokvium 1: Max 15
+  colloquium2?: number | null; // Kollokvium 2: Max 15
+  examScore?: number | null; // İmtahandan çıxış balı: Max 50 (Minimum keçid: 17)
+  // Əvvəlki versiyalarla uyğunluq üçün:
+  laboratory?: number | null;
+  independentWork?: number | null;
+  colloquium?: number | null;
+}
+
+export interface SpecialtyModule {
+  id: string;
+  specialtyId?: string;
+  specialtyName: string;
+  semester: string; // e.g. "I Semestr", "II Semestr", "III Semestr", "IV Semestr"
+  code: string;
+  name: string;
+  creditHours?: number; // e.g. 60 saat
+  credits?: number; // e.g. 4 kredit
+  instructor?: string; // Tədris edən müəllim
+  syllabusTopics?: string; // Sillabus mövzuları və planı
+  syllabusUrl?: string; // Sənəd / Link
+  description?: string;
+  createdAt?: string;
 }
 
 export interface GradeBookCourse {

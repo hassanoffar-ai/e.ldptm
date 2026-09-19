@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Award, BookOpen, Grid, Users } from 'lucide-react';
-import { GradeBookCourse, SpecialtyItem, Student, StudentGrade } from '../types';
-import { GROUPS_LIST, SUBJECTS_LIST } from '../data/mockData';
+import { GradeBookCourse, SpecialtyItem, SpecialtyModule, Student, StudentGrade } from '../types';
+import { GROUPS_LIST, SUBJECTS_LIST, INITIAL_SPECIALTY_MODULES, SEMESTERS_LIST } from '../data/mockData';
 
 interface NewGradeCourseModalProps {
   isOpen: boolean;
@@ -23,8 +23,36 @@ export const NewGradeCourseModal: React.FC<NewGradeCourseModalProps> = ({
   const [specialty, setSpecialty] = useState('');
   const [customSpecialty, setCustomSpecialty] = useState('');
   const [subjectCode, setSubjectCode] = useState('');
-  const [semester, setSemester] = useState('Yaz Semestri (2024/2025)');
-  const [maxScore] = useState(50);
+  const [semester, setSemester] = useState('I Semestr');
+  const [maxScore] = useState(100);
+
+  // Load modules list from localStorage or fallback
+  const specialtyModules: SpecialtyModule[] = React.useMemo(() => {
+    try {
+      const saved = localStorage.getItem('eldptm_modules');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return INITIAL_SPECIALTY_MODULES;
+  }, []);
+
+  // Filter modules based on selected specialty
+  const availableSubjectsForModal = React.useMemo(() => {
+    const matched = specialtyModules
+      .filter((m) => {
+        const specMatch =
+          !specialty ||
+          specialty === '__custom__' ||
+          m.specialtyName.toLowerCase().trim() === specialty.toLowerCase().trim();
+        return specMatch;
+      })
+      .map((m) => m.name);
+
+    if (matched.length > 0) return Array.from(new Set(matched));
+    return SUBJECTS_LIST;
+  }, [specialtyModules, specialty]);
 
   useEffect(() => {
     if (specialties.length > 0 && !specialty) {
@@ -52,10 +80,11 @@ export const NewGradeCourseModal: React.FC<NewGradeCourseModalProps> = ({
         studentName: s.name,
         idNumber: s.studentId,
         avatarInitial: initials || 'TL',
+        attendance: null,
         seminar: null,
-        laboratory: null,
-        independentWork: null,
-        colloquium: null,
+        colloquium1: null,
+        colloquium2: null,
+        examScore: null,
       };
     });
 
@@ -129,16 +158,44 @@ export const NewGradeCourseModal: React.FC<NewGradeCourseModalProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-              Fənn Adı *
+              Fənn / Modul Adı *
             </label>
-            <input
-              type="text"
-              required
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              placeholder="Məs: Veb Proqramlaşdırma əsasları"
-              className="w-full px-3.5 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
-            />
+            <div className="space-y-1.5">
+              <select
+                value={availableSubjectsForModal.includes(subject) ? subject : '__custom__'}
+                onChange={(e) => {
+                  if (e.target.value !== '__custom__') {
+                    setSubject(e.target.value);
+                    const found = specialtyModules.find((m) => m.name === e.target.value);
+                    if (found) {
+                      setSubjectCode(found.code);
+                      setSemester(found.semester);
+                    }
+                  } else {
+                    setSubject('');
+                  }
+                }}
+                className="w-full px-3.5 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer"
+              >
+                {availableSubjectsForModal.map((sub) => (
+                  <option key={sub} value={sub}>
+                    {sub}
+                  </option>
+                ))}
+                <option value="__custom__">+ Digər Fənn / Modul yazın</option>
+              </select>
+
+              {(!availableSubjectsForModal.includes(subject) || subject === '') && (
+                <input
+                  type="text"
+                  required
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  placeholder="Fənnin / Modulun adını daxil edin..."
+                  className="w-full px-3.5 py-2 bg-white border border-[#ccc3d7] rounded-xl text-xs outline-none focus:ring-2 focus:ring-[#5300b7]"
+                />
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -199,13 +256,19 @@ export const NewGradeCourseModal: React.FC<NewGradeCourseModalProps> = ({
             <label className="block text-xs font-semibold text-[#4a4455] mb-1">
               Semestr / Tədris İli
             </label>
-            <input
-              type="text"
+            <select
               value={semester}
               onChange={(e) => setSemester(e.target.value)}
-              placeholder="Yaz Semestri (2024/2025)"
-              className="w-full px-3.5 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
-            />
+              className="w-full px-3.5 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer"
+            >
+              {SEMESTERS_LIST.map((sem) => (
+                <option key={sem} value={sem}>
+                  {sem}
+                </option>
+              ))}
+              <option value="Yaz Semestri (2024/2025)">Yaz Semestri (2024/2025)</option>
+              <option value="Payız Semestri (2024/2025)">Payız Semestri (2024/2025)</option>
+            </select>
           </div>
 
           <div className="p-3 bg-purple-50 rounded-xl text-xs text-purple-900">

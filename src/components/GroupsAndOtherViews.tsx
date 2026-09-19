@@ -25,9 +25,13 @@ import {
   AlertCircle,
   Briefcase,
   UserPlus,
+  ChevronDown,
+  ChevronUp,
+  FileText,
+  User,
 } from 'lucide-react';
-import { ActiveTab, ExamSession, GradeBookCourse, SpecialtyItem, Student } from '../types';
-import { GROUPS_LIST, ROOMS_LIST, SUBJECTS_LIST, INITIAL_SPECIALTIES } from '../data/mockData';
+import { ActiveTab, ExamSession, GradeBookCourse, SpecialtyItem, SpecialtyModule, Student } from '../types';
+import { GROUPS_LIST, ROOMS_LIST, SUBJECTS_LIST, INITIAL_SPECIALTIES, INITIAL_SPECIALTY_MODULES, SEMESTERS_LIST } from '../data/mockData';
 
 interface GroupsAndOtherViewsProps {
   activeTab: ActiveTab;
@@ -68,6 +72,135 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
   const [specEducationType, setSpecEducationType] = useState<'Əyani' | 'Qiyabi'>('Əyani');
   const [specDescription, setSpecDescription] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
+
+  // Modules and Syllabuses Management States
+  const [modulesList, setModulesList] = useState<SpecialtyModule[]>(() => {
+    try {
+      const saved = localStorage.getItem('eldptm_modules');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return INITIAL_SPECIALTY_MODULES;
+  });
+
+  const [selectedModuleSpecialty, setSelectedModuleSpecialty] = useState<string>(
+    specialties[0]?.name || 'Kompüter sistemlərində proqramlaşdırma'
+  );
+  const [selectedModuleSemester, setSelectedModuleSemester] = useState<string>('all');
+  const [isModuleModalOpen, setIsModuleModalOpen] = useState(false);
+  const [editingModule, setEditingModule] = useState<SpecialtyModule | null>(null);
+
+  // Form states for Add/Edit Module
+  const [modSpecialty, setModSpecialty] = useState(
+    specialties[0]?.name || 'Kompüter sistemlərində proqramlaşdırma'
+  );
+  const [modSemester, setModSemester] = useState('I Semestr');
+  const [modName, setModName] = useState('');
+  const [modCode, setModCode] = useState('');
+  const [modHours, setModHours] = useState(60);
+  const [modCredits, setModCredits] = useState(5);
+  const [modInstructor, setModInstructor] = useState('');
+  const [modSyllabusTopics, setModSyllabusTopics] = useState('');
+  const [modDescription, setModDescription] = useState('');
+  const [modError, setModError] = useState<string | null>(null);
+  const [expandedSyllabusId, setExpandedSyllabusId] = useState<string | null>(null);
+
+  const saveModules = (updated: SpecialtyModule[]) => {
+    setModulesList(updated);
+    try {
+      localStorage.setItem('eldptm_modules', JSON.stringify(updated));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const openAddModuleModal = () => {
+    setEditingModule(null);
+    setModSpecialty(
+      selectedModuleSpecialty !== 'all'
+        ? selectedModuleSpecialty
+        : specialties[0]?.name || 'Kompüter sistemlərində proqramlaşdırma'
+    );
+    setModSemester(selectedModuleSemester !== 'all' ? selectedModuleSemester : 'I Semestr');
+    setModName('');
+    setModCode('');
+    setModHours(60);
+    setModCredits(5);
+    setModInstructor('');
+    setModSyllabusTopics('');
+    setModDescription('');
+    setModError(null);
+    setIsModuleModalOpen(true);
+  };
+
+  const openEditModuleModal = (m: SpecialtyModule) => {
+    setEditingModule(m);
+    setModSpecialty(m.specialtyName);
+    setModSemester(m.semester);
+    setModName(m.name);
+    setModCode(m.code);
+    setModHours(m.creditHours || 60);
+    setModCredits(m.credits || 5);
+    setModInstructor(m.instructor || '');
+    setModSyllabusTopics(m.syllabusTopics || '');
+    setModDescription(m.description || '');
+    setModError(null);
+    setIsModuleModalOpen(true);
+  };
+
+  const handleSaveModule = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!modName.trim() || !modCode.trim()) {
+      setModError('Modulun adı və kodu mütləq daxil edilməlidir.');
+      return;
+    }
+
+    if (editingModule) {
+      const updated = modulesList.map((m) =>
+        m.id === editingModule.id
+          ? {
+              ...m,
+              specialtyName: modSpecialty,
+              semester: modSemester,
+              name: modName.trim(),
+              code: modCode.trim(),
+              creditHours: Number(modHours) || 60,
+              credits: Number(modCredits) || 5,
+              instructor: modInstructor.trim(),
+              syllabusTopics: modSyllabusTopics.trim(),
+              description: modDescription.trim(),
+            }
+          : m
+      );
+      saveModules(updated);
+    } else {
+      const newMod: SpecialtyModule = {
+        id: `mod-${Date.now()}`,
+        specialtyName: modSpecialty,
+        semester: modSemester,
+        name: modName.trim(),
+        code: modCode.trim(),
+        creditHours: Number(modHours) || 60,
+        credits: Number(modCredits) || 5,
+        instructor: modInstructor.trim(),
+        syllabusTopics: modSyllabusTopics.trim(),
+        description: modDescription.trim(),
+        createdAt: new Date().toISOString(),
+      };
+      saveModules([newMod, ...modulesList]);
+    }
+
+    setIsModuleModalOpen(false);
+  };
+
+  const handleDeleteModule = (id: string, name: string) => {
+    if (window.confirm(`"${name}" modulunu və tədris sillabusunu silmək istədiyinizdən əminsiniz?`)) {
+      const updated = modulesList.filter((m) => m.id !== id);
+      saveModules(updated);
+    }
+  };
 
   const openAddSpecialtyModal = () => {
     setEditingSpecialty(null);
@@ -491,54 +624,411 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
     );
   }
 
-  // Fənlər / Modullar View
+  // Fənlər / Modullar və Sillabuslar View
   if (activeTab === 'subjects') {
+    const filteredModules = modulesList.filter((m) => {
+      const matchesSpecialty =
+        selectedModuleSpecialty === 'all' ||
+        m.specialtyName.toLowerCase().trim() === selectedModuleSpecialty.toLowerCase().trim();
+      const matchesSemester =
+        selectedModuleSemester === 'all' || m.semester === selectedModuleSemester;
+      return matchesSpecialty && matchesSemester;
+    });
+
     return (
       <div className="p-4 md:p-8 flex-1 max-w-7xl mx-auto w-full space-y-6">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center text-[#5300b7]">
-              <BookOpen className="w-5 h-5" />
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center text-[#5300b7]">
+                <BookOpen className="w-5 h-5" />
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold text-[#121c2a]">
+                Modullar və Sillabuslar
+              </h2>
             </div>
-            <h2 className="text-2xl md:text-3xl font-bold text-[#121c2a]">
-              Tədris Fənləri və Modullar
-            </h2>
+            <p className="text-sm text-[#64748b]">
+              İxtisaslar və semestrlər üzrə tədris modulları, saatlar və tədris planı
+            </p>
           </div>
-          <p className="text-sm text-[#64748b]">
-            Semestr imtahan və qiymətləndirmə fənləri
-          </p>
+
+          <button
+            onClick={openAddModuleModal}
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#5300b7] hover:bg-[#430094] text-white rounded-xl text-xs font-semibold shadow-xs transition-all cursor-pointer w-fit"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Yeni Modul və Sillabus Əlavə Et</span>
+          </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {SUBJECTS_LIST.map((sub, i) => (
-            <div
-              key={sub}
-              className="bg-white p-5 rounded-2xl border border-[#ccc3d7] hover:border-purple-300 transition-all flex flex-col justify-between"
-            >
-              <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md mb-2 inline-block">
-                  Modul #{i + 101}
-                </span>
-                <h4 className="font-bold text-base text-[#121c2a] mb-2">
-                  {sub}
-                </h4>
-                <p className="text-xs text-[#64748b]">
-                  60 Saat Mühazirə + 30 Saat Laboratoriya təcrübəsi
-                </p>
-              </div>
+        {/* Filters Card */}
+        <div className="bg-white p-5 rounded-2xl border border-[#ccc3d7] shadow-xs space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Specialty filter */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                İxtisas Seçin
+              </label>
+              <select
+                value={selectedModuleSpecialty}
+                onChange={(e) => setSelectedModuleSpecialty(e.target.value)}
+                className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer"
+              >
+                <option value="all">Bütün İxtisaslar ({modulesList.length} modul)</option>
+                {specialties.map((s) => (
+                  <option key={s.id} value={s.name}>
+                    {s.name} ({s.code})
+                  </option>
+                ))}
+              </select>
+            </div>
 
-              <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
-                <span className="text-slate-500">Maksimum Bal: 50 + 50</span>
+            {/* Semester Filter Tabs */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                Semestr Seçin
+              </label>
+              <div className="flex flex-wrap gap-1.5">
                 <button
-                  onClick={() => setActiveTab('grades')}
-                  className="text-purple-600 font-semibold hover:underline"
+                  type="button"
+                  onClick={() => setSelectedModuleSemester('all')}
+                  className={`px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    selectedModuleSemester === 'all'
+                      ? 'bg-[#5300b7] text-white shadow-xs'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
                 >
-                  Ballara Bax →
+                  Bütün Semestrlər
+                </button>
+                {SEMESTERS_LIST.map((sem) => (
+                  <button
+                    key={sem}
+                    type="button"
+                    onClick={() => setSelectedModuleSemester(sem)}
+                    className={`px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      selectedModuleSemester === sem
+                        ? 'bg-[#5300b7] text-white shadow-xs'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    {sem}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Modules Grid */}
+        {filteredModules.length === 0 ? (
+          <div className="p-12 text-center bg-white rounded-2xl border border-slate-200 text-slate-400">
+            <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-30 text-purple-600" />
+            <h3 className="text-base font-bold text-slate-700">
+              Bu seçim üzrə heç bir modul tapılmadı
+            </h3>
+            <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+              Seçilmiş ixtisas və ya semestr üçün yeni modul və sillabus əlavə edə bilərsiniz.
+            </p>
+            <button
+              onClick={openAddModuleModal}
+              className="mt-4 px-4 py-2 bg-[#5300b7] hover:bg-[#430094] text-white text-xs font-semibold rounded-xl cursor-pointer"
+            >
+              + Modul Əlavə Et
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredModules.map((m) => {
+              const isExpanded = expandedSyllabusId === m.id;
+              return (
+                <div
+                  key={m.id}
+                  className="bg-white p-5 rounded-2xl border border-[#ccc3d7] hover:border-[#6d28d9] transition-all flex flex-col justify-between shadow-xs hover:shadow-md"
+                >
+                  <div className="space-y-3">
+                    {/* Badges */}
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="text-[11px] font-mono font-extrabold uppercase tracking-wider text-[#5300b7] bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-100">
+                        {m.code}
+                      </span>
+                      <span className="text-xs font-bold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+                        {m.semester}
+                      </span>
+                    </div>
+
+                    {/* Specialty label */}
+                    <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-tight line-clamp-1">
+                      {m.specialtyName}
+                    </p>
+
+                    {/* Title */}
+                    <h3 className="font-bold text-base text-[#121c2a] leading-snug">
+                      {m.name}
+                    </h3>
+
+                    {m.description && (
+                      <p className="text-xs text-[#64748b] leading-relaxed line-clamp-2">
+                        {m.description}
+                      </p>
+                    )}
+
+                    {/* Metadata chips */}
+                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-xs text-slate-600">
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                        <span>{m.creditHours || 60} saat ({m.credits || 5} kredit)</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <User className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                        <span className="truncate">{m.instructor || 'Müəllim təyin olunmayıb'}</span>
+                      </div>
+                    </div>
+
+                    {/* Syllabus Accordion / Topics */}
+                    {m.syllabusTopics && (
+                      <div className="pt-2">
+                        <button
+                          type="button"
+                          onClick={() => setExpandedSyllabusId(isExpanded ? null : m.id)}
+                          className="w-full flex items-center justify-between px-3 py-2 bg-slate-50 hover:bg-purple-50 text-slate-700 hover:text-[#5300b7] rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                        >
+                          <span className="flex items-center gap-1.5">
+                            <FileText className="w-3.5 h-3.5 text-purple-600" />
+                            <span>Sillabus Planı və Mövzuları</span>
+                          </span>
+                          {isExpanded ? (
+                            <ChevronUp className="w-3.5 h-3.5" />
+                          ) : (
+                            <ChevronDown className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+
+                        {isExpanded && (
+                          <div className="mt-2 p-3 bg-purple-50/60 border border-purple-100 rounded-xl text-xs text-slate-700 whitespace-pre-line leading-relaxed max-h-48 overflow-y-auto">
+                            {m.syllabusTopics}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actions Footer */}
+                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <button
+                      onClick={() => setActiveTab('grades')}
+                      className="text-[#5300b7] font-bold hover:underline cursor-pointer"
+                    >
+                      Qiymət Jurnalı →
+                    </button>
+
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => openEditModuleModal(m)}
+                        className="p-1.5 text-slate-500 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors cursor-pointer"
+                        title="Redaktə Et"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteModule(m.id, m.name)}
+                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                        title="Sil"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Modal: Add/Edit Module */}
+        {isModuleModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-xs">
+            <div className="bg-white rounded-2xl shadow-2xl border border-[#ccc3d7] w-full max-w-lg max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+              <div className="px-6 py-4 bg-[#f8f9ff] border-b border-[#ccc3d7] flex items-center justify-between sticky top-0 bg-[#f8f9ff] z-10">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-[#5300b7] text-white flex items-center justify-center">
+                    <BookOpen className="w-4 h-4" />
+                  </div>
+                  <h3 className="font-bold text-base text-[#121c2a]">
+                    {editingModule ? 'Modulu Redaktə Et' : 'Yeni Modul və Sillabus Əlavə Et'}
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setIsModuleModalOpen(false)}
+                  className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
                 </button>
               </div>
+
+              <form onSubmit={handleSaveModule} className="p-6 space-y-4">
+                {modError && (
+                  <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{modError}</span>
+                  </div>
+                )}
+
+                {/* Specialty */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    İxtisas
+                  </label>
+                  <select
+                    value={modSpecialty}
+                    onChange={(e) => setModSpecialty(e.target.value)}
+                    className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer"
+                  >
+                    {specialties.map((s) => (
+                      <option key={s.id} value={s.name}>
+                        {s.name} ({s.code})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Semester & Code */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Semestr
+                    </label>
+                    <select
+                      value={modSemester}
+                      onChange={(e) => setModSemester(e.target.value)}
+                      className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer"
+                    >
+                      {SEMESTERS_LIST.map((sem) => (
+                        <option key={sem} value={sem}>
+                          {sem}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Modul Kodu
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Məs: KSP-101"
+                      value={modCode}
+                      onChange={(e) => setModCode(e.target.value)}
+                      className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7]"
+                    />
+                  </div>
+                </div>
+
+                {/* Name */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Modulun Adı
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Məs: Proqramlaşdırmanın Əsasları"
+                    value={modName}
+                    onChange={(e) => setModName(e.target.value)}
+                    className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7]"
+                  />
+                </div>
+
+                {/* Hours, Credits, Teacher */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Tədris Saatı
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={modHours}
+                      onChange={(e) => setModHours(Number(e.target.value))}
+                      className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Kredit Sayı
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={modCredits}
+                      onChange={(e) => setModCredits(Number(e.target.value))}
+                      className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Tədris Edən Müəllim
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Məs: Əliyev V."
+                      value={modInstructor}
+                      onChange={(e) => setModInstructor(e.target.value)}
+                      className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7]"
+                    />
+                  </div>
+                </div>
+
+                {/* Syllabus Topics */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Sillabus Mövzuları və Tədris Planı
+                  </label>
+                  <textarea
+                    rows={4}
+                    placeholder="Hər mövzunu yeni sətirdən daxil edin (məs: 1. Giriş və anlayışlar&#10;2. Şərt operatorları&#10;3. Funksiyalar...)"
+                    value={modSyllabusTopics}
+                    onChange={(e) => setModSyllabusTopics(e.target.value)}
+                    className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl p-3 text-xs font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7]"
+                  />
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Qısa Təsvir / Qeydlər
+                  </label>
+                  <textarea
+                    rows={2}
+                    placeholder="Modul haqqında qısa izahat..."
+                    value={modDescription}
+                    onChange={(e) => setModDescription(e.target.value)}
+                    className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl p-3 text-xs font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7]"
+                  />
+                </div>
+
+                {/* Modal Footer */}
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsModuleModalOpen(false)}
+                    className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 cursor-pointer"
+                  >
+                    Ləğv Et
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2.5 rounded-xl bg-[#5300b7] hover:bg-[#430094] text-white text-xs font-bold shadow-xs cursor-pointer"
+                  >
+                    {editingModule ? 'Yadda Saxla' : 'Modulu Əlavə Et'}
+                  </button>
+                </div>
+              </form>
             </div>
-          ))}
-        </div>
+          </div>
+        )}
       </div>
     );
   }

@@ -5,6 +5,8 @@ import {
   ArrowRight,
   ShieldCheck,
   ChevronRight,
+  Users,
+  BookOpen,
 } from 'lucide-react';
 import { ActiveTab, ExamSession, GradeBookCourse, Student } from '../types';
 
@@ -30,13 +32,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <div className="relative z-10 max-w-2xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/15 backdrop-blur-md rounded-full text-xs font-medium mb-3">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-300" />
-            <span>Mərkəzi İmtahan Sistemi — YTP</span>
+            <span>YTP Tələbə İdarəetmə Sistemi</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2">
-            İmtahan İdarəetmə Paneli
+            Lənkəran Dövlət Peşə Təhsil Mərkəzi
           </h1>
           <p className="text-purple-100 text-xs sm:text-sm leading-relaxed max-w-xl">
-            Lənkəran Dövlət Peşə Təhsil Mərkəzi Yüksək Texniki Peşə (YTP) ixtisasları üzrə imtahan sessiyalarının təşkili, bilet təyinatı və tələbə ballarının qeydiyyat sistemi.
+            Yüksək Texniki Peşə (YTP) tələbələrinin idarəetməsi, modullar, sillabuslar, kollokvium və imtahan nəticələri sistemi.
           </p>
         </div>
 
@@ -44,53 +46,97 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <div className="absolute -bottom-12 -right-12 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
       </div>
 
-      {/* Main 3 Core Screens Jump Grid */}
+      {/* Main Core Screens Jump Grid */}
       <div>
         <h2 className="text-lg font-bold text-[#121c2a] mb-4">
-          Əsas İmtahan və Tədris Ekranları
+          Əsas İdarəetmə və Tədris Bölmələri
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Card 1: İmtahan Protokolu */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+          {/* Card 1: Tələbələr */}
           <div
-            onClick={() => setActiveTab('exams')}
-            className="group bg-white p-6 rounded-2xl border border-[#ccc3d7] hover:border-[#6d28d9] shadow-xs hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between"
+            onClick={() => setActiveTab('students')}
+            className="group bg-white p-5 rounded-2xl border border-[#ccc3d7] hover:border-[#6d28d9] shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
           >
             <div>
-              <div className="w-12 h-12 rounded-2xl bg-[#eff4ff] text-[#5300b7] flex items-center justify-center mb-4 group-hover:bg-[#6d28d9] group-hover:text-white transition-colors">
-                <FileText className="w-6 h-6" />
+              <div className="w-11 h-11 rounded-2xl bg-[#eff4ff] text-[#5300b7] flex items-center justify-center mb-3 group-hover:bg-[#6d28d9] group-hover:text-white transition-colors">
+                <Users className="w-5 h-5" />
               </div>
-              <h3 className="text-lg font-bold text-[#121c2a] mb-2">
-                1. İmtahan Protokolu
+              <h3 className="text-base font-bold text-[#121c2a] mb-1.5">
+                Tələbələr
               </h3>
-              <p className="text-xs text-[#64748b] leading-relaxed mb-4">
-                Qruplar üzrə rəsmi imtahan cədvəli, bilet təyinatları, PC nömrələri və çap/ixrac imkanı.
+              <p className="text-xs text-[#64748b] leading-relaxed mb-3">
+                İxtisaslar üzrə tələbələrin bazası, ID təyinatı və tələbə profilləri.
               </p>
             </div>
-            <div className="flex items-center gap-2 text-xs font-bold text-[#5300b7] group-hover:translate-x-1 transition-transform">
-              <span>Protokola Bax</span>
-              <ArrowRight className="w-4 h-4" />
+            <div className="flex items-center gap-1.5 text-xs font-bold text-[#5300b7] group-hover:translate-x-1 transition-transform pt-2 border-t border-slate-100">
+              <span>Tələbələr Bölməsi</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </div>
           </div>
 
-          {/* Card 2: Qiymət Daxiletmə */}
+          {/* Card 2: Modullar və Sillabuslar */}
           <div
-            onClick={() => setActiveTab('grades')}
-            className="group bg-white p-6 rounded-2xl border border-[#ccc3d7] hover:border-[#6d28d9] shadow-xs hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between"
+            onClick={() => setActiveTab('subjects')}
+            className="group bg-white p-5 rounded-2xl border border-[#ccc3d7] hover:border-[#6d28d9] shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
           >
             <div>
-              <div className="w-12 h-12 rounded-2xl bg-[#eff4ff] text-[#5300b7] flex items-center justify-center mb-4 group-hover:bg-[#6d28d9] group-hover:text-white transition-colors">
-                <Award className="w-6 h-6" />
+              <div className="w-11 h-11 rounded-2xl bg-[#eff4ff] text-[#5300b7] flex items-center justify-center mb-3 group-hover:bg-[#6d28d9] group-hover:text-white transition-colors">
+                <BookOpen className="w-5 h-5" />
               </div>
-              <h3 className="text-lg font-bold text-[#121c2a] mb-2">
-                2. Qiymət Daxiletmə
+              <h3 className="text-base font-bold text-[#121c2a] mb-1.5">
+                Modullar və Sillabuslar
               </h3>
-              <p className="text-xs text-[#64748b] leading-relaxed mb-4">
-                Fənlər üzrə Seminar, Laboratoriya, Sərbəst İş və Kollokvium ballarının canlı hesablanması və dərc edilməsi.
+              <p className="text-xs text-[#64748b] leading-relaxed mb-3">
+                İxtisaslar və semestrlər üzrə tədris modulları, saatlar və mövzular.
               </p>
             </div>
-            <div className="flex items-center gap-2 text-xs font-bold text-[#5300b7] group-hover:translate-x-1 transition-transform">
-              <span>Qiymətləri Daxil Et</span>
-              <ArrowRight className="w-4 h-4" />
+            <div className="flex items-center gap-1.5 text-xs font-bold text-[#5300b7] group-hover:translate-x-1 transition-transform pt-2 border-t border-slate-100">
+              <span>Modullara Bax</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </div>
+          </div>
+
+          {/* Card 3: Kollokvium və İmtahanlar */}
+          <div
+            onClick={() => setActiveTab('grades')}
+            className="group bg-white p-5 rounded-2xl border border-[#ccc3d7] hover:border-[#6d28d9] shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
+          >
+            <div>
+              <div className="w-11 h-11 rounded-2xl bg-[#eff4ff] text-[#5300b7] flex items-center justify-center mb-3 group-hover:bg-[#6d28d9] group-hover:text-white transition-colors">
+                <Award className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-bold text-[#121c2a] mb-1.5">
+                Kollokvium və Qiymətlər
+              </h3>
+              <p className="text-xs text-[#64748b] leading-relaxed mb-3">
+                50 bal giriş (10 qayıb, 10 seminar, 30 kollokvium) və 50 bal imtahan.
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5 text-xs font-bold text-[#5300b7] group-hover:translate-x-1 transition-transform pt-2 border-t border-slate-100">
+              <span>Jurnala Keç</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </div>
+          </div>
+
+          {/* Card 4: İmtahan Sessiyaları */}
+          <div
+            onClick={() => setActiveTab('exams')}
+            className="group bg-white p-5 rounded-2xl border border-[#ccc3d7] hover:border-[#6d28d9] shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
+          >
+            <div>
+              <div className="w-11 h-11 rounded-2xl bg-[#eff4ff] text-[#5300b7] flex items-center justify-center mb-3 group-hover:bg-[#6d28d9] group-hover:text-white transition-colors">
+                <FileText className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-bold text-[#121c2a] mb-1.5">
+                İmtahan Protokolu
+              </h3>
+              <p className="text-xs text-[#64748b] leading-relaxed mb-3">
+                İmtahan sessiyaları, zallar, PC təyinatları və protokollar.
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5 text-xs font-bold text-[#5300b7] group-hover:translate-x-1 transition-transform pt-2 border-t border-slate-100">
+              <span>Protokollara Bax</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </div>
           </div>
         </div>

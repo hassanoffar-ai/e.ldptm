@@ -14,10 +14,12 @@ import {
   Shield,
   Building2,
   Check,
-  Percent,
-  Sparkles
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
-import { ExamSession, GradeBookCourse, StudentUser } from '../types';
+import { ExamSession, GradeBookCourse, SpecialtyModule, StudentGrade, StudentUser } from '../types';
+import { INITIAL_SPECIALTY_MODULES, SEMESTERS_LIST } from '../data/mockData';
 
 interface PublicPortalViewProps {
   student: StudentUser;
@@ -34,9 +36,33 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
   onLogout,
   onNavigateToAdmin,
 }) => {
-  const [activeTab, setActiveTab] = useState<'grades' | 'schedule' | 'attendance' | 'rules'>(
-    'grades'
-  );
+  const [activeTab, setActiveTab] = useState<
+    'grades' | 'modules' | 'schedule' | 'attendance' | 'rules'
+  >('grades');
+  const [selectedSemesterForModules, setSelectedSemesterForModules] = useState<string>('all');
+  const [expandedSyllabusId, setExpandedSyllabusId] = useState<string | null>(null);
+
+  // Load modules list from localStorage or fallback
+  const allModules: SpecialtyModule[] = React.useMemo(() => {
+    try {
+      const saved = localStorage.getItem('eldptm_modules');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return INITIAL_SPECIALTY_MODULES;
+  }, []);
+
+  // Filter modules for this student's specialty
+  const mySpecialtyModules = React.useMemo(() => {
+    return allModules.filter(
+      (m) =>
+        m.specialtyName.toLowerCase().trim() === student.specialty.toLowerCase().trim() ||
+        student.specialty.toLowerCase().includes(m.specialtyName.toLowerCase()) ||
+        m.specialtyName.toLowerCase().includes(student.specialty.toLowerCase())
+    );
+  }, [allModules, student.specialty]);
 
   // Filter courses for this student (either by group + specialty or explicit student grade record)
   const studentCoursesWithGrades = courses
@@ -64,16 +90,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
     })
     .filter(Boolean) as Array<{
     course: GradeBookCourse;
-    grade: {
-      studentId: string;
-      studentName: string;
-      idNumber: string;
-      seminar: number | null;
-      laboratory: number | null;
-      independentWork: number | null;
-      colloquium: number | null;
-      examScore?: number | null;
-    } | null;
+    grade: StudentGrade | null;
   }>;
 
   // Filter sessions for student's group and specialty
@@ -89,6 +106,18 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
       )
   );
 
+  const calculateEntryScore = (g: StudentGrade) => {
+    const att = g.attendance ?? 0;
+    const sem = g.seminar ?? 0;
+    const col1 = g.colloquium1 ?? (g.colloquium ? Math.min(g.colloquium, 15) : 0);
+    const col2 = g.colloquium2 ?? (g.laboratory ? Math.min(g.laboratory, 15) : 0);
+    return att + sem + col1 + col2;
+  };
+
+  const calculateTotalScore = (g: StudentGrade) => {
+    return calculateEntryScore(g) + (g.examScore ?? 0);
+  };
+
   // Calculate overall statistics
   const totalCourses = studentCoursesWithGrades.length;
   let totalEntryScore = 0;
@@ -96,11 +125,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
 
   studentCoursesWithGrades.forEach(({ grade }) => {
     if (grade) {
-      const entryScore =
-        (grade.seminar || 0) +
-        (grade.laboratory || 0) +
-        (grade.independentWork || 0) +
-        (grade.colloquium || 0);
+      const entryScore = calculateEntryScore(grade);
       if (entryScore > 0) {
         totalEntryScore += entryScore;
         scoredCoursesCount++;
@@ -111,13 +136,68 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
   const averageEntryScore =
     scoredCoursesCount > 0 ? (totalEntryScore / scoredCoursesCount).toFixed(1) : '0';
 
-  const getLetterScore = (total: number) => {
-    if (total >= 91) return { letter: 'A', text: 'Əla', color: 'text-emerald-700 bg-emerald-50' };
-    if (total >= 81) return { letter: 'B', text: 'Çox yaxşı', color: 'text-blue-700 bg-blue-50' };
-    if (total >= 71) return { letter: 'C', text: 'Yaxşı', color: 'text-cyan-700 bg-cyan-50' };
-    if (total >= 61) return { letter: 'D', text: 'Kafi', color: 'text-amber-700 bg-amber-50' };
-    if (total >= 51) return { letter: 'E', text: 'Qənaətbəxş', color: 'text-orange-700 bg-orange-50' };
-    return { letter: 'F', text: 'Qeyri-kafi', color: 'text-rose-700 bg-rose-50' };
+  const getEvaluationStatus = (g: StudentGrade) => {
+    const entry = calculateEntryScore(g);
+    const exam = g.examScore;
+
+    if (exam === null || exam === undefined) {
+      if (entry >= 17) {
+        return {
+          isPassed: true,
+          status: 'İmtahana Buraxılır',
+          subtext: `Giriş balı: ${entry} / 50`,
+          color: 'text-blue-700 bg-blue-50 border-blue-200',
+        };
+      }
+      return {
+        isPassed: false,
+        status: 'İmtahana Buraxılmır (Bal < 17)',
+        subtext: `Giriş balı: ${entry} / 50`,
+        color: 'text-amber-700 bg-amber-50 border-amber-200',
+      };
+    }
+
+    if (exam < 17) {
+      return {
+        isPassed: false,
+        status: 'Kəsildi (İmtahan balı < 17)',
+        subtext: `İmtahan: ${exam} bal`,
+        color: 'text-rose-700 bg-rose-50 border-rose-200',
+      };
+    }
+
+    const total = entry + exam;
+    if (total <= 50) {
+      return {
+        isPassed: false,
+        status: 'Kəsildi (Ümumi bal ≤ 50)',
+        subtext: `Yekun: ${total} bal`,
+        color: 'text-rose-700 bg-rose-50 border-rose-200',
+      };
+    }
+
+    let letter = 'E';
+    let text = 'Qənaətbəxş';
+    if (total >= 91) {
+      letter = 'A';
+      text = 'Əla';
+    } else if (total >= 81) {
+      letter = 'B';
+      text = 'Çox yaxşı';
+    } else if (total >= 71) {
+      letter = 'C';
+      text = 'Yaxşı';
+    } else if (total >= 61) {
+      letter = 'D';
+      text = 'Kafi';
+    }
+
+    return {
+      isPassed: true,
+      status: `Müvəffəq (${letter} — ${text})`,
+      subtext: `Yekun: ${total} bal`,
+      color: 'text-emerald-700 bg-emerald-50 border-emerald-200',
+    };
   };
 
   return (
@@ -255,6 +335,18 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
           </button>
 
           <button
+            onClick={() => setActiveTab('modules')}
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
+              activeTab === 'modules'
+                ? 'bg-[#5300b7] text-white shadow-sm'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+            }`}
+          >
+            <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span>Modullar və Sillabuslar</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('schedule')}
             className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
               activeTab === 'schedule'
@@ -286,7 +378,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                 : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
-            <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span>YTP Qiymətləndirmə Qaydaları</span>
           </button>
         </div>
@@ -327,11 +419,11 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h2 className="text-xl font-bold text-slate-900">
-                  Cari Semestr Fənləri və Qiymətləndirmə Fəaliyyəti
+                  Cari Semestr Modulları və Qiymətləndirmə Nəticələri
                 </h2>
               </div>
-              <div className="text-xs font-medium text-purple-700 bg-purple-50 border border-purple-200 px-3 py-1.5 rounded-xl">
-                Maksimum: 50 Bal Giriş + 50 Bal İmtahan = 100 Bal
+              <div className="text-xs font-bold text-purple-700 bg-purple-50 border border-purple-200 px-3.5 py-1.5 rounded-xl">
+                YTP Standartı: 50 Bal Giriş (Qayıb: 10, Sem: 10, Kol: 30) + 50 Bal İmtahan (Min: 17)
               </div>
             </div>
 
@@ -339,33 +431,24 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
               <div className="p-8 sm:p-12 text-center bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm text-slate-400">
                 <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-40 text-purple-600" />
                 <h3 className="text-base font-bold text-slate-700">
-                  Hazırda heç bir fənn üzrə jurnal daxil edilməyib
+                  Hazırda heç bir fənn üzrə qiymətləndirmə jurnalı daxil edilməyib
                 </h3>
                 <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-                  Müəllimlər və inzibatçılar fənn ballarını daxil etdikdə burada dərhal əks olunacaq.
+                  Müəllimlər fənn ballarını daxil etdikdə burada dərhal əks olunacaq.
                 </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-4">
                 {studentCoursesWithGrades.map(({ course, grade }) => {
-                  const seminar = grade?.seminar ?? null;
-                  const lab = grade?.laboratory ?? null;
-                  const indep = grade?.independentWork ?? null;
-                  const colloq = grade?.colloquium ?? null;
+                  const att = grade?.attendance ?? null;
+                  const sem = grade?.seminar ?? null;
+                  const col1 = grade?.colloquium1 ?? null;
+                  const col2 = grade?.colloquium2 ?? null;
                   const exam = grade?.examScore ?? null;
 
-                  const entryTotal =
-                    (seminar || 0) + (lab || 0) + (indep || 0) + (colloq || 0);
-
-                  const hasScored =
-                    seminar !== null ||
-                    lab !== null ||
-                    indep !== null ||
-                    colloq !== null;
-
-                  const isQualifiedForExam = entryTotal >= 17;
-                  const finalTotal = exam !== null ? entryTotal + exam : entryTotal;
-                  const letterData = exam !== null ? getLetterScore(finalTotal) : null;
+                  const entryTotal = grade ? calculateEntryScore(grade) : 0;
+                  const finalTotal = grade ? calculateTotalScore(grade) : 0;
+                  const evalStatus = grade ? getEvaluationStatus(grade) : null;
 
                   return (
                     <div
@@ -389,71 +472,96 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                         </div>
 
                         {/* Status badge */}
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border ${
-                              !hasScored
-                                ? 'bg-slate-50 text-slate-500 border-slate-200'
-                                : isQualifiedForExam
-                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                : 'bg-rose-50 text-rose-700 border-rose-200'
-                            }`}
-                          >
-                            {!hasScored
-                              ? 'Qiymətləndirmə Gözlənilir'
-                              : isQualifiedForExam
-                              ? 'İmtahana Buraxılır'
-                              : 'İmtahana Buraxılmır (Bal < 17)'}
-                          </span>
-                        </div>
+                        {evalStatus && (
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`px-3 py-1 rounded-full text-xs font-bold border ${evalStatus.color}`}
+                            >
+                              {evalStatus.status}
+                            </span>
+                          </div>
+                        )}
                       </div>
 
-                      {/* 50 Point Breakdown Grid */}
-                      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3">
+                      {/* 100-Point YTP Breakdown Grid */}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-3">
+                        {/* 1. Qayıblar */}
                         <div className="p-2.5 sm:p-3 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-100 text-center">
-                          <span className="text-[10px] sm:text-[11px] text-slate-500 font-semibold block mb-0.5 sm:mb-1">
-                            Seminar (Maks 10)
+                          <span className="text-[10px] sm:text-[11px] text-slate-500 font-semibold block mb-0.5">
+                            Qayıblar (Max 10)
                           </span>
                           <span className="text-base sm:text-lg font-bold text-slate-800 font-mono">
-                            {seminar !== null ? `${seminar} bal` : '-'}
+                            {att !== null ? `${att} bal` : '-'}
                           </span>
                         </div>
 
+                        {/* 2. Seminar */}
                         <div className="p-2.5 sm:p-3 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-100 text-center">
-                          <span className="text-[10px] sm:text-[11px] text-slate-500 font-semibold block mb-0.5 sm:mb-1">
-                            Laboratoriya (Maks 10)
+                          <span className="text-[10px] sm:text-[11px] text-slate-500 font-semibold block mb-0.5">
+                            Seminar (Max 10)
                           </span>
                           <span className="text-base sm:text-lg font-bold text-slate-800 font-mono">
-                            {lab !== null ? `${lab} bal` : '-'}
+                            {sem !== null ? `${sem} bal` : '-'}
                           </span>
                         </div>
 
+                        {/* 3. Kollokvium 1 */}
                         <div className="p-2.5 sm:p-3 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-100 text-center">
-                          <span className="text-[10px] sm:text-[11px] text-slate-500 font-semibold block mb-0.5 sm:mb-1">
-                            Sərbəst İş (Maks 10)
+                          <span className="text-[10px] sm:text-[11px] text-slate-500 font-semibold block mb-0.5">
+                            Kollokvium 1 (Max 15)
                           </span>
                           <span className="text-base sm:text-lg font-bold text-slate-800 font-mono">
-                            {indep !== null ? `${indep} bal` : '-'}
+                            {col1 !== null ? `${col1} bal` : '-'}
                           </span>
                         </div>
 
+                        {/* 4. Kollokvium 2 */}
                         <div className="p-2.5 sm:p-3 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-100 text-center">
-                          <span className="text-[10px] sm:text-[11px] text-slate-500 font-semibold block mb-0.5 sm:mb-1">
-                            Kollokvium (Maks 20)
+                          <span className="text-[10px] sm:text-[11px] text-slate-500 font-semibold block mb-0.5">
+                            Kollokvium 2 (Max 15)
                           </span>
                           <span className="text-base sm:text-lg font-bold text-slate-800 font-mono">
-                            {colloq !== null ? `${colloq} bal` : '-'}
+                            {col2 !== null ? `${col2} bal` : '-'}
                           </span>
                         </div>
 
-                        {/* Total Entry Score (50) */}
-                        <div className="p-2.5 sm:p-3 bg-purple-50 rounded-xl sm:rounded-2xl border border-purple-200 text-center col-span-2 sm:col-span-1">
-                          <span className="text-[10px] sm:text-[11px] text-purple-700 font-extrabold uppercase block mb-0.5 sm:mb-1">
-                            Giriş Balı (Maks 50)
+                        {/* 5. Giriş Balı (Max 50) */}
+                        <div className="p-2.5 sm:p-3 bg-purple-50/70 rounded-xl sm:rounded-2xl border border-purple-200 text-center">
+                          <span className="text-[10px] sm:text-[11px] text-purple-700 font-extrabold uppercase block mb-0.5">
+                            Giriş Balı (Max 50)
                           </span>
-                          <span className="text-lg sm:text-xl font-black text-[#5300b7] font-mono">
-                            {entryTotal} / 50
+                          <span className="text-base sm:text-lg font-black text-[#5300b7] font-mono">
+                            {entryTotal} bal
                           </span>
+                          <span className="text-[9px] text-purple-600 block">Min: 17 bal</span>
+                        </div>
+
+                        {/* 6. İmtahan Balı (Max 50 / Min 17) */}
+                        <div className="p-2.5 sm:p-3 bg-amber-50/70 rounded-xl sm:rounded-2xl border border-amber-200 text-center">
+                          <span className="text-[10px] sm:text-[11px] text-amber-800 font-extrabold uppercase block mb-0.5">
+                            İmtahan (Max 50)
+                          </span>
+                          <span className={`text-base sm:text-lg font-black font-mono ${
+                            exam !== null && exam < 17 ? 'text-rose-600' : 'text-amber-900'
+                          }`}>
+                            {exam !== null ? `${exam} bal` : '-'}
+                          </span>
+                          <span className="text-[9px] text-amber-700 block">Min: 17 bal</span>
+                        </div>
+
+                        {/* 7. Yekun Bal (Max 100 / Keçid > 50) */}
+                        <div className="p-2.5 sm:p-3 bg-purple-100/70 rounded-xl sm:rounded-2xl border border-purple-300 text-center col-span-2 sm:col-span-4 lg:col-span-1">
+                          <span className="text-[10px] sm:text-[11px] text-purple-900 font-black uppercase block mb-0.5">
+                            Yekun Bal (100)
+                          </span>
+                          <span className={`text-lg sm:text-xl font-black font-mono ${
+                            exam !== null && (exam < 17 || finalTotal <= 50)
+                              ? 'text-rose-600'
+                              : 'text-[#5300b7]'
+                          }`}>
+                            {exam !== null ? `${finalTotal} bal` : `${entryTotal} (Giriş)`}
+                          </span>
+                          <span className="text-[9px] text-purple-800 block">Keçid: &gt; 50</span>
                         </div>
                       </div>
 
@@ -468,20 +576,145 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                           </span>
                         </div>
 
-                        {letterData && (
+                        {evalStatus && (
                           <div className="flex items-center gap-2">
-                            <span>Yekun Qiymət:</span>
-                            <span
-                              className={`px-2.5 py-0.5 rounded-md font-bold font-mono ${letterData.color}`}
-                            >
-                              {finalTotal} bal ({letterData.letter} - {letterData.text})
-                            </span>
+                            <span>Status:</span>
+                            <span className="font-bold text-slate-800">{evalStatus.status}</span>
+                            <span className="text-slate-400">•</span>
+                            <span>{evalStatus.subtext}</span>
                           </div>
                         )}
                       </div>
                     </div>
                   );
                 })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 1.5: MODULES & SYLLABUSES (NEW) */}
+        {activeTab === 'modules' && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">
+                  {student.specialty} — Tədris Modulları və Sillabuslar
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Semestrlər üzrə tədris planı, fənn saatları, kreditlər və mühazirə mövzuları
+                </p>
+              </div>
+
+              {/* Semester filter pills */}
+              <div className="flex flex-wrap gap-1.5">
+                <button
+                  onClick={() => setSelectedSemesterForModules('all')}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    selectedSemesterForModules === 'all'
+                      ? 'bg-[#5300b7] text-white shadow-xs'
+                      : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  Bütün Semestrlər
+                </button>
+                {SEMESTERS_LIST.map((sem) => (
+                  <button
+                    key={sem}
+                    onClick={() => setSelectedSemesterForModules(sem)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      selectedSemesterForModules === sem
+                        ? 'bg-[#5300b7] text-white shadow-xs'
+                        : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    {sem}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {mySpecialtyModules.length === 0 ? (
+              <div className="p-8 sm:p-12 text-center bg-white rounded-2xl sm:rounded-3xl border border-slate-200 text-slate-400">
+                <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-30 text-purple-600" />
+                <h3 className="text-base font-bold text-slate-700">
+                  İxtisasınız üzrə modullar hələ admin tərəfindən daxil edilməyib
+                </h3>
+                <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+                  Admin panelindən modullar və sillabuslar yerləşdirildikdə burada görünəcək.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {mySpecialtyModules
+                  .filter(
+                    (m) =>
+                      selectedSemesterForModules === 'all' ||
+                      m.semester === selectedSemesterForModules
+                  )
+                  .map((m) => {
+                    const isExpanded = expandedSyllabusId === m.id;
+                    return (
+                      <div
+                        key={m.id}
+                        className="bg-white p-5 rounded-2xl sm:rounded-3xl border border-slate-200 hover:border-[#5300b7] transition-all shadow-xs space-y-3"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="px-2.5 py-1 bg-purple-50 text-[#5300b7] rounded-lg font-mono font-bold text-xs">
+                            {m.code}
+                          </span>
+                          <span className="text-xs font-bold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+                            {m.semester}
+                          </span>
+                        </div>
+
+                        <h3 className="font-bold text-base text-slate-900">{m.name}</h3>
+
+                        {m.description && (
+                          <p className="text-xs text-slate-600 leading-relaxed">
+                            {m.description}
+                          </p>
+                        )}
+
+                        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-xs text-slate-600">
+                          <div className="flex items-center gap-1.5">
+                            <Clock className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                            <span>{m.creditHours || 60} saat ({m.credits || 5} kredit)</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <User className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                            <span className="truncate">{m.instructor || 'Müəllim təyin olunmayıb'}</span>
+                          </div>
+                        </div>
+
+                        {m.syllabusTopics && (
+                          <div className="pt-2">
+                            <button
+                              type="button"
+                              onClick={() => setExpandedSyllabusId(isExpanded ? null : m.id)}
+                              className="w-full flex items-center justify-between px-3 py-2 bg-purple-50/70 hover:bg-purple-100 text-purple-900 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                            >
+                              <span className="flex items-center gap-1.5">
+                                <FileText className="w-3.5 h-3.5 text-[#5300b7]" />
+                                <span>Sillabus Planı və Mövzularını Gör</span>
+                              </span>
+                              {isExpanded ? (
+                                <ChevronUp className="w-3.5 h-3.5" />
+                              ) : (
+                                <ChevronDown className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+
+                            {isExpanded && (
+                              <div className="mt-2 p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 whitespace-pre-line leading-relaxed max-h-56 overflow-y-auto">
+                                {m.syllabusTopics}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
               </div>
             )}
           </div>
@@ -602,68 +835,72 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
           </div>
         )}
 
-        {/* TAB 4: YTP RULES */}
+        {/* TAB 5: YTP RULES */}
         {activeTab === 'rules' && (
           <div className="max-w-4xl mx-auto space-y-6">
             <div className="text-center">
               <h2 className="text-2xl font-black text-slate-900">
-                Yüksək Texniki Peşə (YTP) Tədris və Qiymətləndirmə Təlimatı
+                Yüksək Texniki Peşə (YTP) 100 Ballıq Qiymətləndirmə Təlimatı
               </h2>
               <p className="text-xs text-slate-500 mt-1.5">
-                Subbakalavr təhsil proqramı çərçivəsində tətbiq edilən əsas meyarlar
+                Peşə Təhsili YTP Subbakalavr təhsil pilləsi üzrə rəsmi imtahan və qiymətləndirmə qaydaları
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-white p-5 rounded-2xl border border-slate-200 space-y-2">
                 <h4 className="font-bold text-sm text-slate-900 flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-purple-100 text-[#5300b7] flex items-center justify-center text-xs">
+                  <span className="w-6 h-6 rounded-full bg-purple-100 text-[#5300b7] flex items-center justify-center text-xs font-bold">
                     1
                   </span>
-                  <span>50 Ballıq İmtahanöncəsi Qiymətləndirmə</span>
+                  <span>50 Ballıq İmtahanöncəsi Giriş Balı</span>
                 </h4>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Semestr ərzində tələbə seminar (10 bal), laboratoriya (10 bal), sərbəst iş (10 bal)
-                  və kollokviumlardan (20 bal) maksimum 50 bal toplayır.
+                  Semestr ərzində toplanan maksimum 50 giriş balının bölgüsü:
+                  <br />• <strong>Qayıblar (Davamiyyət):</strong> 10 bal
+                  <br />• <strong>Seminar (Məşğələ / Cari fəallıq):</strong> 10 bal
+                  <br />• <strong>Kollokvium 1 və Kollokvium 2:</strong> Birlikdə 30 bal (hərəsi 15 bal)
                 </p>
               </div>
 
               <div className="bg-white p-5 rounded-2xl border border-slate-200 space-y-2">
                 <h4 className="font-bold text-sm text-slate-900 flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-purple-100 text-[#5300b7] flex items-center justify-center text-xs">
+                  <span className="w-6 h-6 rounded-full bg-purple-100 text-[#5300b7] flex items-center justify-center text-xs font-bold">
                     2
                   </span>
-                  <span>İmtahana Buraxılış Şərti (17 Bal)</span>
+                  <span>50 Ballıq İmtahan (Çıxış) Balı — Min 17 Bal</span>
                 </h4>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Tələbənin imtahana buraxılması üçün semestr ərzində toplanan giriş balı
-                  ən azı 17 bal olmalıdır. 17 baldan aşağı olduqda tələbə imtahana buraxılmır.
+                  İmtahan balı maksimum 50 baldır. Peşədəki YTP İmtahan sisteminə əsasən, <strong>imtahandan çıxış balı 17 baldan aşağı olmamalıdır</strong>. 17 baldan az toplandıqda tələbə birbaşa kəsilir (akademik borc yaranır).
                 </p>
               </div>
 
               <div className="bg-white p-5 rounded-2xl border border-slate-200 space-y-2">
                 <h4 className="font-bold text-sm text-slate-900 flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-purple-100 text-[#5300b7] flex items-center justify-center text-xs">
+                  <span className="w-6 h-6 rounded-full bg-purple-100 text-[#5300b7] flex items-center justify-center text-xs font-bold">
                     3
                   </span>
-                  <span>Yekun Qiymətləndirmə Şkalası</span>
+                  <span>Yekun Keçid Balı (50-dən yuxarı)</span>
                 </h4>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  A (91-100): Əla, B (81-90): Çox yaxşı, C (71-80): Yaxşı, D (61-70): Kafi,
-                  E (51-60): Qənaətbəxş, F (51-dən aşağı): Qeyri-kafi (kəsr).
+                  Tələbənin modulu uğurla tamamlaması üçün <strong>ümumi balı 50-dən yuxarı (ən azı 51 bal) olmalıdır</strong>. 50 və ya daha az bal toplandıqda yekun qiymət F (Qeyri-müvəffəq) sayılır.
                 </p>
               </div>
 
               <div className="bg-white p-5 rounded-2xl border border-slate-200 space-y-2">
                 <h4 className="font-bold text-sm text-slate-900 flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-purple-100 text-[#5300b7] flex items-center justify-center text-xs">
+                  <span className="w-6 h-6 rounded-full bg-purple-100 text-[#5300b7] flex items-center justify-center text-xs font-bold">
                     4
                   </span>
-                  <span>Subbakalavr Diplomuna Təsiri</span>
+                  <span>Yekun Hərf Qiymətləri Şkalası</span>
                 </h4>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  YTP pilləsini uğurla başa vuran məzunlar subbakalavr dərəcəsi qazanır və
-                  ali təhsil müəssisələrinə müsabiqədənkənar və ya imtiyazlı qəbul hüququ əldə edirlər.
+                  • <strong>A (91 - 100):</strong> Əla
+                  <br />• <strong>B (81 - 90):</strong> Çox yaxşı
+                  <br />• <strong>C (71 - 80):</strong> Yaxşı
+                  <br />• <strong>D (61 - 70):</strong> Kafi
+                  <br />• <strong>E (51 - 60):</strong> Qənaətbəxş
+                  <br />• <strong>F (≤ 50 və ya İmtahan &lt; 17):</strong> Qeyri-müvəffəq (Kəsr)
                 </p>
               </div>
             </div>
