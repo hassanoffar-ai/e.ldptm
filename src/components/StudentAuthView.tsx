@@ -454,7 +454,7 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
                       <input
                         type="tel"
                         required
-                        placeholder="+994 50 123 45 67"
+                        placeholder=" "
                         value={phone}
                         onChange={(e) => {
                           setPhone(e.target.value);
@@ -474,7 +474,7 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
                       <input
                         type="email"
                         required
-                        placeholder="ad.soyad@gmail.com"
+                        placeholder=" "
                         value={email}
                         onChange={(e) => {
                           setEmail(e.target.value);
@@ -553,7 +553,7 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
                 disabled={Boolean(matchedStudentById?.isRegistered)}
                 className="w-full py-3.5 bg-gradient-to-r from-[#5300b7] to-[#7c3aed] disabled:opacity-50 disabled:cursor-not-allowed hover:from-[#430094] hover:to-[#6d28d9] text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg shadow-purple-950/50 transition-all flex items-center justify-center gap-2 active:scale-[0.99] cursor-pointer mt-3"
               >
-                <span>Qeydiyyatı Tamamla və Hesabı Aktivləşdir</span>
+                <span>Qeydiyyatdan keçin</span>
                 <CheckCircle2 className="w-4 h-4" />
               </button>
 
