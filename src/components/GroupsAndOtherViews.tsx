@@ -31,7 +31,7 @@ import {
   User,
 } from 'lucide-react';
 import { ActiveTab, ExamSession, GradeBookCourse, SpecialtyItem, SpecialtyModule, Student } from '../types';
-import { GROUPS_LIST, ROOMS_LIST, SUBJECTS_LIST, INITIAL_SPECIALTIES, INITIAL_SPECIALTY_MODULES, SEMESTERS_LIST } from '../data/mockData';
+import { GROUPS_LIST, ROOMS_LIST, SUBJECTS_LIST, INITIAL_SPECIALTIES, getStoredModules, SEMESTERS_LIST } from '../data/mockData';
 
 interface GroupsAndOtherViewsProps {
   activeTab: ActiveTab;
@@ -74,16 +74,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
   const [formError, setFormError] = useState<string | null>(null);
 
   // Modules and Syllabuses Management States
-  const [modulesList, setModulesList] = useState<SpecialtyModule[]>(() => {
-    try {
-      const saved = localStorage.getItem('eldptm_modules');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch {}
-    return INITIAL_SPECIALTY_MODULES;
-  });
+  const [modulesList, setModulesList] = useState<SpecialtyModule[]>(() => getStoredModules());
 
   const [selectedModuleSpecialty, setSelectedModuleSpecialty] = useState<string>(
     specialties[0]?.name || 'Kompüter sistemlərində proqramlaşdırma'

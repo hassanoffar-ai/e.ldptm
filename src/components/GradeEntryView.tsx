@@ -14,7 +14,7 @@ import {
   Award
 } from 'lucide-react';
 import { GradeBookCourse, SpecialtyItem, SpecialtyModule, StudentGrade } from '../types';
-import { GROUPS_LIST, SUBJECTS_LIST, INITIAL_SPECIALTY_MODULES, SEMESTERS_LIST } from '../data/mockData';
+import { GROUPS_LIST, SUBJECTS_LIST, getStoredModules, SEMESTERS_LIST } from '../data/mockData';
 
 interface GradeEntryViewProps {
   courses: GradeBookCourse[];
@@ -40,13 +40,13 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
     currentCourse?.group || GROUPS_LIST[0] || '1-ci kurs'
   );
   const [selectedSpecialty, setSelectedSpecialty] = useState(
-    currentCourse?.specialty || specialties[0]?.name || 'Kibertəhlükəsizlik'
+    currentCourse?.specialty || specialties[0]?.name || ''
   );
   const [selectedSubject, setSelectedSubject] = useState(
-    currentCourse?.subject || SUBJECTS_LIST[0] || 'Veb Proqramlaşdırma əsasları'
+    currentCourse?.subject || ''
   );
   const [selectedSemester, setSelectedSemester] = useState(
-    currentCourse?.semester || 'Yaz Semestri (2024/2025)'
+    currentCourse?.semester || 'I Semestr'
   );
 
   const [gradesList, setGradesList] = useState<StudentGrade[]>(
@@ -62,14 +62,7 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
 
   // Load modules list from localStorage or fallback
   const specialtyModules: SpecialtyModule[] = React.useMemo(() => {
-    try {
-      const saved = localStorage.getItem('eldptm_modules');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch {}
-    return INITIAL_SPECIALTY_MODULES;
+    return getStoredModules();
   }, []);
 
   // Filter modules based on selected specialty and semester

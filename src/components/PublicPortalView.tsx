@@ -19,7 +19,7 @@ import {
   ChevronUp,
 } from 'lucide-react';
 import { ExamSession, GradeBookCourse, SpecialtyModule, StudentGrade, StudentUser } from '../types';
-import { INITIAL_SPECIALTY_MODULES, SEMESTERS_LIST } from '../data/mockData';
+import { getStoredModules, SEMESTERS_LIST } from '../data/mockData';
 
 interface PublicPortalViewProps {
   student: StudentUser;
@@ -44,14 +44,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
 
   // Load modules list from localStorage or fallback
   const allModules: SpecialtyModule[] = React.useMemo(() => {
-    try {
-      const saved = localStorage.getItem('eldptm_modules');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch {}
-    return INITIAL_SPECIALTY_MODULES;
+    return getStoredModules();
   }, []);
 
   // Filter modules for this student's specialty

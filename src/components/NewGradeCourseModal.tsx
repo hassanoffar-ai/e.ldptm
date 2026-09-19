@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Award, BookOpen, Grid, Users } from 'lucide-react';
 import { GradeBookCourse, SpecialtyItem, SpecialtyModule, Student, StudentGrade } from '../types';
-import { GROUPS_LIST, SUBJECTS_LIST, INITIAL_SPECIALTY_MODULES, SEMESTERS_LIST } from '../data/mockData';
+import { GROUPS_LIST, SUBJECTS_LIST, getStoredModules, SEMESTERS_LIST } from '../data/mockData';
 
 interface NewGradeCourseModalProps {
   isOpen: boolean;
@@ -28,14 +28,7 @@ export const NewGradeCourseModal: React.FC<NewGradeCourseModalProps> = ({
 
   // Load modules list from localStorage or fallback
   const specialtyModules: SpecialtyModule[] = React.useMemo(() => {
-    try {
-      const saved = localStorage.getItem('eldptm_modules');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch {}
-    return INITIAL_SPECIALTY_MODULES;
+    return getStoredModules();
   }, []);
 
   // Filter modules based on selected specialty
