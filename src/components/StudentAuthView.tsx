@@ -12,7 +12,6 @@ import {
   CheckCircle2,
   AlertCircle,
   ShieldCheck,
-  Building2,
   Check,
 } from 'lucide-react';
 import { Student, StudentUser } from '../types';
@@ -224,13 +223,6 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
             <span className="text-[10px] sm:text-[11px] text-purple-300 font-semibold tracking-wide uppercase">
               Yüksək Texniki Peşə (YTP) Portalı
             </span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2.5">
-          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-purple-200">
-            <Building2 className="w-3.5 h-3.5 text-purple-400" />
-            <span>Lənkəran Dövlət Peşə Təhsil Mərkəzi</span>
           </div>
         </div>
       </header>
@@ -540,7 +532,7 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
               </button>
 
               <div className="mt-4 pt-4 border-t border-slate-800 text-center text-xs text-slate-400">
-                Artıq hesabınız aktivdir?{' '}
+                Hesabınız aktivdir?{' '}
                 <button
                   type="button"
                   onClick={() => {
