@@ -363,14 +363,14 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
               {/* Identification: Student ID Input */}
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  Tələbə ID (Mərkəz tərəfindən verilən)
+                  Tələbə ID
                 </label>
                 <div className="relative">
                   <KeyRound className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-400" />
                   <input
                     type="text"
                     required
-                    placeholder="Məs: TLB-1001"
+                    placeholder=" "
                     value={registerStudentId}
                     onChange={(e) => {
                       setRegisterStudentId(e.target.value);
