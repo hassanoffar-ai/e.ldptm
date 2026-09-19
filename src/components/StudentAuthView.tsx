@@ -268,7 +268,7 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
                   <input
                     type="text"
                     required
-                    placeholder="Məs: TLB-1001"
+                    placeholder=" "
                     value={loginIdentifier}
                     onChange={(e) => setLoginIdentifier(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 bg-slate-800/60 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all font-mono"
@@ -285,7 +285,7 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
                   <input
                     type={showLoginPassword ? 'text' : 'password'}
                     required
-                    placeholder="Hesab şifrəniz"
+                    placeholder=" "
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
                     className="w-full pl-10 pr-10 py-3 bg-slate-800/60 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
