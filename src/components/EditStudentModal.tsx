@@ -233,7 +233,7 @@ export const EditStudentModal: React.FC<EditStudentModalProps> = ({
                       {spec}
                     </option>
                   ))}
-                  <option value="__custom__">+ Digər xüsusi ixtisas daxil et</option>
+                  <option value="__custom__">+ Digər ixtisas daxil et</option>
                 </select>
                 {specialty === '__custom__' && (
                   <input

@@ -174,7 +174,7 @@ export const NewExamSessionModal: React.FC<NewExamSessionModalProps> = ({
                         {s.name} ({s.code})
                       </option>
                     ))}
-                    <option value="__custom__">+ Digər / Fərdi İxtisas</option>
+                    <option value="__custom__">+ Digər İxtisas</option>
                   </select>
                   {specialty === '__custom__' && (
                     <input

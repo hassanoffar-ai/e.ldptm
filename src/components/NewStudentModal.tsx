@@ -249,7 +249,7 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
                         {s.name} ({s.code})
                       </option>
                     ))}
-                    <option value="__custom__">+ Digər / Fərdi İxtisas Daxil Et</option>
+                    <option value="__custom__">+ Digər İxtisas Daxil Et</option>
                   </select>
                   {specialty === '__custom__' && (
                     <input
