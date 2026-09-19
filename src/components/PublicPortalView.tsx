@@ -193,7 +193,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
 
               <div className="flex flex-wrap items-center gap-x-3 sm:gap-x-4 gap-y-1 text-xs text-purple-100/90 font-medium">
                 <span>
-                  FİN Kod: <strong className="font-mono text-white">{student.finCode || student.studentId}</strong>
+                  Tələbə ID: <strong className="font-mono text-white">{student.studentId || student.finCode}</strong>
                 </span>
                 <span>•</span>
                 <span>
@@ -308,29 +308,16 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                 <span className="px-2.5 py-0.5 rounded-full bg-purple-100 text-[#5300b7] text-xs font-bold">
                   {student.group}
                 </span>
-                <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-semibold">
-                  Rəsmi Qeydiyyatlı
-                </span>
               </div>
               <p className="text-xs text-slate-500">
                 Lənkəran Dövlət Peşə Təhsil Mərkəzi • Yüksək Texniki Peşə (Subbakalavr)
               </p>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600 pt-0.5">
-                <span>FİN Kod: <strong className="font-mono text-[#5300b7]">{student.finCode || student.studentId}</strong></span>
+                <span>Tələbə ID: <strong className="font-mono text-[#5300b7]">{student.studentId || student.finCode}</strong></span>
                 {student.email && <span>E-poçt: <strong className="text-slate-800">{student.email}</strong></span>}
                 {student.phone && <span>Əlaqə: <strong className="text-slate-800">{student.phone}</strong></span>}
               </div>
             </div>
-          </div>
-
-          <div className="text-xs text-slate-600 bg-purple-50/60 border border-purple-100 rounded-2xl p-3.5 max-w-sm">
-            <div className="flex items-center gap-1.5 text-[#5300b7] font-bold mb-1">
-              <Shield className="w-4 h-4 text-[#5300b7]" />
-              <span>Fərdi Tələbə Kabineti</span>
-            </div>
-            <p className="text-[11px] text-slate-500 leading-relaxed">
-              Bu kabinetdə yalnız Sizin fərdi ixtisasınız ({student.specialty}) və {student.group} üzrə təsdiqlənmiş fənlər, cari semestr balları və imtahan cədvəliniz əks olunur.
-            </p>
           </div>
         </div>
 

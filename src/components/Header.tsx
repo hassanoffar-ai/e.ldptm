@@ -77,14 +77,6 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center gap-2 md:gap-3">
 
 
-        {/* Quick Kiosk switch */}
-        <button
-          onClick={() => setActiveTab('tickets')}
-          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-50 hover:bg-purple-100 text-[#5300b7] text-xs font-semibold border border-purple-200 transition-colors cursor-pointer"
-        >
-          <Monitor className="w-3.5 h-3.5" />
-          <span>Kiosk Rejimi</span>
-        </button>
 
         {/* Notifications */}
         <div className="relative">

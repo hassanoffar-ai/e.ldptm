@@ -50,9 +50,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             E-LDPTM Tədris və İmtahan Portalı
           </h1>
           <p className="text-white/80 text-sm md:text-base leading-relaxed mb-6">
-            Elektron İmtahan Protokolları, İmtahan Zalı Bilet Çapı Kiosku və
-            Semestr Qiymət Daxiletmə sistemi mərkəzləşdirilmiş şəkildə fəaliyyət
-            göstərir.
+            Elektron İmtahan Protokolları və Semestr Qiymət Daxiletmə sistemi
+            mərkəzləşdirilmiş şəkildə fəaliyyət göstərir.
           </p>
 
           <div className="flex flex-wrap gap-3">
@@ -62,13 +61,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             >
               <FileText className="w-4 h-4" />
               <span>İmtahan Protokolu</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('tickets')}
-              className="px-4 py-2.5 bg-white/20 hover:bg-white/30 text-white rounded-xl text-sm font-semibold backdrop-blur-md transition-all flex items-center gap-2"
-            >
-              <Ticket className="w-4 h-4" />
-              <span>Zal Bilet Kiosku</span>
             </button>
             <button
               onClick={() => setActiveTab('grades')}
@@ -158,7 +150,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <h2 className="text-lg font-bold text-[#121c2a] mb-4">
           Əsas İmtahan və Tədris Ekranları
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Card 1: İmtahan Protokolu */}
           <div
             onClick={() => setActiveTab('exams')}
@@ -181,29 +173,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
           </div>
 
-          {/* Card 2: İmtahan Zalı Ekranı (Kiosk) */}
-          <div
-            onClick={() => setActiveTab('tickets')}
-            className="group bg-white p-6 rounded-2xl border border-[#ccc3d7] hover:border-[#6d28d9] shadow-xs hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between"
-          >
-            <div>
-              <div className="w-12 h-12 rounded-2xl bg-[#eff4ff] text-[#5300b7] flex items-center justify-center mb-4 group-hover:bg-[#6d28d9] group-hover:text-white transition-colors">
-                <Ticket className="w-6 h-6" />
-              </div>
-              <h3 className="text-lg font-bold text-[#121c2a] mb-2">
-                2. İmtahan Zalı Paneli
-              </h3>
-              <p className="text-xs text-[#64748b] leading-relaxed mb-4">
-                Tələbə kodu ilə axtarış, rəsmi imtahan bileti kartı, QR kod, otaq/kompüter bölgüsü və operativ çap.
-              </p>
-            </div>
-            <div className="flex items-center gap-2 text-xs font-bold text-[#5300b7] group-hover:translate-x-1 transition-transform">
-              <span>Zal Kioskunu Aç</span>
-              <ArrowRight className="w-4 h-4" />
-            </div>
-          </div>
-
-          {/* Card 3: Qiymət Daxiletmə */}
+          {/* Card 2: Qiymət Daxiletmə */}
           <div
             onClick={() => setActiveTab('grades')}
             className="group bg-white p-6 rounded-2xl border border-[#ccc3d7] hover:border-[#6d28d9] shadow-xs hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between"
@@ -213,7 +183,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <Award className="w-6 h-6" />
               </div>
               <h3 className="text-lg font-bold text-[#121c2a] mb-2">
-                3. Qiymət Daxiletmə
+                2. Qiymət Daxiletmə
               </h3>
               <p className="text-xs text-[#64748b] leading-relaxed mb-4">
                 Fənlər üzrə Seminar, Laboratoriya, Sərbəst İş və Kollokvium ballarının canlı hesablanması və dərc edilməsi.

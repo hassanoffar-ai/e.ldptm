@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { X, UserPlus, GraduationCap, Users, Mail, Phone, AlertCircle } from 'lucide-react';
+import {
+  X,
+  UserPlus,
+  GraduationCap,
+  Users,
+  AlertCircle,
+  KeyRound,
+  ShieldCheck,
+  Sparkles,
+} from 'lucide-react';
 import { SpecialtyItem, Student } from '../types';
 import { GROUPS_LIST, SPECIALTIES_LIST } from '../data/mockData';
 
@@ -32,18 +41,33 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
         }))
     ).slice().sort((a, b) => a.name.localeCompare(b.name, 'az'));
 
+  const generateSuggestedId = () => {
+    const numbers = existingStudents
+      .map((s) => {
+        const match = s.studentId?.match(/\d+/);
+        return match ? parseInt(match[0], 10) : null;
+      })
+      .filter((n): n is number => n !== null);
+
+    const maxNum = numbers.length > 0 ? Math.max(...numbers) : 1000;
+    const nextNum = maxNum < 1000 ? 1001 : maxNum + 1;
+    return `TLB-${nextNum}`;
+  };
+
   const [name, setName] = useState('');
-  const [finCode, setFinCode] = useState('');
+  const [studentId, setStudentId] = useState('');
   const [group, setGroup] = useState(defaultGroup || GROUPS_LIST[0] || '1-ci kurs');
-  const [specialty, setSpecialty] = useState(defaultSpecialty || effectiveSpecialties[0]?.name || '');
+  const [specialty, setSpecialty] = useState(
+    defaultSpecialty || effectiveSpecialties[0]?.name || ''
+  );
   const [customSpecialty, setCustomSpecialty] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('123456');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
+      if (!studentId) {
+        setStudentId(generateSuggestedId());
+      }
       if (defaultGroup) setGroup(defaultGroup);
       if (defaultSpecialty) {
         setSpecialty(defaultSpecialty);
@@ -59,26 +83,27 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
     e.preventDefault();
     setError(null);
 
-    const cleanFin = finCode.trim().toUpperCase();
+    const cleanId = studentId.trim();
 
     if (!name.trim()) {
       setError('Tələbənin ad, soyad və ata adını daxil edin.');
       return;
     }
 
-    if (cleanFin.length !== 7) {
-      setError('FİN kod mütləq şəxsiyyət vəsiqəsindən 7 simvol olmalıdır.');
+    if (!cleanId) {
+      setError('Tələbə üçün unikal Tələbə ID daxil edin və ya avtomatik təyin edin.');
       return;
     }
 
-    // Check uniqueness by FIN code
-    const duplicateFin = existingStudents.find(
+    // Check uniqueness by Student ID
+    const duplicateStudent = existingStudents.find(
       (s) =>
-        (s.finCode && s.finCode.toUpperCase() === cleanFin) ||
-        (s.studentId && s.studentId.toUpperCase() === cleanFin)
+        (s.studentId && s.studentId.trim().toLowerCase() === cleanId.toLowerCase()) ||
+        (s.id && s.id.trim().toLowerCase() === cleanId.toLowerCase()) ||
+        (s.finCode && s.finCode.trim().toLowerCase() === cleanId.toLowerCase())
     );
-    if (duplicateFin) {
-      setError(`Bu FİN kod artıq başqa bir tələbəyə (${duplicateFin.name}) aiddir.`);
+    if (duplicateStudent) {
+      setError(`Bu Tələbə ID (${cleanId}) artıq başqa bir tələbəyə (${duplicateStudent.name}) aiddir.`);
       return;
     }
 
@@ -89,24 +114,21 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
 
     const student: Student = {
       id: `std-${Date.now()}`,
-      studentId: cleanFin,
-      finCode: cleanFin,
+      studentId: cleanId,
+      finCode: cleanId,
       name: name.trim(),
       group,
       specialty: resolvedSpecialty,
-      email: email || `${cleanFin.toLowerCase()}@eldptm.edu.az`,
-      phone: phone || '+994 50 000 00 00',
-      passwordHash: password.trim() || '123456',
+      email: `${cleanId.toLowerCase()}@eldptm.edu.az`,
+      phone: '',
+      passwordHash: '123456',
       status: 'active',
       isRegistered: false,
     };
 
     onAddStudent(student);
     setName('');
-    setFinCode('');
-    setEmail('');
-    setPhone('');
-    setPassword('123456');
+    setStudentId('');
     setError(null);
     onClose();
   };
@@ -125,13 +147,13 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
                 Yeni Tələbə Qeydiyyatı
               </h3>
               <p className="text-xs text-[#64748b]">
-                Sistemə yeni tələbə məlumatlarını əlavə edin
+                Tələbənin ad, soyadını və təyin olunmuş Tələbə ID-sini daxil edin
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 text-slate-400 hover:text-slate-700 rounded-lg"
+            className="p-1 text-slate-400 hover:text-slate-700 rounded-lg cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -139,6 +161,7 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
 
         {/* Modal Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* Ad, Soyad Input */}
           <div>
             <label className="block text-xs font-semibold text-[#4a4455] mb-1">
               Ad, Soyad, Ata adı
@@ -148,41 +171,58 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
               required
               placeholder="Məs: Əliyev Tural İlqar"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                if (error) setError(null);
+              }}
               className="w-full px-3.5 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
             />
           </div>
 
+          {/* Tələbə ID Input */}
           <div>
-            <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-              FİN Kod (Şəxsiyyət vəsiqəsi)
-            </label>
-            <input
-              type="text"
-              required
-              maxLength={7}
-              placeholder="7 simvol (məs: 5ABC123)"
-              value={finCode}
-              onChange={(e) => {
-                setFinCode(e.target.value.toUpperCase());
-                setError(null);
-              }}
-              className="w-full px-3.5 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm font-mono outline-none focus:ring-2 focus:ring-[#5300b7] uppercase"
-            />
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-semibold text-[#4a4455]">
+                Tələbə ID (Sistem İdentifikatoru)
+              </label>
+              <button
+                type="button"
+                onClick={() => setStudentId(generateSuggestedId())}
+                className="text-[11px] font-medium text-[#5300b7] hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <Sparkles className="w-3 h-3" />
+                <span>Yeni ID təklif et</span>
+              </button>
+            </div>
+            <div className="relative">
+              <KeyRound className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                required
+                placeholder="Məs: TLB-1001"
+                value={studentId}
+                onChange={(e) => {
+                  setStudentId(e.target.value);
+                  if (error) setError(null);
+                }}
+                className="w-full pl-10 pr-4 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm font-mono outline-none focus:ring-2 focus:ring-[#5300b7]"
+              />
+            </div>
             <span className="text-[11px] text-slate-500 mt-1 block">
-              Tələbə portala yalnız bu 7 simvollu FİN kod ilə qeydiyyatdan keçə biləcək
+              Tələbə bu Tələbə ID və Ad Soyadı ilə portala daxil olaraq qeydiyyatdan keçəcək
             </span>
           </div>
 
+          {/* Qrup və İxtisas */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-                Qrup
+                Kurs / Qrup
               </label>
               <select
                 value={group}
                 onChange={(e) => setGroup(e.target.value)}
-                className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
+                className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer"
               >
                 {GROUPS_LIST.map((g) => (
                   <option key={g} value={g}>
@@ -201,7 +241,7 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
                   <select
                     value={specialty}
                     onChange={(e) => setSpecialty(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
+                    className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer"
                   >
                     {effectiveSpecialties.map((s) => (
                       <option key={s.id} value={s.name}>
@@ -223,7 +263,7 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
               ) : (
                 <input
                   type="text"
-                  placeholder="məs: Kompüter sistemlərində proqram təminatı"
+                  placeholder="məs: Kompüter sistemlərində proqramlaşdırma"
                   value={customSpecialty}
                   onChange={(e) => setCustomSpecialty(e.target.value)}
                   className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
@@ -232,51 +272,15 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-                E-poçt
-              </label>
-              <div className="relative">
-                <Mail className="w-4 h-4 absolute left-3 top-3 text-[#7b7486]" />
-                <input
-                  type="email"
-                  placeholder="telebe@eldptm.edu.az"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
-                />
-              </div>
+          {/* Info card regarding student self-registration */}
+          <div className="p-3.5 rounded-xl bg-purple-50/70 border border-purple-200/80 text-xs text-purple-900 flex items-start gap-2.5">
+            <ShieldCheck className="w-4 h-4 text-[#5300b7] shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <strong className="block text-[#5300b7] font-semibold">Tələbənin müstəqil qeydiyyatı:</strong>
+              <p className="text-slate-600 leading-relaxed text-[11px]">
+                Tələbənin əlaqə nömrəsi, gmail hesabı və şəxsi şifrəsi tələbə tərəfindən portaldan qeydiyyat zamanı təyin olunacaq. Tələbəyə yalnız Ad, Soyad və Tələbə ID-ni təqdim etməyiniz kifayətdir.
+              </p>
             </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-                Əlaqə Nömrəsi
-              </label>
-              <div className="relative">
-                <Phone className="w-4 h-4 absolute left-3 top-3 text-[#7b7486]" />
-                <input
-                  type="text"
-                  placeholder="+994 50 123 45 67"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-              Portal üçün Şifrə
-            </label>
-            <input
-              type="text"
-              placeholder="Standart: 123456"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm font-mono outline-none focus:ring-2 focus:ring-[#5300b7]"
-            />
           </div>
 
           {error && (
@@ -291,13 +295,13 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50 transition-colors"
+              className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50 transition-colors cursor-pointer"
             >
               Ləğv et
             </button>
             <button
               type="submit"
-              className="px-5 py-2.5 rounded-xl bg-[#6d28d9] hover:bg-[#581c87] text-white text-sm font-semibold shadow-[0_2px_8px_rgba(109,40,217,0.25)] transition-all"
+              className="px-5 py-2.5 rounded-xl bg-[#6d28d9] hover:bg-[#581c87] text-white text-sm font-semibold shadow-[0_2px_8px_rgba(109,40,217,0.25)] transition-all cursor-pointer"
             >
               Təsdiqlə və Əlavə Et
             </button>

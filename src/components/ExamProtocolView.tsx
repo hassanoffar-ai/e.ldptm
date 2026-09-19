@@ -521,17 +521,6 @@ export const ExamProtocolView: React.FC<ExamProtocolViewProps> = ({
                     <td className="p-4 whitespace-nowrap font-medium text-[#121c2a]">
                       <div className="flex items-center gap-2">
                         <span>{item.studentName}</span>
-                        {onOpenTicketKioskForStudent && (
-                          <button
-                            onClick={() =>
-                              onOpenTicketKioskForStudent(item.studentId)
-                            }
-                            className="opacity-0 group-hover:opacity-100 hover:opacity-100 text-xs text-purple-600 hover:underline no-print px-1.5 py-0.5 bg-purple-50 rounded"
-                            title="Biletini Aç"
-                          >
-                            Bilet
-                          </button>
-                        )}
                         <button
                           onClick={() => handleDeleteStudentItem(item.id)}
                           className="opacity-0 group-hover:opacity-100 hover:opacity-100 text-xs text-rose-500 hover:text-rose-700 p-1 rounded hover:bg-rose-50 transition-all no-print"

@@ -414,6 +414,7 @@ export default function App() {
       const existingIdx = prev.findIndex(
         (s) =>
           s.id === newStudent.id ||
+          (s.studentId && newStudent.studentId && s.studentId.toUpperCase() === newStudent.studentId.toUpperCase()) ||
           (s.finCode && newStudent.finCode && s.finCode.toUpperCase() === newStudent.finCode.toUpperCase())
       );
       if (existingIdx >= 0) {
@@ -619,15 +620,6 @@ export default function App() {
                 />
               )}
 
-              {/* SCREEN 2: İMTAHAN ZALI EKRANI (BİLET ÇAPI KİOSKU) */}
-              {activeTab === 'tickets' && (
-                <ExamTicketKioskView
-                  students={students}
-                  sessions={sessions}
-                  initialStudentId={kioskStudentId}
-                  onClearInitialStudentId={() => setKioskStudentId(undefined)}
-                />
-              )}
 
               {/* SCREEN 3: QİYMƏT DAXİLETMƏ */}
               {activeTab === 'grades' && (
