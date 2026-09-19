@@ -38,20 +38,22 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
     'grades'
   );
 
-  // Filter courses for this student (either by group or explicit student grade record)
+  // Filter courses for this student (either by group + specialty or explicit student grade record)
   const studentCoursesWithGrades = courses
     .map((course) => {
       const studentGrade = course.grades.find(
         (g) =>
           g.studentId === student.id ||
           g.idNumber.toLowerCase() === student.studentId.toLowerCase() ||
+          (student.finCode && g.idNumber.toLowerCase() === student.finCode.toLowerCase()) ||
           g.studentName.toLowerCase().includes(student.name.toLowerCase())
       );
 
-      const isForMyGroup =
-        course.group.toLowerCase().trim() === student.group.toLowerCase().trim();
+      const isForMyCohort =
+        course.group.toLowerCase().trim() === student.group.toLowerCase().trim() &&
+        (!course.specialty || course.specialty.toLowerCase().trim() === student.specialty.toLowerCase().trim());
 
-      if (!studentGrade && !isForMyGroup) {
+      if (!studentGrade && !isForMyCohort) {
         return null;
       }
 
@@ -74,13 +76,15 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
     } | null;
   }>;
 
-  // Filter sessions for student's group
+  // Filter sessions for student's group and specialty
   const studentSessions = sessions.filter(
     (s) =>
-      s.group.toLowerCase().trim() === student.group.toLowerCase().trim() ||
+      ((s.group.toLowerCase().trim() === student.group.toLowerCase().trim()) &&
+       (!s.specialty || s.specialty.toLowerCase().trim() === student.specialty.toLowerCase().trim())) ||
       s.items.some(
         (item) =>
           item.studentId.toLowerCase() === student.studentId.toLowerCase() ||
+          (student.finCode && item.studentId.toLowerCase() === student.finCode.toLowerCase()) ||
           item.studentName.toLowerCase().includes(student.name.toLowerCase())
       )
   );
@@ -290,6 +294,46 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
 
       {/* 4. Main Body */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-3 sm:px-6 lg:px-8 py-5 sm:py-8 space-y-6 sm:space-y-8">
+        {/* Fərdi Peşə və Tədris Məlumatları Card */}
+        <div className="bg-white rounded-2xl sm:rounded-3xl border border-purple-100 p-4 sm:p-6 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-100 to-purple-200 text-[#5300b7] flex items-center justify-center shrink-0 shadow-xs">
+              <GraduationCap className="w-6 h-6" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-base sm:text-lg font-bold text-slate-900">
+                  {student.specialty}
+                </h2>
+                <span className="px-2.5 py-0.5 rounded-full bg-purple-100 text-[#5300b7] text-xs font-bold">
+                  {student.group}
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-semibold">
+                  Rəsmi Qeydiyyatlı
+                </span>
+              </div>
+              <p className="text-xs text-slate-500">
+                Lənkəran Dövlət Peşə Təhsil Mərkəzi • Yüksək Texniki Peşə (Subbakalavr)
+              </p>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600 pt-0.5">
+                <span>FİN Kod: <strong className="font-mono text-[#5300b7]">{student.finCode || student.studentId}</strong></span>
+                {student.email && <span>E-poçt: <strong className="text-slate-800">{student.email}</strong></span>}
+                {student.phone && <span>Əlaqə: <strong className="text-slate-800">{student.phone}</strong></span>}
+              </div>
+            </div>
+          </div>
+
+          <div className="text-xs text-slate-600 bg-purple-50/60 border border-purple-100 rounded-2xl p-3.5 max-w-sm">
+            <div className="flex items-center gap-1.5 text-[#5300b7] font-bold mb-1">
+              <Shield className="w-4 h-4 text-[#5300b7]" />
+              <span>Fərdi Tələbə Kabineti</span>
+            </div>
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              Bu kabinetdə yalnız Sizin fərdi ixtisasınız ({student.specialty}) və {student.group} üzrə təsdiqlənmiş fənlər, cari semestr balları və imtahan cədvəliniz əks olunur.
+            </p>
+          </div>
+        </div>
+
         {/* TAB 1: SEMESTER GRADES & ACTIVITY */}
         {activeTab === 'grades' && (
           <div className="space-y-6">

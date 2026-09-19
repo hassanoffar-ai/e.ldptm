@@ -15,7 +15,6 @@ import {
   Plus,
   Shield,
   ShieldCheck,
-  Globe,
   X,
   User
 } from 'lucide-react';
@@ -185,16 +184,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <span>Yeni Tələbə Əlavə Et</span>
             </button>
           )}
-
-          {/* Return to Public Site */}
-          <button
-            id="sidebar-to-public-btn"
-            onClick={onNavigateToPublic}
-            className="w-full flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-[#5300b7] hover:bg-purple-50 transition-colors cursor-pointer"
-          >
-            <Globe className="w-4 h-4 text-[#5300b7]" />
-            <span>Əsas Sayta Keçid (/)</span>
-          </button>
 
           {/* Logout */}
           <button

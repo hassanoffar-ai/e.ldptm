@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Bell, Menu, Monitor, Globe, LogOut, CheckCircle2, AlertCircle, Clock, ShieldCheck, User } from 'lucide-react';
+import { Search, Bell, Menu, Monitor, LogOut, CheckCircle2, AlertCircle, Clock, ShieldCheck, User } from 'lucide-react';
 import { ActiveTab, AdminUser } from '../types';
 
 interface HeaderProps {
@@ -75,15 +75,7 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Right Controls */}
       <div className="flex items-center gap-2 md:gap-3">
-        {/* Switch to Public Site Button */}
-        <button
-          onClick={onNavigateToPublic}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 hover:bg-purple-50 text-slate-700 hover:text-[#5300b7] border border-slate-200 text-xs font-semibold transition-colors cursor-pointer"
-          title="Prodakşn / Tələbə Saytına Bax"
-        >
-          <Globe className="w-3.5 h-3.5 text-purple-600" />
-          <span className="hidden sm:inline">Əsas Sayt</span>
-        </button>
+
 
         {/* Quick Kiosk switch */}
         <button

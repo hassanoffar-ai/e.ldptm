@@ -314,6 +314,10 @@ export default function App() {
 
   // Modals
   const [isNewStudentModalOpen, setIsNewStudentModalOpen] = useState(false);
+  const [newStudentDefaults, setNewStudentDefaults] = useState<{
+    group?: string;
+    specialty?: string;
+  }>({});
   const [isNewSessionModalOpen, setIsNewSessionModalOpen] = useState(false);
   const [isNewCourseModalOpen, setIsNewCourseModalOpen] = useState(false);
 
@@ -489,7 +493,10 @@ export default function App() {
         }}
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
-        onOpenNewStudentModal={() => setIsNewStudentModalOpen(true)}
+        onOpenNewStudentModal={() => {
+          setNewStudentDefaults({});
+          setIsNewStudentModalOpen(true);
+        }}
         currentUser={currentUser}
         permissions={permissions}
         onLogout={handleLogout}
@@ -588,8 +595,15 @@ export default function App() {
               {activeTab === 'students' && (
                 <StudentsView
                   students={students}
+                  specialties={specialties}
                   onOpenTicketKioskForStudent={handleOpenTicketKioskForStudent}
-                  onOpenNewStudentModal={() => setIsNewStudentModalOpen(true)}
+                  onOpenNewStudentModal={(defaultGroup, defaultSpecialty) => {
+                    setNewStudentDefaults({
+                      group: defaultGroup,
+                      specialty: defaultSpecialty,
+                    });
+                    setIsNewStudentModalOpen(true);
+                  }}
                   onDeleteStudent={handleDeleteStudent}
                 />
               )}
@@ -625,10 +639,15 @@ export default function App() {
       {/* New Student Registration Modal */}
       <NewStudentModal
         isOpen={isNewStudentModalOpen}
-        onClose={() => setIsNewStudentModalOpen(false)}
+        onClose={() => {
+          setIsNewStudentModalOpen(false);
+          setNewStudentDefaults({});
+        }}
         onAddStudent={handleAddStudent}
         specialties={specialties}
         existingStudents={students}
+        defaultGroup={newStudentDefaults.group}
+        defaultSpecialty={newStudentDefaults.specialty}
       />
 
       {/* New Exam Session Modal */}

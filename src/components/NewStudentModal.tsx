@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, UserPlus, GraduationCap, Users, Mail, Phone, AlertCircle } from 'lucide-react';
 import { SpecialtyItem, Student } from '../types';
-import { GROUPS_LIST } from '../data/mockData';
+import { GROUPS_LIST, SPECIALTIES_LIST } from '../data/mockData';
 
 interface NewStudentModalProps {
   isOpen: boolean;
@@ -9,6 +9,8 @@ interface NewStudentModalProps {
   onAddStudent: (newStudent: Student) => void;
   specialties?: SpecialtyItem[];
   existingStudents?: Student[];
+  defaultGroup?: string;
+  defaultSpecialty?: string;
 }
 
 export const NewStudentModal: React.FC<NewStudentModalProps> = ({
@@ -17,11 +19,22 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
   onAddStudent,
   specialties = [],
   existingStudents = [],
+  defaultGroup,
+  defaultSpecialty,
 }) => {
+  const effectiveSpecialties: Array<{ id: string; name: string; code: string }> =
+    specialties.length > 0
+      ? specialties
+      : SPECIALTIES_LIST.map((name, idx) => ({
+          id: `spec-default-${idx}`,
+          name,
+          code: `YTP-${idx + 1}`,
+        }));
+
   const [name, setName] = useState('');
   const [finCode, setFinCode] = useState('');
-  const [group, setGroup] = useState(GROUPS_LIST[0] || 'İT-21');
-  const [specialty, setSpecialty] = useState('');
+  const [group, setGroup] = useState(defaultGroup || GROUPS_LIST[0] || '2-ci kurs');
+  const [specialty, setSpecialty] = useState(defaultSpecialty || effectiveSpecialties[0]?.name || '');
   const [customSpecialty, setCustomSpecialty] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -29,10 +42,15 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (specialties.length > 0 && !specialty) {
-      setSpecialty(specialties[0].name);
+    if (isOpen) {
+      if (defaultGroup) setGroup(defaultGroup);
+      if (defaultSpecialty) {
+        setSpecialty(defaultSpecialty);
+      } else if (!specialty && effectiveSpecialties.length > 0) {
+        setSpecialty(effectiveSpecialties[0].name);
+      }
     }
-  }, [specialties, specialty]);
+  }, [isOpen, defaultGroup, defaultSpecialty, effectiveSpecialties]);
 
   if (!isOpen) return null;
 
@@ -177,14 +195,14 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
               <label className="block text-xs font-semibold text-[#4a4455] mb-1">
                 İxtisas / Peşə İstiqaməti
               </label>
-              {specialties.length > 0 ? (
+              {effectiveSpecialties.length > 0 ? (
                 <div className="space-y-2">
                   <select
                     value={specialty}
                     onChange={(e) => setSpecialty(e.target.value)}
                     className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
                   >
-                    {specialties.map((s) => (
+                    {effectiveSpecialties.map((s) => (
                       <option key={s.id} value={s.name}>
                         {s.name} ({s.code})
                       </option>
