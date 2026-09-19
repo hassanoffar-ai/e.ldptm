@@ -174,8 +174,23 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
       return;
     }
 
-    if (password.length < 4) {
-      setRegisterError('Şəxsi şifrə ən azı 4 simvoldan ibarət olmalıdır.');
+    if (password.length < 8) {
+      setRegisterError('Şəxsi şifrə ən azı 8 simvoldan ibarət olmalıdır.');
+      return;
+    }
+
+    if (!/[A-ZƏÇŞĞÖÜIİ]/.test(password)) {
+      setRegisterError('Şəxsi şifrədə ən azı 1 böyük hərf olmalıdır (məs: A, B, C...).');
+      return;
+    }
+
+    if (!/[0-9]/.test(password)) {
+      setRegisterError('Şəxsi şifrədə ən azı 1 rəqəm olmalıdır (0-9).');
+      return;
+    }
+
+    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~`]/.test(password)) {
+      setRegisterError('Şəxsi şifrədə ən azı 1 durğu və ya xüsusi simvol olmalıdır (məs: ! @ # $ % * . , -).');
       return;
     }
 
@@ -527,7 +542,7 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
                     <input
                       type={showRegisterPassword ? 'text' : 'password'}
                       required
-                      placeholder="Ən azı 4 simvol"
+                      placeholder="Ən azı 8 simvol (məs: Parol123!)"
                       value={password}
                       onChange={(e) => {
                         setPassword(e.target.value);
@@ -566,6 +581,31 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
                       }}
                       className="w-full pl-10 pr-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
                     />
+                  </div>
+                </div>
+              </div>
+
+              {/* Password security checklist */}
+              <div className="p-2.5 rounded-xl bg-slate-800/40 border border-slate-700/60 text-[11px] space-y-1.5">
+                <span className="font-semibold text-slate-300 block">
+                  Təhlükəsiz şifrə tələbləri:
+                </span>
+                <div className="grid grid-cols-2 gap-x-2 gap-y-1">
+                  <div className={`flex items-center gap-1.5 transition-colors ${password.length >= 8 ? 'text-emerald-400 font-medium' : 'text-slate-400'}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${password.length >= 8 ? 'bg-emerald-400' : 'bg-slate-500'}`} />
+                    <span>Ən azı 8 simvol</span>
+                  </div>
+                  <div className={`flex items-center gap-1.5 transition-colors ${/[A-ZƏÇŞĞÖÜIİ]/.test(password) ? 'text-emerald-400 font-medium' : 'text-slate-400'}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${/[A-ZƏÇŞĞÖÜIİ]/.test(password) ? 'bg-emerald-400' : 'bg-slate-500'}`} />
+                    <span>1 böyük hərf</span>
+                  </div>
+                  <div className={`flex items-center gap-1.5 transition-colors ${/[0-9]/.test(password) ? 'text-emerald-400 font-medium' : 'text-slate-400'}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${/[0-9]/.test(password) ? 'bg-emerald-400' : 'bg-slate-500'}`} />
+                    <span>1 rəqəm (0-9)</span>
+                  </div>
+                  <div className={`flex items-center gap-1.5 transition-colors ${/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~`]/.test(password) ? 'text-emerald-400 font-medium' : 'text-slate-400'}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~`]/.test(password) ? 'bg-emerald-400' : 'bg-slate-500'}`} />
+                    <span>1 durğu işarəsi (!@#...)</span>
                   </div>
                 </div>
               </div>
