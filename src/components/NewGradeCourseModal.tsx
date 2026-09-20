@@ -95,7 +95,7 @@ export const NewGradeCourseModal: React.FC<NewGradeCourseModalProps> = ({
       group,
       specialty: resolvedSpecialty,
       subject: subject.trim(),
-      subjectCode: subjectCode.trim() || `${group}-CS`,
+      subjectCode: subjectCode.trim() || '',
       semester,
       maxScore,
       lastSaved: new Date().toLocaleDateString('az-AZ', {

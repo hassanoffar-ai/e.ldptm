@@ -475,9 +475,11 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 sm:pb-4 border-b border-slate-100 gap-2.5 sm:gap-3">
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 bg-purple-50 text-[#5300b7] rounded-lg text-xs font-mono font-bold">
-                              {course.subjectCode}
-                            </span>
+                            {course.subjectCode && !course.subjectCode.endsWith('-CS') && !course.subjectCode.endsWith('-EX') && course.subjectCode !== course.group && (
+                              <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 bg-purple-50 text-[#5300b7] rounded-lg text-xs font-mono font-bold">
+                                {course.subjectCode}
+                              </span>
+                            )}
                             <h3 className="font-bold text-sm sm:text-base text-slate-900">
                               {course.subject}
                             </h3>
@@ -697,9 +699,11 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                     className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs space-y-3"
                   >
                     <div className="flex justify-between items-start">
-                      <span className="px-2.5 py-1 bg-purple-50 text-[#5300b7] rounded-lg font-mono font-bold text-xs">
-                        {s.subjectCode}
-                      </span>
+                      {s.subjectCode && !s.subjectCode.endsWith('-CS') && !s.subjectCode.endsWith('-EX') && s.subjectCode !== s.group ? (
+                        <span className="px-2.5 py-1 bg-purple-50 text-[#5300b7] rounded-lg font-mono font-bold text-xs">
+                          {s.subjectCode}
+                        </span>
+                      ) : <div />}
                       <span
                         className={`text-xs px-2.5 py-0.5 rounded-full font-bold ${
                           s.status === 'upcoming'

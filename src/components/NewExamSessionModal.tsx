@@ -73,7 +73,7 @@ export const NewExamSessionModal: React.FC<NewExamSessionModalProps> = ({
     const newSession: ExamSession = {
       id: `exam-${Date.now()}`,
       subject: subject.trim(),
-      subjectCode: subjectCode.trim() || `${group}-EX`,
+      subjectCode: subjectCode.trim() || '',
       group,
       specialty: resolvedSpecialty,
       date,
