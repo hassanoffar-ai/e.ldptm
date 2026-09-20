@@ -298,7 +298,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
               </div>
 
               <p className="text-xs text-purple-200 pt-0.5">
-                İxtisas: <strong className="text-white">{student.specialty}</strong> (Yüksək Texniki Peşə)
+                İxtisas: <strong className="text-white">{student.specialty}</strong> • YTP (Yüksək Texniki Peşə)
               </p>
             </div>
           </div>
@@ -483,7 +483,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                             </h3>
                           </div>
                           <span className="text-xs text-slate-500 mt-1 block">
-                            Qrup: <strong className="text-slate-700">{course.group}</strong> • İxtisas: {course.specialty} • Semestr: {course.semester}
+                            Qrup: <strong className="text-slate-700">{course.group}</strong> • Semestr: {course.semester}
                           </span>
                         </div>
 
