@@ -14,6 +14,7 @@ import {
   Building2,
   Check,
   Sparkles,
+  Percent,
 } from 'lucide-react';
 import { ExamSession, GradeBookCourse, SpecialtyModule, StudentGrade, StudentUser } from '../types';
 import { getStoredModules, SEMESTERS_LIST } from '../data/mockData';
@@ -28,8 +29,8 @@ interface PublicPortalViewProps {
 
 export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
   student,
-  courses,
-  sessions,
+  courses = [],
+  sessions = [],
   onLogout,
   onNavigateToAdmin,
 }) => {
@@ -38,35 +39,57 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
   >('grades');
   const [selectedSemesterForModules, setSelectedSemesterForModules] = useState<string>('all');
 
+  // Safe student strings
+  const studentSpecialty = (student?.specialty || '').trim();
+  const studentGroup = (student?.group || '').trim();
+  const studentId = (student?.studentId || '').trim();
+  const studentFin = (student?.finCode || '').trim();
+  const studentName = (student?.name || '').trim();
+
   // Load modules list from localStorage or fallback
   const allModules: SpecialtyModule[] = React.useMemo(() => {
-    return getStoredModules();
+    return getStoredModules() || [];
   }, []);
 
   // Filter modules for this student's specialty
   const mySpecialtyModules = React.useMemo(() => {
-    return allModules.filter(
-      (m) =>
-        m.specialtyName.toLowerCase().trim() === student.specialty.toLowerCase().trim() ||
-        student.specialty.toLowerCase().includes(m.specialtyName.toLowerCase()) ||
-        m.specialtyName.toLowerCase().includes(student.specialty.toLowerCase())
-    );
-  }, [allModules, student.specialty]);
+    if (!studentSpecialty) return allModules;
+    const specLower = studentSpecialty.toLowerCase();
+    return allModules.filter((m) => {
+      const mSpec = (m.specialtyName || '').toLowerCase().trim();
+      return (
+        mSpec === specLower ||
+        specLower.includes(mSpec) ||
+        mSpec.includes(specLower)
+      );
+    });
+  }, [allModules, studentSpecialty]);
 
   // Filter courses for this student (either by group + specialty or explicit student grade record)
-  const studentCoursesWithGrades = courses
+  const studentCoursesWithGrades = (courses || [])
     .map((course) => {
-      const studentGrade = course.grades.find(
-        (g) =>
-          g.studentId === student.id ||
-          g.idNumber.toLowerCase() === student.studentId.toLowerCase() ||
-          (student.finCode && g.idNumber.toLowerCase() === student.finCode.toLowerCase()) ||
-          g.studentName.toLowerCase().includes(student.name.toLowerCase())
-      );
+      if (!course) return null;
+      const grades = course.grades || [];
+      const studentGrade = grades.find((g) => {
+        if (!g) return false;
+        const gId = (g.idNumber || '').toLowerCase();
+        const gName = (g.studentName || '').toLowerCase();
+        return (
+          g.studentId === student?.id ||
+          (studentId && gId === studentId.toLowerCase()) ||
+          (studentFin && gId === studentFin.toLowerCase()) ||
+          (studentName && gName.includes(studentName.toLowerCase()))
+        );
+      });
+
+      const courseGroup = (course.group || '').toLowerCase().trim();
+      const courseSpec = (course.specialty || '').toLowerCase().trim();
+      const sGroupLower = studentGroup.toLowerCase();
+      const sSpecLower = studentSpecialty.toLowerCase();
 
       const isForMyCohort =
-        course.group.toLowerCase().trim() === student.group.toLowerCase().trim() &&
-        (!course.specialty || course.specialty.toLowerCase().trim() === student.specialty.toLowerCase().trim());
+        courseGroup === sGroupLower &&
+        (!courseSpec || !sSpecLower || courseSpec === sSpecLower);
 
       if (!studentGrade && !isForMyCohort) {
         return null;
@@ -83,17 +106,28 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
   }>;
 
   // Filter sessions for student's group and specialty
-  const studentSessions = sessions.filter(
-    (s) =>
-      ((s.group.toLowerCase().trim() === student.group.toLowerCase().trim()) &&
-       (!s.specialty || s.specialty.toLowerCase().trim() === student.specialty.toLowerCase().trim())) ||
-      s.items.some(
-        (item) =>
-          item.studentId.toLowerCase() === student.studentId.toLowerCase() ||
-          (student.finCode && item.studentId.toLowerCase() === student.finCode.toLowerCase()) ||
-          item.studentName.toLowerCase().includes(student.name.toLowerCase())
-      )
-  );
+  const studentSessions = (sessions || []).filter((s) => {
+    if (!s) return false;
+    const sGroup = (s.group || '').toLowerCase().trim();
+    const sSpec = (s.specialty || '').toLowerCase().trim();
+    const isCohortMatch =
+      sGroup === studentGroup.toLowerCase() &&
+      (!sSpec || !studentSpecialty || sSpec === studentSpecialty.toLowerCase());
+
+    const items = s.items || [];
+    const hasStudentItem = items.some((item) => {
+      if (!item) return false;
+      const itemId = (item.studentId || '').toLowerCase();
+      const itemName = (item.studentName || '').toLowerCase();
+      return (
+        (studentId && itemId === studentId.toLowerCase()) ||
+        (studentFin && itemId === studentFin.toLowerCase()) ||
+        (studentName && itemName.includes(studentName.toLowerCase()))
+      );
+    });
+
+    return isCohortMatch || hasStudentItem;
+  });
 
   const calculateEntryScore = (g: StudentGrade) => {
     const att = g.attendance ?? 0;

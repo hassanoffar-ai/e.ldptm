@@ -92,7 +92,7 @@ export const ExamProtocolView: React.FC<ExamProtocolViewProps> = ({
       'Biletin vaxtı',
       'İmza Vəziyyəti',
     ];
-    const rows = currentSession.items.map((item) => [
+    const rows = (currentSession?.items || []).map((item) => [
       item.studentName,
       item.studentId,
       item.group,

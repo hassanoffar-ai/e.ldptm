@@ -57,17 +57,25 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
   // Only 1-ci, 2-ci, 3-cü, 4-cü kurs
   const allGroupNames = GROUPS_LIST;
 
-  const filteredStudents = students.filter((s) => {
+  const filteredStudents = (students || []).filter((s) => {
+    if (!s) return false;
+    const term = (searchTerm || '').toLowerCase();
+    const sName = (s.name || '').toLowerCase();
+    const sId = (s.studentId || '').toLowerCase();
+    const sFin = (s.finCode || '').toLowerCase();
+    const sSpec = (s.specialty || '').toLowerCase();
+
     const matchesSearch =
-      s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.studentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (s.finCode && s.finCode.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      s.specialty.toLowerCase().includes(searchTerm.toLowerCase());
+      !term ||
+      sName.includes(term) ||
+      sId.includes(term) ||
+      sFin.includes(term) ||
+      sSpec.includes(term);
     const matchesGroup = selectedGroup === 'all' || s.group === selectedGroup;
     const matchesSpecialty = selectedSpecialty === 'all' || s.specialty === selectedSpecialty;
     const matchesStatus =
       selectedStatus === 'all' ||
-      (selectedStatus === 'registered' && s.isRegistered) ||
+      (selectedStatus === 'registered' && !!s.isRegistered) ||
       (selectedStatus === 'pending' && !s.isRegistered);
 
     return matchesSearch && matchesGroup && matchesSpecialty && matchesStatus;

@@ -54,12 +54,14 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
   // Find student in registered DB by Student ID (or finCode for legacy)
   const matchedStudentById =
     cleanRegisterId.length >= 2
-      ? students.find(
-          (s) =>
-            s.studentId.trim().toLowerCase() === cleanRegisterId.toLowerCase() ||
-            s.id.trim().toLowerCase() === cleanRegisterId.toLowerCase() ||
-            (s.finCode && s.finCode.trim().toLowerCase() === cleanRegisterId.toLowerCase())
-        ) || null
+      ? (students || []).find((s) => {
+          if (!s) return false;
+          const sId = (s.studentId || '').trim().toLowerCase();
+          const sDbId = (s.id || '').trim().toLowerCase();
+          const sFin = (s.finCode || '').trim().toLowerCase();
+          const target = cleanRegisterId.toLowerCase();
+          return sId === target || sDbId === target || sFin === target;
+        }) || null
       : null;
 
   // Auto-fill existing details if already partially saved
@@ -88,12 +90,13 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
     }
 
     // Match by studentId, id, or legacy finCode
-    const matched = students.find(
-      (s) =>
-        s.studentId.toLowerCase() === cleanId ||
-        s.id.toLowerCase() === cleanId ||
-        (s.finCode && s.finCode.toLowerCase() === cleanId)
-    );
+    const matched = (students || []).find((s) => {
+      if (!s) return false;
+      const sId = (s.studentId || '').toLowerCase();
+      const sDbId = (s.id || '').toLowerCase();
+      const sFin = (s.finCode || '').toLowerCase();
+      return sId === cleanId || sDbId === cleanId || sFin === cleanId;
+    });
 
     if (!matched) {
       setLoginError(
@@ -116,14 +119,14 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
     }
 
     const sessionUser: StudentUser = {
-      id: matched.id,
-      studentId: matched.studentId,
-      finCode: matched.finCode || matched.studentId,
-      name: matched.name,
-      group: matched.group,
-      specialty: matched.specialty,
-      email: matched.email,
-      phone: matched.phone,
+      id: matched.id || '',
+      studentId: matched.studentId || matched.finCode || '',
+      finCode: matched.finCode || matched.studentId || '',
+      name: matched.name || 'Tələbə',
+      group: matched.group || '',
+      specialty: matched.specialty || '',
+      email: matched.email || '',
+      phone: matched.phone || '',
     };
 
     saveStoredStudentSession(sessionUser);

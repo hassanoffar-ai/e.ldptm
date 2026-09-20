@@ -189,7 +189,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
                 <div className="flex items-center gap-2">
                   <span className="text-xs px-2.5 py-1 bg-purple-50 text-[#5300b7] rounded-full font-medium">
-                    {sess.items.length} Tələbə
+                    {(sess.items || []).length} Tələbə
                   </span>
                   <button
                     onClick={() => setActiveTab('exams')}

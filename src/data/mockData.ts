@@ -20,7 +20,7 @@ export const INITIAL_SPECIALTIES: SpecialtyItem[] = [
     code: 'KT',
     direction: 'Yüksək Texniki Peşə (YTP)',
     duration: '3 illik',
-    educationType: 'Əyani',
+    educationType: 'Əyani' as const,
     description: 'Yüksək Texniki Peşə (Subbakalavr) təhsil pilləsi',
   },
   {
@@ -29,7 +29,7 @@ export const INITIAL_SPECIALTIES: SpecialtyItem[] = [
     code: 'KSP',
     direction: 'Yüksək Texniki Peşə (YTP)',
     duration: '3 illik',
-    educationType: 'Əyani',
+    educationType: 'Əyani' as const,
     description: 'Yüksək Texniki Peşə (Subbakalavr) təhsil pilləsi',
   },
   {
@@ -38,7 +38,7 @@ export const INITIAL_SPECIALTIES: SpecialtyItem[] = [
     code: 'KŞŞİ',
     direction: 'Yüksək Texniki Peşə (YTP)',
     duration: '3 illik',
-    educationType: 'Əyani',
+    educationType: 'Əyani' as const,
     description: 'Yüksək Texniki Peşə (Subbakalavr) təhsil pilləsi',
   },
   {
@@ -47,7 +47,7 @@ export const INITIAL_SPECIALTIES: SpecialtyItem[] = [
     code: 'MRİTİE',
     direction: 'Yüksək Texniki Peşə (YTP)',
     duration: '3 illik',
-    educationType: 'Əyani',
+    educationType: 'Əyani' as const,
     description: 'Yüksək Texniki Peşə (Subbakalavr) təhsil pilləsi',
   },
   {
@@ -56,7 +56,7 @@ export const INITIAL_SPECIALTIES: SpecialtyItem[] = [
     code: 'MU',
     direction: 'Yüksək Texniki Peşə (YTP)',
     duration: '3 illik',
-    educationType: 'Əyani',
+    educationType: 'Əyani' as const,
     description: 'Yüksək Texniki Peşə (Subbakalavr) təhsil pilləsi',
   },
 ].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'az'));

@@ -62,7 +62,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const visibleMenuItems = allMenuItems.filter((item) => {
     if (isSuperAdmin) return true;
     if (item.superAdminOnly) return false;
-    if (item.requiredPerm && !permissions[item.requiredPerm]) return false;
+    if (item.requiredPerm && !permissions?.[item.requiredPerm]) return false;
     return true;
   });
 
@@ -173,7 +173,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Sidebar Footer */}
         <div className="p-3 border-t border-[#e2e8f0] space-y-2 bg-[#fcfdff]">
-          {(isSuperAdmin || permissions.canManageStudents) && (
+          {(isSuperAdmin || permissions?.canManageStudents) && (
             <button
               id="sidebar-new-student-btn"
               onClick={onOpenNewStudentModal}

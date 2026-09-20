@@ -101,7 +101,14 @@ export const getStoredSession = (): AdminUser | null => {
   try {
     const raw = localStorage.getItem('eldptm_auth_session');
     if (raw) {
-      return JSON.parse(raw);
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object' && parsed.username) {
+        return {
+          username: String(parsed.username || 'admin'),
+          fullName: String(parsed.fullName || parsed.username || 'Admin'),
+          role: parsed.role === 'super_admin' ? 'super_admin' : 'admin',
+        };
+      }
     }
   } catch (e) {
     console.error(e);
@@ -125,7 +132,19 @@ export const getStoredStudentSession = (): StudentUser | null => {
   try {
     const raw = localStorage.getItem('eldptm_student_session');
     if (raw) {
-      return JSON.parse(raw);
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object' && (parsed.id || parsed.studentId)) {
+        return {
+          id: String(parsed.id || ''),
+          studentId: String(parsed.studentId || parsed.finCode || ''),
+          finCode: String(parsed.finCode || parsed.studentId || ''),
+          name: String(parsed.name || 'Tələbə'),
+          group: String(parsed.group || ''),
+          specialty: String(parsed.specialty || ''),
+          email: parsed.email ? String(parsed.email) : undefined,
+          phone: parsed.phone ? String(parsed.phone) : undefined,
+        };
+      }
     }
   } catch (e) {
     console.error(e);

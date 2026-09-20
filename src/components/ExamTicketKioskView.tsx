@@ -74,9 +74,12 @@ export const ExamTicketKioskView: React.FC<ExamTicketKioskViewProps> = ({
     let foundItem: any = null;
     let foundSession: any = null;
 
-    for (const session of sessions) {
-      const match = session.items.find(
-        (i) => i.studentId.toLowerCase() === trimmedId.toLowerCase()
+    const targetLower = trimmedId.toLowerCase();
+
+    for (const session of (sessions || [])) {
+      if (!session) continue;
+      const match = (session.items || []).find(
+        (i) => (i?.studentId || '').toLowerCase() === targetLower
       );
       if (match) {
         foundItem = match;
@@ -85,11 +88,12 @@ export const ExamTicketKioskView: React.FC<ExamTicketKioskViewProps> = ({
       }
     }
 
-    const foundStudent = students.find(
-      (s) =>
-        s.studentId.toLowerCase() === trimmedId.toLowerCase() ||
-        (s.finCode && s.finCode.toLowerCase() === trimmedId.toLowerCase())
-    );
+    const foundStudent = (students || []).find((s) => {
+      if (!s) return false;
+      const sId = (s.studentId || '').toLowerCase();
+      const sFin = (s.finCode || '').toLowerCase();
+      return sId === targetLower || sFin === targetLower;
+    });
 
     if (!foundItem && !foundStudent) {
       setErrorMessage(
