@@ -370,16 +370,17 @@ export const GradeEntryView: React.FC<GradeEntryViewProps> = ({
               onClick={() => {
                 if (
                   window.confirm(
-                    `"${currentCourse.group} - ${currentCourse.subject}" jurnalını silmək istədiyinizdən əminsiniz?`
+                    `"${currentCourse.group} - ${currentCourse.subject}" jurnalını və qiymətlərini silmək istədiyinizdən əminsiniz?`
                   )
                 ) {
                   onDeleteCourse(currentCourse.id);
                 }
               }}
-              className="p-2 text-slate-400 hover:text-rose-600 rounded-xl hover:bg-rose-50 border border-[#ccc3d7] transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-2 text-rose-600 hover:text-white hover:bg-rose-600 rounded-xl border border-rose-200 transition-colors text-xs font-semibold cursor-pointer shadow-2xs"
               title="Bu Jurnalı Sil"
             >
               <Trash2 className="w-4 h-4" />
+              <span>Bu Jurnalı Sil</span>
             </button>
           )}
 

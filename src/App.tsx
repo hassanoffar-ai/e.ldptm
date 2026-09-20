@@ -156,9 +156,15 @@ export default function App() {
     );
     return savedSessions[0]?.id || '';
   });
-  const [courses, setCourses] = useState<GradeBookCourse[]>(() =>
-    loadFromStorage('eldptm_courses', INITIAL_GRADE_COURSES)
-  );
+  const [courses, setCourses] = useState<GradeBookCourse[]>(() => {
+    const raw = loadFromStorage<GradeBookCourse[]>('eldptm_courses', INITIAL_GRADE_COURSES);
+    try {
+      const deletedCourses: string[] = JSON.parse(localStorage.getItem('eldptm_deleted_courses') || '[]');
+      return raw.filter((c) => !deletedCourses.includes(c.id));
+    } catch {
+      return raw;
+    }
+  });
   const [specialties, setSpecialties] = useState<SpecialtyItem[]>(loadSpecialtiesFromStorage);
 
   // Sync route with URL navigation and history
@@ -279,7 +285,9 @@ export default function App() {
         }
 
         if (dbCourses.length > 0) {
-          setCourses(dbCourses);
+          const deletedCourses: string[] = JSON.parse(localStorage.getItem('eldptm_deleted_courses') || '[]');
+          const validCourses = dbCourses.filter((c) => !deletedCourses.includes(c.id));
+          setCourses(validCourses);
         } else if (courses.length > 0) {
           courses.forEach((c) => upsertCourseToDb(c));
         }
@@ -422,11 +430,25 @@ export default function App() {
   };
 
   const handleCreateCourse = (newCourse: GradeBookCourse) => {
+    try {
+      const deletedCourses: string[] = JSON.parse(localStorage.getItem('eldptm_deleted_courses') || '[]');
+      const filtered = deletedCourses.filter((x) => x !== newCourse.id);
+      localStorage.setItem('eldptm_deleted_courses', JSON.stringify(filtered));
+    } catch (e) {
+      console.error(e);
+    }
     setCourses((prev) => [newCourse, ...prev]);
     upsertCourseToDb(newCourse);
   };
 
   const handleDeleteCourse = (id: string) => {
+    try {
+      const deletedCourses: string[] = JSON.parse(localStorage.getItem('eldptm_deleted_courses') || '[]');
+      if (!deletedCourses.includes(id)) deletedCourses.push(id);
+      localStorage.setItem('eldptm_deleted_courses', JSON.stringify(deletedCourses));
+    } catch (e) {
+      console.error(e);
+    }
     setCourses((prev) => prev.filter((c) => c.id !== id));
     deleteCourseFromDb(id);
   };
