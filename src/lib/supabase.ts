@@ -60,6 +60,7 @@ export async function fetchStudentsFromDb(): Promise<Student[]> {
   const { data, error } = await supabase
     .from('students')
     .select('*')
+    .neq('status', 'deleted')
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -77,10 +78,25 @@ export async function upsertStudentToDb(student: Student): Promise<void> {
   }
 }
 
-export async function deleteStudentFromDb(id: string): Promise<void> {
-  const { error } = await supabase.from('students').delete().eq('id', id);
-  if (error) {
-    console.error('Error deleting student from Supabase:', error);
+export async function deleteStudentFromDb(id: string, studentId?: string): Promise<void> {
+  try {
+    let query = supabase.from('students').delete();
+    if (studentId && studentId !== id) {
+      query = query.or(`id.eq.${id},student_id.eq.${studentId},student_id.eq.${id}`);
+    } else {
+      query = query.or(`id.eq.${id},student_id.eq.${id}`);
+    }
+    const { error } = await query;
+    if (error) {
+      console.error('Error deleting student from Supabase directly:', error);
+    }
+    // Also mark status as deleted in case DB RLS blocks hard deletes
+    await supabase
+      .from('students')
+      .update({ status: 'deleted' })
+      .or(studentId ? `id.eq.${id},student_id.eq.${studentId}` : `id.eq.${id},student_id.eq.${id}`);
+  } catch (e) {
+    console.error('Error in deleteStudentFromDb:', e);
   }
 }
 

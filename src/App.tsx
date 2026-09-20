@@ -137,9 +137,15 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Persistent real data states
-  const [students, setStudents] = useState<Student[]>(() =>
-    loadFromStorage('eldptm_students', INITIAL_STUDENTS)
-  );
+  const [students, setStudents] = useState<Student[]>(() => {
+    const raw = loadFromStorage<Student[]>('eldptm_students', INITIAL_STUDENTS);
+    try {
+      const deletedList: string[] = JSON.parse(localStorage.getItem('eldptm_deleted_students') || '[]');
+      return raw.filter((s) => !deletedList.includes(s.id) && !deletedList.includes(s.studentId));
+    } catch {
+      return raw;
+    }
+  });
   const [sessions, setSessions] = useState<ExamSession[]>(() =>
     loadFromStorage('eldptm_sessions', INITIAL_EXAM_SESSIONS)
   );
@@ -255,7 +261,11 @@ export default function App() {
         if (!isMounted) return;
 
         if (dbStudents.length > 0) {
-          setStudents(dbStudents);
+          const deletedList: string[] = JSON.parse(localStorage.getItem('eldptm_deleted_students') || '[]');
+          const validStudents = dbStudents.filter(
+            (s) => !deletedList.includes(s.id) && !deletedList.includes(s.studentId)
+          );
+          setStudents(validStudents);
         } else if (students.length > 0) {
           // Sync any existing local students to Supabase
           students.forEach((s) => upsertStudentToDb(s));
@@ -309,7 +319,11 @@ export default function App() {
         { event: '*', schema: 'public', table: 'students' },
         async () => {
           const fresh = await fetchStudentsFromDb();
-          if (isMounted && fresh.length > 0) setStudents(fresh);
+          const deletedList: string[] = JSON.parse(localStorage.getItem('eldptm_deleted_students') || '[]');
+          const validStudents = fresh.filter(
+            (s) => !deletedList.includes(s.id) && !deletedList.includes(s.studentId)
+          );
+          if (isMounted) setStudents(validStudents);
         }
       )
       .on(
@@ -423,6 +437,14 @@ export default function App() {
   };
 
   const handleAddStudent = (newStudent: Student) => {
+    try {
+      const deletedList: string[] = JSON.parse(localStorage.getItem('eldptm_deleted_students') || '[]');
+      const filtered = deletedList.filter((x) => x !== newStudent.id && x !== newStudent.studentId);
+      localStorage.setItem('eldptm_deleted_students', JSON.stringify(filtered));
+    } catch (e) {
+      console.error(e);
+    }
+
     setStudents((prev) => {
       const existingIdx = prev.findIndex(
         (s) =>
@@ -487,8 +509,24 @@ export default function App() {
   };
 
   const handleDeleteStudent = (id: string) => {
-    setStudents((prev) => prev.filter((s) => s.id !== id));
-    deleteStudentFromDb(id);
+    const student = students.find((s) => s.id === id || s.studentId === id);
+    const studentId = student?.studentId;
+
+    try {
+      const deletedList: string[] = JSON.parse(localStorage.getItem('eldptm_deleted_students') || '[]');
+      if (id && !deletedList.includes(id)) deletedList.push(id);
+      if (studentId && !deletedList.includes(studentId)) deletedList.push(studentId);
+      localStorage.setItem('eldptm_deleted_students', JSON.stringify(deletedList));
+    } catch (e) {
+      console.error(e);
+    }
+
+    setStudents((prev) =>
+      prev.filter(
+        (s) => s.id !== id && s.studentId !== id && (studentId ? s.studentId !== studentId : true)
+      )
+    );
+    deleteStudentFromDb(id, studentId);
   };
 
   const handleOpenTicketKioskForStudent = (studentId: string) => {
