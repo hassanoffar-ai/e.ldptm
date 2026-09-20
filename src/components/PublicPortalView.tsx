@@ -333,7 +333,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                 Təhsil Pilləsi
               </span>
               <span className="text-xs font-bold text-emerald-300 block mt-0.5 sm:mt-1">
-                YTP Subbakalavr
+                YTP (Yüksək Texniki Peşə)
               </span>
             </div>
           </div>
@@ -423,7 +423,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                 </span>
               </div>
               <p className="text-xs text-slate-500">
-                Lənkəran Dövlət Peşə Təhsil Mərkəzi • Yüksək Texniki Peşə (Subbakalavr)
+                Lənkəran Dövlət Peşə Təhsil Mərkəzi • YTP (Yüksək Texniki Peşə)
               </p>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600 pt-0.5">
                 <span>Tələbə ID: <strong className="font-mono text-[#5300b7]">{student.studentId || student.finCode}</strong></span>
@@ -774,7 +774,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                 Davamiyyət və Dərsdə İştirak Monitorinqi
               </h2>
               <p className="text-xs text-slate-500">
-                Subbakalavr təhsil standartları üzrə fənlər üzrə qayıb limitləri və iştirak payı
+                YTP (Yüksək Texniki Peşə) təhsil standartları üzrə fənlər üzrə qayıb limitləri və iştirak payı
               </p>
             </div>
 
@@ -822,7 +822,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                 Yüksək Texniki Peşə (YTP) 100 Ballıq Qiymətləndirmə Təlimatı
               </h2>
               <p className="text-xs text-slate-500 mt-1.5">
-                Peşə Təhsili YTP Subbakalavr təhsil pilləsi üzrə rəsmi imtahan və qiymətləndirmə qaydaları
+                Peşə Təhsili YTP (Yüksək Texniki Peşə) təhsil pilləsi üzrə rəsmi imtahan və qiymətləndirmə qaydaları
               </p>
             </div>
 

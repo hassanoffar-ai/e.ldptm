@@ -257,8 +257,8 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                         </div>
                         <div>
                           <span>{student.name}</span>
-                          <div className="text-[10px] text-slate-400 font-normal">
-                            YTP Subbakalavr
+                          <div className="text-[10px] text-purple-700 font-medium">
+                            YTP (Yüksək Texniki Peşə)
                           </div>
                         </div>
                       </div>
