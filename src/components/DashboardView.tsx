@@ -51,7 +51,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <h2 className="text-lg font-bold text-[#121c2a] mb-4">
           Əsas İdarəetmə və Tədris Bölmələri
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
           {/* Card 1: Tələbələr */}
           <div
             onClick={() => setActiveTab('students')}
@@ -96,7 +96,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
           </div>
 
-          {/* Card 3: Kollokvium və İmtahanlar */}
+          {/* Card 3: Kollokvium və Qiymətlər */}
           <div
             onClick={() => setActiveTab('grades')}
             className="group bg-white p-5 rounded-2xl border border-[#ccc3d7] hover:border-[#6d28d9] shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
@@ -114,28 +114,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
             <div className="flex items-center gap-1.5 text-xs font-bold text-[#5300b7] group-hover:translate-x-1 transition-transform pt-2 border-t border-slate-100">
               <span>Jurnala Keç</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </div>
-          </div>
-
-          {/* Card 4: İmtahan Sessiyaları */}
-          <div
-            onClick={() => setActiveTab('exams')}
-            className="group bg-white p-5 rounded-2xl border border-[#ccc3d7] hover:border-[#6d28d9] shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
-          >
-            <div>
-              <div className="w-11 h-11 rounded-2xl bg-[#eff4ff] text-[#5300b7] flex items-center justify-center mb-3 group-hover:bg-[#6d28d9] group-hover:text-white transition-colors">
-                <FileText className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-bold text-[#121c2a] mb-1.5">
-                İmtahan Protokolu
-              </h3>
-              <p className="text-xs text-[#64748b] leading-relaxed mb-3">
-                İmtahan sessiyaları, zallar, PC təyinatları və protokollar.
-              </p>
-            </div>
-            <div className="flex items-center gap-1.5 text-xs font-bold text-[#5300b7] group-hover:translate-x-1 transition-transform pt-2 border-t border-slate-100">
-              <span>Protokollara Bax</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </div>
           </div>
