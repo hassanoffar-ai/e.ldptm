@@ -170,12 +170,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
           color: 'text-blue-700 bg-blue-50 border-blue-200',
         };
       }
-      return {
-        isPassed: false,
-        status: 'İmtahana Buraxılmır (Bal < 17)',
-        subtext: `Giriş balı: ${entry} / 50`,
-        color: 'text-amber-700 bg-amber-50 border-amber-200',
-      };
+      return null;
     }
 
     if (exam < 17) {
@@ -584,27 +579,6 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                           </span>
                           <span className="text-[9px] text-purple-800 block">Keçid: &gt; 50</span>
                         </div>
-                      </div>
-
-                      {/* Final summary footer */}
-                      <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs text-slate-500 gap-2">
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-slate-400" />
-                          <span>
-                            {course.lastSaved
-                              ? `Son yenilənmə: ${course.lastSaved}`
-                              : 'Cari semestr üzrə aktiv jurnal'}
-                          </span>
-                        </div>
-
-                        {evalStatus && (
-                          <div className="flex items-center gap-2">
-                            <span>Status:</span>
-                            <span className="font-bold text-slate-800">{evalStatus.status}</span>
-                            <span className="text-slate-400">•</span>
-                            <span>{evalStatus.subtext}</span>
-                          </div>
-                        )}
                       </div>
                     </div>
                   );
