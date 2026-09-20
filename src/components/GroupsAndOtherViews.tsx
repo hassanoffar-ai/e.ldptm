@@ -182,8 +182,8 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
     setEditingSpecialty(item);
     setSpecName(item.name);
     setSpecCode(item.code || '');
-    setSpecDirection('Yüksək Texniki Peşə (YTP)');
-    setSpecDuration(item.duration === '4 illik' ? '4 illik' : '3 illik');
+    setSpecDirection(item.direction || 'Yüksək Texniki Peşə (YTP)');
+    setSpecDuration(item.duration || '3 illik');
     setSpecEducationType(item.educationType || 'Əyani');
     setSpecDescription(item.description || '');
     setFormError(null);
@@ -196,9 +196,14 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
       setFormError('İxtisasın adını qeyd edin');
       return;
     }
+    if (!specDuration.trim()) {
+      setFormError('İxtisasın təhsil müddətini (neçə il olduğunu) qeyd edin');
+      return;
+    }
 
     const finalDirection = 'Yüksək Texniki Peşə (YTP)';
     const finalCode = specCode.trim() || 'YTP';
+    const finalDuration = specDuration.trim();
 
     if (editingSpecialty) {
       const updated: SpecialtyItem = {
@@ -206,7 +211,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
         name: specName.trim(),
         code: finalCode,
         direction: finalDirection,
-        duration: specDuration,
+        duration: finalDuration,
         educationType: specEducationType,
         description: specDescription.trim() || undefined,
       };
@@ -217,7 +222,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
         name: specName.trim(),
         code: finalCode,
         direction: finalDirection,
-        duration: specDuration,
+        duration: finalDuration,
         educationType: specEducationType,
         description: specDescription.trim() || undefined,
         createdAt: new Date().toISOString(),
@@ -541,17 +546,45 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-                    Təhsil Müddəti *
-                  </label>
-                  <select
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-semibold text-[#4a4455]">
+                      Təhsil Müddəti (İl sayı) *
+                    </label>
+                    <span className="text-[11px] font-medium text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-100">
+                      Müddət: {specDuration || 'Seçilməyib'}
+                    </span>
+                  </div>
+
+                  {/* İl sayı üçün sürətli seçim düymələri */}
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 mb-2">
+                    {['1 illik', '1.5 illik', '2 illik', '3 illik', '4 illik', '5 illik'].map((dur) => (
+                      <button
+                        key={dur}
+                        type="button"
+                        onClick={() => setSpecDuration(dur)}
+                        className={`py-2 px-1 text-xs font-semibold rounded-xl border transition-all cursor-pointer ${
+                          specDuration === dur
+                            ? 'bg-[#5300b7] text-white border-[#5300b7] shadow-sm'
+                            : 'bg-[#f8f9ff] text-slate-700 border-[#ccc3d7] hover:bg-purple-50 hover:border-purple-300'
+                        }`}
+                      >
+                        {dur}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Fərdi / Dəqiq daxiletmə sahəsi */}
+                  <input
+                    type="text"
+                    placeholder="Məsələn: 3 illik, 4 illik, 1.5 illik və ya fərdi müddət..."
                     value={specDuration}
                     onChange={(e) => setSpecDuration(e.target.value)}
                     className="w-full px-3.5 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
-                  >
-                    <option value="3 illik">3 illik</option>
-                    <option value="4 illik">4 illik</option>
-                  </select>
+                    required
+                  />
+                  <p className="text-[11px] text-slate-500 mt-1">
+                    Hər bir ixtisas üzrə təhsil müddətini (neçə il olduğunu) yuxarıdakı variantlardan seçin və ya qeyd edin.
+                  </p>
                 </div>
 
                 <div>
