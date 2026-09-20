@@ -142,9 +142,7 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
     }
 
     if (!matchedStudentById) {
-      setRegisterError(
-        `Daxil edilən Tələbə ID (${cleanRegisterId}) mərkəzin bazasında tapılmadı. Yalnız admin tərəfindən qeydiyyata alınmış rəsmi tələbələr qeydiyyatdan keçə bilər.`
-      );
+      setRegisterError('Tələbə ID tapılmadı');
       return;
     }
 
@@ -358,16 +356,11 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
 
               {/* Verification Feedback Badges */}
               {cleanRegisterId.length >= 2 && !matchedStudentById && (
-                <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-2.5 animate-in fade-in duration-200">
-                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
-                  <div className="space-y-0.5">
-                    <span className="font-semibold block text-rose-200">
-                      Tələbə ID ({cleanRegisterId}) bazada tapılmadı
-                    </span>
-                    <p className="text-rose-300/90 text-[11px]">
-                      Yalnız mərkəz administrasiyası tərəfindən rəsmi Tələbə ID təyin olunmuş tələbələr qeydiyyatdan keçə bilər.
-                    </p>
-                  </div>
+                <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2.5 animate-in fade-in duration-200">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                  <span className="font-semibold text-rose-200">
+                    Tələbə ID tapılmadı
+                  </span>
                 </div>
               )}
 
