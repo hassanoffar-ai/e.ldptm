@@ -550,21 +550,21 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                     <label className="block text-xs font-semibold text-[#4a4455]">
                       Təhsil Müddəti (İl sayı) *
                     </label>
-                    <span className="text-[11px] font-medium text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-100">
+                    <span className="text-[11px] font-semibold text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-md border border-purple-100">
                       Müddət: {specDuration || 'Seçilməyib'}
                     </span>
                   </div>
 
-                  {/* İl sayı üçün sürətli seçim düymələri */}
-                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 mb-2">
-                    {['1 illik', '1.5 illik', '2 illik', '3 illik', '4 illik', '5 illik'].map((dur) => (
+                  {/* 1-dən 4-ə qədər il sayı seçimi */}
+                  <div className="grid grid-cols-4 gap-2 mb-2">
+                    {['1 illik', '2 illik', '3 illik', '4 illik'].map((dur) => (
                       <button
                         key={dur}
                         type="button"
                         onClick={() => setSpecDuration(dur)}
-                        className={`py-2 px-1 text-xs font-semibold rounded-xl border transition-all cursor-pointer ${
+                        className={`py-2.5 px-2 text-xs font-bold rounded-xl border transition-all cursor-pointer text-center ${
                           specDuration === dur
-                            ? 'bg-[#5300b7] text-white border-[#5300b7] shadow-sm'
+                            ? 'bg-[#5300b7] text-white border-[#5300b7] shadow-sm ring-2 ring-[#5300b7]/20'
                             : 'bg-[#f8f9ff] text-slate-700 border-[#ccc3d7] hover:bg-purple-50 hover:border-purple-300'
                         }`}
                       >
@@ -573,17 +573,19 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                     ))}
                   </div>
 
-                  {/* Fərdi / Dəqiq daxiletmə sahəsi */}
-                  <input
-                    type="text"
-                    placeholder="Məsələn: 3 illik, 4 illik, 1.5 illik və ya fərdi müddət..."
+                  <select
                     value={specDuration}
                     onChange={(e) => setSpecDuration(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
+                    className="w-full px-3.5 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7] font-medium"
                     required
-                  />
+                  >
+                    <option value="1 illik">1 illik (1 il)</option>
+                    <option value="2 illik">2 illik (2 il)</option>
+                    <option value="3 illik">3 illik (3 il)</option>
+                    <option value="4 illik">4 illik (4 il)</option>
+                  </select>
                   <p className="text-[11px] text-slate-500 mt-1">
-                    Hər bir ixtisas üzrə təhsil müddətini (neçə il olduğunu) yuxarıdakı variantlardan seçin və ya qeyd edin.
+                    İxtisas üzrə təhsil müddətini seçin (1-ci ildən 4-cü ilə qədər).
                   </p>
                 </div>
 
