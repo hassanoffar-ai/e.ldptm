@@ -23,7 +23,7 @@ export const NewGradeCourseModal: React.FC<NewGradeCourseModalProps> = ({
   const [specialty, setSpecialty] = useState('');
   const [customSpecialty, setCustomSpecialty] = useState('');
   const [subjectCode, setSubjectCode] = useState('');
-  const [semester, setSemester] = useState(SEMESTERS_LIST[0] || '1-ci il — I Semestr');
+  const [semester, setSemester] = useState(SEMESTERS_LIST[0] || '1-ci kurs 1-ci semestr');
   const [maxScore] = useState(100);
 
   // Load modules list from localStorage or fallback
@@ -258,21 +258,21 @@ export const NewGradeCourseModal: React.FC<NewGradeCourseModalProps> = ({
               onChange={(e) => setSemester(e.target.value)}
               className="w-full px-3.5 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer"
             >
-              <optgroup label="1-ci il (1-ci kurs)">
-                <option value="1-ci il — I Semestr">1-ci il — I Semestr</option>
-                <option value="1-ci il — II Semestr">1-ci il — II Semestr</option>
+              <optgroup label="1-ci kurs">
+                <option value="1-ci kurs 1-ci semestr">1-ci kurs 1-ci semestr</option>
+                <option value="1-ci kurs 2-ci semestr">1-ci kurs 2-ci semestr</option>
               </optgroup>
-              <optgroup label="2-ci il (2-ci kurs)">
-                <option value="2-ci il — I Semestr">2-ci il — I Semestr</option>
-                <option value="2-ci il — II Semestr">2-ci il — II Semestr</option>
+              <optgroup label="2-ci kurs">
+                <option value="2-ci kurs 1-ci semestr">2-ci kurs 1-ci semestr</option>
+                <option value="2-ci kurs 2-ci semestr">2-ci kurs 2-ci semestr</option>
               </optgroup>
-              <optgroup label="3-cü il (3-cü kurs)">
-                <option value="3-cü il — I Semestr">3-cü il — I Semestr</option>
-                <option value="3-cü il — II Semestr">3-cü il — II Semestr</option>
+              <optgroup label="3-cü kurs">
+                <option value="3-cü kurs 1-ci semestr">3-cü kurs 1-ci semestr</option>
+                <option value="3-cü kurs 2-ci semestr">3-cü kurs 2-ci semestr</option>
               </optgroup>
-              <optgroup label="4-cü il (4-cü kurs)">
-                <option value="4-cü il — I Semestr">4-cü il — I Semestr</option>
-                <option value="4-cü il — II Semestr">4-cü il — II Semestr</option>
+              <optgroup label="4-cü kurs">
+                <option value="4-cü kurs 1-ci semestr">4-cü kurs 1-ci semestr</option>
+                <option value="4-cü kurs 2-ci semestr">4-cü kurs 2-ci semestr</option>
               </optgroup>
             </select>
           </div>
