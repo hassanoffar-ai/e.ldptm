@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Calendar, Clock, DoorClosed, UserCheck, BookOpen, Grid, GraduationCap } from 'lucide-react';
 import { ExamSession, ExamProtocolItem, SpecialtyItem, Student } from '../types';
-import { GROUPS_LIST, ROOMS_LIST, SUBJECTS_LIST } from '../data/mockData';
+import { GROUPS_LIST, ROOMS_LIST, SUBJECTS_LIST, SEMESTERS_LIST } from '../data/mockData';
 
 interface NewExamSessionModalProps {
   isOpen: boolean;
@@ -28,7 +28,7 @@ export const NewExamSessionModal: React.FC<NewExamSessionModalProps> = ({
   const [room, setRoom] = useState(ROOMS_LIST[0] || 'Lab-1');
   const [supervisor, setSupervisor] = useState('');
   const [academicYear, setAcademicYear] = useState('2024/2025');
-  const [semester, setSemester] = useState('Yaz Semestri');
+  const [semester, setSemester] = useState(SEMESTERS_LIST[0] || '1-ci il — I Semestr');
   const [autoIncludeGroupStudents, setAutoIncludeGroupStudents] = useState(true);
 
   const sortedSpecialties = React.useMemo(() => {
@@ -288,13 +288,28 @@ export const NewExamSessionModal: React.FC<NewExamSessionModalProps> = ({
               <label className="block text-xs font-semibold text-[#4a4455] mb-1">
                 Semestr
               </label>
-              <input
-                type="text"
+              <select
                 value={semester}
                 onChange={(e) => setSemester(e.target.value)}
-                placeholder="Yaz Semestri"
-                className="w-full px-3.5 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
-              />
+                className="w-full px-3.5 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer"
+              >
+                <optgroup label="1-ci il (1-ci kurs)">
+                  <option value="1-ci il — I Semestr">1-ci il — I Semestr</option>
+                  <option value="1-ci il — II Semestr">1-ci il — II Semestr</option>
+                </optgroup>
+                <optgroup label="2-ci il (2-ci kurs)">
+                  <option value="2-ci il — I Semestr">2-ci il — I Semestr</option>
+                  <option value="2-ci il — II Semestr">2-ci il — II Semestr</option>
+                </optgroup>
+                <optgroup label="3-cü il (3-cü kurs)">
+                  <option value="3-cü il — I Semestr">3-cü il — I Semestr</option>
+                  <option value="3-cü il — II Semestr">3-cü il — II Semestr</option>
+                </optgroup>
+                <optgroup label="4-cü il (4-cü kurs)">
+                  <option value="4-cü il — I Semestr">4-cü il — I Semestr</option>
+                  <option value="4-cü il — II Semestr">4-cü il — II Semestr</option>
+                </optgroup>
+              </select>
             </div>
           </div>
 

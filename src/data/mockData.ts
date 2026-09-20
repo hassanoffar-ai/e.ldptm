@@ -70,10 +70,19 @@ export const SPECIALTIES_LIST: string[] = [
 ].sort((a, b) => a.localeCompare(b, 'az'));
 
 export const SEMESTERS_LIST = [
+  '1-ci il — I Semestr',
+  '1-ci il — II Semestr',
+  '2-ci il — I Semestr',
+  '2-ci il — II Semestr',
+  '3-cü il — I Semestr',
+  '3-cü il — II Semestr',
+  '4-cü il — I Semestr',
+  '4-cü il — II Semestr',
+];
+
+export const BASE_SEMESTERS_LIST = [
   'I Semestr',
   'II Semestr',
-  'III Semestr',
-  'IV Semestr',
 ];
 
 export const INITIAL_SPECIALTY_MODULES: SpecialtyModule[] = [];

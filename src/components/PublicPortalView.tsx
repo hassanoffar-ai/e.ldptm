@@ -670,11 +670,13 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {mySpecialtyModules
-                  .filter(
-                    (m) =>
-                      selectedSemesterForModules === 'all' ||
-                      m.semester === selectedSemesterForModules
-                  )
+                  .filter((m) => {
+                    if (selectedSemesterForModules === 'all') return true;
+                    if (!m.semester) return false;
+                    const mSem = m.semester.toLowerCase();
+                    const sSem = selectedSemesterForModules.toLowerCase();
+                    return mSem === sSem || mSem.includes(sSem) || sSem.includes(mSem);
+                  })
                   .map((m) => {
                     return (
                       <div
