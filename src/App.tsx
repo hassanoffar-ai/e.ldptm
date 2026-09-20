@@ -523,7 +523,6 @@ export default function App() {
           students={students}
           onRegisterStudent={handleAddStudent}
           onLoginSuccess={handleStudentLoginSuccess}
-          onNavigateToAdmin={() => navigateTo('admin')}
         />
       );
     }
@@ -534,7 +533,6 @@ export default function App() {
         courses={courses}
         sessions={sessions}
         onLogout={handleStudentLogout}
-        onNavigateToAdmin={() => navigateTo('admin')}
       />
     );
   }

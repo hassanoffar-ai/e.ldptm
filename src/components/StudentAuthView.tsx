@@ -21,14 +21,12 @@ interface StudentAuthViewProps {
   students: Student[];
   onRegisterStudent: (newStudent: Student) => void;
   onLoginSuccess: (studentUser: StudentUser) => void;
-  onNavigateToAdmin?: () => void;
 }
 
 export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
   students,
   onRegisterStudent,
   onLoginSuccess,
-  onNavigateToAdmin,
 }) => {
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
