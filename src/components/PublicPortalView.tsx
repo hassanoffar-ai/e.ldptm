@@ -251,24 +251,15 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
             </div>
           </div>
 
-          {/* Student Profile Overview & Logout */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="hidden md:flex flex-col text-right">
-              <span className="text-xs font-bold text-slate-800 leading-tight">
-                {student.name}
-              </span>
-              <span className="text-[11px] font-mono text-purple-700 font-semibold">
-                {student.studentId} {student.group && student.group !== 'YTP' ? `• Qrup: ${student.group}` : '• YTP'}
-              </span>
-            </div>
-
+          {/* Logout Button */}
+          <div className="flex items-center">
             <button
               onClick={onLogout}
-              className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 text-xs font-bold transition-all cursor-pointer"
+              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 text-xs font-bold transition-all cursor-pointer shadow-2xs"
               title="Kabinetdən Çıxış"
             >
               <LogOut className="w-4 h-4 text-rose-500" />
-              <span className="hidden sm:inline">Çıxış</span>
+              <span>Çıxış</span>
             </button>
           </div>
         </div>
