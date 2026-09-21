@@ -1421,36 +1421,6 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                   </div>
                 </div>
 
-                {/* Qiymətləndirmə Şkalası (YTP Standartı: A-F) */}
-                <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Award className="w-4 h-4 text-amber-800" />
-                    <h4 className="text-xs font-bold text-amber-950 uppercase tracking-wide">
-                      Qiymətləndirmə Şkalası və Hərf Şərhələri
-                    </h4>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
-                    <div className="p-2 bg-white rounded-lg border border-amber-200">
-                      <span className="font-bold text-emerald-700">A (91 - 100):</span> <span className="text-slate-800 font-medium">Əla</span>
-                    </div>
-                    <div className="p-2 bg-white rounded-lg border border-amber-200">
-                      <span className="font-bold text-blue-700">B (81 - 90):</span> <span className="text-slate-800 font-medium">Çox yaxşı</span>
-                    </div>
-                    <div className="p-2 bg-white rounded-lg border border-amber-200">
-                      <span className="font-bold text-purple-700">C (71 - 80):</span> <span className="text-slate-800 font-medium">Yaxşı</span>
-                    </div>
-                    <div className="p-2 bg-white rounded-lg border border-amber-200">
-                      <span className="font-bold text-amber-700">D (61 - 70):</span> <span className="text-slate-800 font-medium">Kafi</span>
-                    </div>
-                    <div className="p-2 bg-white rounded-lg border border-amber-200">
-                      <span className="font-bold text-teal-700">E (51 - 60):</span> <span className="text-slate-800 font-medium">Qənaətbəxş</span>
-                    </div>
-                    <div className="p-2 bg-white rounded-lg border border-amber-200">
-                      <span className="font-bold text-rose-700">F (0 - 50):</span> <span className="text-slate-800 font-medium">Kəsildi</span>
-                    </div>
-                  </div>
-                </div>
-
                 {/* Syllabus Attachment (Supabase 'syllabuses' bucket) */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
