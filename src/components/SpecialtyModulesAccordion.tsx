@@ -303,51 +303,153 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                                       </p>
                                     )}
 
-                                    {/* Exam Schedule Card Inside Fənn */}
-                                    <div className="p-3 rounded-xl bg-gradient-to-r from-purple-50/70 via-indigo-50/40 to-white border border-purple-100 space-y-1.5">
+                                    {/* Colloquiums and Exam Schedule Card Inside Fənn */}
+                                    <div className="p-3.5 rounded-xl bg-gradient-to-r from-purple-50/70 via-indigo-50/40 to-white border border-purple-100 space-y-2.5">
                                       <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-1.5 text-xs font-bold text-[#5300b7]">
                                           <Calendar className="w-3.5 h-3.5" />
-                                          <span>İmtahan Cədvəli</span>
+                                          <span>İmtahan və Kollokvium Cədvəli</span>
                                         </div>
-                                        {hasExamInfo ? (
-                                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                            Elan Edilib
-                                          </span>
-                                        ) : (
-                                          <span className="text-[10px] font-semibold text-slate-400">
-                                            Gözlənilir
-                                          </span>
-                                        )}
                                       </div>
 
-                                      {hasExamInfo ? (
-                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs pt-1.5 border-t border-purple-100/60">
-                                          {m.examDate && (
-                                            <div>
-                                              <span className="text-[10px] text-slate-500 block">Tarix</span>
-                                              <strong className="font-bold text-slate-900">{m.examDate}</strong>
+                                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 border-t border-purple-100/60 text-xs">
+                                        {/* 1-ci Kollokvium */}
+                                        <div className="p-2 bg-white/80 rounded-lg border border-purple-100">
+                                          <div className="text-[10px] font-bold text-purple-700 uppercase tracking-wide">
+                                            1-ci Kollokvium
+                                          </div>
+                                          {m.colloquium1Date || m.colloquium1Time || m.colloquium1Room ? (
+                                            <div className="text-[11px] text-slate-800 space-y-0.5 mt-1">
+                                              {m.colloquium1Date && <div><strong>Tarix:</strong> {m.colloquium1Date}</div>}
+                                              {m.colloquium1Time && <div><strong>Saat:</strong> {m.colloquium1Time}</div>}
+                                              {m.colloquium1Room && <div><strong>Otaq:</strong> {m.colloquium1Room}</div>}
                                             </div>
-                                          )}
-                                          {m.examTime && (
-                                            <div>
-                                              <span className="text-[10px] text-slate-500 block">Saat</span>
-                                              <strong className="font-bold text-slate-900">{m.examTime}</strong>
-                                            </div>
-                                          )}
-                                          {m.examRoom && (
-                                            <div>
-                                              <span className="text-[10px] text-slate-500 block">Otaq</span>
-                                              <strong className="font-bold text-slate-900">{m.examRoom}</strong>
-                                            </div>
+                                          ) : (
+                                            <div className="text-[10px] text-slate-400 italic mt-1">Təyin edilməyib</div>
                                           )}
                                         </div>
-                                      ) : (
-                                        <p className="text-[11px] text-slate-400 italic">
-                                          İmtahan tarixi və saatı təyin edildikdə burada görünəcək.
-                                        </p>
-                                      )}
+
+                                        {/* 2-ci Kollokvium */}
+                                        <div className="p-2 bg-white/80 rounded-lg border border-purple-100">
+                                          <div className="text-[10px] font-bold text-purple-700 uppercase tracking-wide">
+                                            2-ci Kollokvium
+                                          </div>
+                                          {m.colloquium2Date || m.colloquium2Time || m.colloquium2Room ? (
+                                            <div className="text-[11px] text-slate-800 space-y-0.5 mt-1">
+                                              {m.colloquium2Date && <div><strong>Tarix:</strong> {m.colloquium2Date}</div>}
+                                              {m.colloquium2Time && <div><strong>Saat:</strong> {m.colloquium2Time}</div>}
+                                              {m.colloquium2Room && <div><strong>Otaq:</strong> {m.colloquium2Room}</div>}
+                                            </div>
+                                          ) : (
+                                            <div className="text-[10px] text-slate-400 italic mt-1">Təyin edilməyib</div>
+                                          )}
+                                        </div>
+
+                                        {/* Yekun İmtahan */}
+                                        <div className="p-2 bg-purple-100/50 rounded-lg border border-purple-200">
+                                          <div className="text-[10px] font-bold text-[#5300b7] uppercase tracking-wide">
+                                            Yekun İmtahan
+                                          </div>
+                                          {m.examDate || m.examTime || m.examRoom ? (
+                                            <div className="text-[11px] text-slate-900 space-y-0.5 mt-1 font-medium">
+                                              {m.examDate && <div><strong>Tarix:</strong> {m.examDate}</div>}
+                                              {m.examTime && <div><strong>Saat:</strong> {m.examTime}</div>}
+                                              {m.examRoom && <div><strong>Otaq:</strong> {m.examRoom}</div>}
+                                            </div>
+                                          ) : (
+                                            <div className="text-[10px] text-slate-400 italic mt-1">Təyin edilməyib</div>
+                                          )}
+                                        </div>
+                                      </div>
                                     </div>
+
+                                    {/* Student Grade in this Subject (if exists in Gradebook) */}
+                                    {(() => {
+                                      let allCourses: any[] = [];
+                                      try {
+                                        const saved = localStorage.getItem('eldptm_courses');
+                                        if (saved) allCourses = JSON.parse(saved);
+                                      } catch (e) {}
+
+                                      // Match course by subject name
+                                      const matchedCourse = allCourses.find((c: any) => {
+                                        const cSub = (c.subject || '').toLowerCase().trim();
+                                        const mSub = (m.name || '').toLowerCase().trim();
+                                        return cSub && mSub && (cSub === mSub || cSub.includes(mSub) || mSub.includes(cSub));
+                                      });
+
+                                      if (!matchedCourse || !matchedCourse.students) return null;
+
+                                      const myStudentId = (student.studentId || student.id || student.finCode || '').toLowerCase();
+                                      const myStudentName = (student.name || '').toLowerCase();
+                                      const myGrade = matchedCourse.students.find((gs: any) => {
+                                        const gsId = (gs.studentId || gs.idNumber || '').toLowerCase();
+                                        const gsName = (gs.studentName || '').toLowerCase();
+                                        return (myStudentId && gsId === myStudentId) || (myStudentName && gsName.includes(myStudentName));
+                                      });
+
+                                      if (!myGrade) return null;
+
+                                      const entryTotal = (myGrade.attendance || 0) + (myGrade.seminar || 0) + (myGrade.colloquium1 || 0) + (myGrade.colloquium2 || 0);
+                                      const hasAnyGrade = myGrade.attendance !== null || myGrade.seminar !== null || myGrade.colloquium1 !== null || myGrade.colloquium2 !== null || myGrade.examScore !== null;
+
+                                      if (!hasAnyGrade) return null;
+
+                                      const finalScore = myGrade.examScore !== null && myGrade.examScore !== undefined ? entryTotal + myGrade.examScore : null;
+                                      const isPassed = finalScore !== null && myGrade.examScore >= 17 && finalScore > 50;
+
+                                      return (
+                                        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                                          <div className="flex items-center justify-between">
+                                            <span className="text-[11px] font-bold text-slate-700">
+                                              📊 Sizin Cari Qiymət Göstəriciləriniz:
+                                            </span>
+                                            {finalScore !== null ? (
+                                              <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                                                isPassed ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-700'
+                                              }`}>
+                                                {isPassed ? 'Müvəffəq' : 'Qeyri-müvəffəq'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-[10px] text-purple-700 font-bold bg-purple-100 px-2 py-0.5 rounded-md">
+                                                Giriş Balı: {entryTotal} / 50
+                                              </span>
+                                            )}
+                                          </div>
+
+                                          <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5 text-center text-[10px]">
+                                            <div className="bg-white p-1 rounded border border-slate-200">
+                                              <span className="text-slate-400 block">Davamiyyət</span>
+                                              <strong className="text-slate-800">{myGrade.attendance ?? '-'}</strong>
+                                            </div>
+                                            <div className="bg-white p-1 rounded border border-slate-200">
+                                              <span className="text-slate-400 block">Seminar</span>
+                                              <strong className="text-slate-800">{myGrade.seminar ?? '-'}</strong>
+                                            </div>
+                                            <div className="bg-white p-1 rounded border border-slate-200">
+                                              <span className="text-slate-400 block">Kol 1</span>
+                                              <strong className="text-slate-800">{myGrade.colloquium1 ?? '-'}</strong>
+                                            </div>
+                                            <div className="bg-white p-1 rounded border border-slate-200">
+                                              <span className="text-slate-400 block">Kol 2</span>
+                                              <strong className="text-slate-800">{myGrade.colloquium2 ?? '-'}</strong>
+                                            </div>
+                                            <div className="bg-purple-50 p-1 rounded border border-purple-200 font-bold text-[#5300b7]">
+                                              <span className="text-purple-600 block">Giriş</span>
+                                              <strong>{entryTotal}</strong>
+                                            </div>
+                                            <div className="bg-amber-50 p-1 rounded border border-amber-200 font-bold text-amber-900">
+                                              <span className="text-amber-700 block">İmtahan</span>
+                                              <strong>{myGrade.examScore ?? '-'}</strong>
+                                            </div>
+                                            <div className="bg-purple-100/70 p-1 rounded border border-purple-300 font-bold text-purple-950">
+                                              <span className="text-purple-800 block">Yekun</span>
+                                              <strong>{finalScore ?? entryTotal}</strong>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      );
+                                    })()}
                                   </div>
 
                                   {/* Syllabus Action Button */}

@@ -350,6 +350,12 @@ export const mapDbToModule = (row: any): SpecialtyModule => ({
   examDate: row.exam_date || row.examDate || undefined,
   examTime: row.exam_time || row.examTime || undefined,
   examRoom: row.exam_room || row.examRoom || undefined,
+  colloquium1Date: row.colloquium1_date || row.colloquium1Date || undefined,
+  colloquium1Time: row.colloquium1_time || row.colloquium1Time || undefined,
+  colloquium1Room: row.colloquium1_room || row.colloquium1Room || undefined,
+  colloquium2Date: row.colloquium2_date || row.colloquium2Date || undefined,
+  colloquium2Time: row.colloquium2_time || row.colloquium2Time || undefined,
+  colloquium2Room: row.colloquium2_room || row.colloquium2Room || undefined,
   description: row.description || undefined,
   createdAt: row.created_at || undefined,
 });
@@ -369,6 +375,12 @@ export const mapModuleToDb = (m: SpecialtyModule) => ({
   exam_date: m.examDate || null,
   exam_time: m.examTime || null,
   exam_room: m.examRoom || null,
+  colloquium1_date: m.colloquium1Date || null,
+  colloquium1_time: m.colloquium1Time || null,
+  colloquium1_room: m.colloquium1Room || null,
+  colloquium2_date: m.colloquium2Date || null,
+  colloquium2_time: m.colloquium2Time || null,
+  colloquium2_room: m.colloquium2Room || null,
   description: m.description || null,
 });
 

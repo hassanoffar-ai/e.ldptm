@@ -164,13 +164,31 @@ export default function App() {
     );
     return savedSessions[0]?.id || '';
   });
+  const isLegacyFakeCourse = (c: GradeBookCourse) => {
+    if (!c) return true;
+    const sub = (c.subject || '').toLowerCase().trim();
+    const id = (c.id || '').toLowerCase();
+    return (
+      id.startsWith('course-mock-') ||
+      id.startsWith('course-ksp-') ||
+      id.startsWith('course-prog-') ||
+      id === 'course-1' ||
+      sub === 'proqramlaşdırmanın əsasları' ||
+      sub === 'proqramlasdirmanin esaslari'
+    );
+  };
+
   const [courses, setCourses] = useState<GradeBookCourse[]>(() => {
     const raw = loadFromStorage<GradeBookCourse[]>('eldptm_courses', INITIAL_GRADE_COURSES);
     try {
       const deletedCourses: string[] = JSON.parse(localStorage.getItem('eldptm_deleted_courses') || '[]');
-      return raw.filter((c) => !deletedCourses.includes(c.id));
+      const filtered = raw.filter((c) => !deletedCourses.includes(c.id) && !isLegacyFakeCourse(c));
+      if (filtered.length !== raw.length) {
+        localStorage.setItem('eldptm_courses', JSON.stringify(filtered));
+      }
+      return filtered;
     } catch {
-      return raw;
+      return raw.filter((c) => !isLegacyFakeCourse(c));
     }
   });
   const [specialties, setSpecialties] = useState<SpecialtyItem[]>(loadSpecialtiesFromStorage);
@@ -294,10 +312,16 @@ export default function App() {
 
         if (dbCourses.length > 0) {
           const deletedCourses: string[] = JSON.parse(localStorage.getItem('eldptm_deleted_courses') || '[]');
-          const validCourses = dbCourses.filter((c) => !deletedCourses.includes(c.id));
+          const validCourses = dbCourses.filter((c) => !deletedCourses.includes(c.id) && !isLegacyFakeCourse(c));
+          // If any fake course found in DB, delete it
+          dbCourses.forEach((c) => {
+            if (isLegacyFakeCourse(c)) {
+              deleteCourseFromDb(c.id);
+            }
+          });
           setCourses(validCourses);
         } else if (courses.length > 0) {
-          courses.forEach((c) => upsertCourseToDb(c));
+          courses.filter((c) => !isLegacyFakeCourse(c)).forEach((c) => upsertCourseToDb(c));
         }
 
         if (dbSpecialties.length > 0) {
@@ -751,6 +775,7 @@ export default function App() {
                   students={students}
                   sessions={sessions}
                   courses={courses}
+                  onUpdateCourses={setCourses}
                   specialties={specialties}
                   onAddSpecialty={handleAddSpecialty}
                   onUpdateSpecialty={handleUpdateSpecialty}

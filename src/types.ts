@@ -85,6 +85,12 @@ export interface SpecialtyModule {
   examDate?: string; // İmtahan tarixi (məs: "2026-06-15")
   examTime?: string; // İmtahan saatı (məs: "10:00 - 12:00")
   examRoom?: string; // İmtahan otağı (məs: "Otaq 204")
+  colloquium1Date?: string; // 1-ci Kollokvium tarixi
+  colloquium1Time?: string; // 1-ci Kollokvium saatı
+  colloquium1Room?: string; // 1-ci Kollokvium otağı
+  colloquium2Date?: string; // 2-ci Kollokvium tarixi
+  colloquium2Time?: string; // 2-ci Kollokvium saatı
+  colloquium2Room?: string; // 2-ci Kollokvium otağı
   description?: string;
   createdAt?: string;
 }
