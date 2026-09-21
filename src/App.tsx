@@ -576,7 +576,6 @@ export default function App() {
     if (tab === 'exams' && !permissions.canManageExams) return false;
     if (tab === 'grades' && !permissions.canManageGrades) return false;
     if (tab === 'tickets' && !permissions.canAccessTickets) return false;
-    if (tab === 'rooms' && !permissions.canAccessRooms) return false;
     if (tab === 'reports' && !permissions.canViewReports) return false;
     if (tab === 'journal' && !permissions.canAccessJournal) return false;
     if (tab === 'attendance' && !permissions.canManageAttendance) return false;
@@ -743,7 +742,6 @@ export default function App() {
                 'subjects',
                 'journal',
                 'attendance',
-                'rooms',
                 'reports',
                 'settings',
               ].includes(activeTab) && (

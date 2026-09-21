@@ -389,31 +389,6 @@ export const AdminPermissionsView: React.FC<AdminPermissionsViewProps> = ({
           </div>
 
 
-          {/* Permission 10: Rooms */}
-          <div className="p-4 rounded-xl border border-slate-200 flex items-center justify-between hover:bg-slate-50 transition-colors">
-            <div>
-              <h4 className="text-sm font-bold text-slate-800">
-                Otaqlar və Laboratoriyalar
-              </h4>
-              <p className="text-xs text-slate-500">
-                Kompüter otaqlarının vəziyyətini və tutumunu izləmək
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => handleTogglePermission('canAccessRooms')}
-              className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${
-                permissions.canAccessRooms ? 'bg-[#5300b7]' : 'bg-slate-300'
-              }`}
-            >
-              <div
-                className={`w-5 h-5 rounded-full bg-white transition-transform absolute top-0.5 ${
-                  permissions.canAccessRooms ? 'right-0.5' : 'left-0.5'
-                }`}
-              />
-            </button>
-          </div>
-
           {/* Permission 11: Reports */}
           <div className="p-4 rounded-xl border border-slate-200 flex items-center justify-between hover:bg-slate-50 transition-colors">
             <div>

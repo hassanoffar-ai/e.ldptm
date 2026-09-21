@@ -11,7 +11,6 @@ export const DEFAULT_ADMIN_PERMISSIONS: AdminPermissions = {
   canManageStudents: true,
   canManageExams: true,
   canManageGrades: true,
-  canAccessRooms: true,
   canAccessJournal: true,
   canViewReports: false,
   canAccessTickets: true,
