@@ -29,9 +29,22 @@ import {
   ChevronUp,
   FileText,
   User,
+  UploadCloud,
+  FileUp,
+  Download,
+  ExternalLink,
+  Loader2,
+  Paperclip,
 } from 'lucide-react';
 import { ActiveTab, ExamSession, GradeBookCourse, SpecialtyItem, SpecialtyModule, Student } from '../types';
 import { GROUPS_LIST, ROOMS_LIST, SUBJECTS_LIST, INITIAL_SPECIALTIES, getStoredModules, SEMESTERS_LIST } from '../data/mockData';
+import {
+  uploadSyllabusFile,
+  deleteSyllabusFile,
+  fetchModulesFromDb,
+  upsertModuleToDb,
+  deleteModuleFromDb,
+} from '../lib/supabase';
 
 interface GroupsAndOtherViewsProps {
   activeTab: ActiveTab;
@@ -75,6 +88,22 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
 
   // Modules and Syllabuses Management States
   const [modulesList, setModulesList] = useState<SpecialtyModule[]>(() => getStoredModules());
+  const [isUploadingSyllabus, setIsUploadingSyllabus] = useState(false);
+  const [modSyllabusUrl, setModSyllabusUrl] = useState('');
+  const [modSyllabusFileName, setModSyllabusFileName] = useState('');
+  const [uploadSyllabusError, setUploadSyllabusError] = useState<string | null>(null);
+
+  // Sync modules from Supabase on mount
+  React.useEffect(() => {
+    fetchModulesFromDb().then((dbMods) => {
+      if (dbMods && dbMods.length > 0) {
+        setModulesList(dbMods);
+        try {
+          localStorage.setItem('eldptm_modules', JSON.stringify(dbMods));
+        } catch {}
+      }
+    });
+  }, []);
 
   const sortedSpecialties = React.useMemo(() => {
     return [...specialties].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'az'));
@@ -113,6 +142,9 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
     );
     setModSemester(selectedModuleSemester !== 'all' ? selectedModuleSemester : SEMESTERS_LIST[0] || '1-ci kurs 1-ci semestr');
     setModName('');
+    setModSyllabusUrl('');
+    setModSyllabusFileName('');
+    setUploadSyllabusError(null);
     setModError(null);
     setIsModuleModalOpen(true);
   };
@@ -122,8 +154,43 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
     setModSpecialty(m.specialtyName);
     setModSemester(m.semester);
     setModName(m.name);
+    setModSyllabusUrl(m.syllabusUrl || '');
+    setModSyllabusFileName(m.syllabusFileName || '');
+    setUploadSyllabusError(null);
     setModError(null);
     setIsModuleModalOpen(true);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check size limit: 30MB
+    if (file.size > 30 * 1024 * 1024) {
+      setUploadSyllabusError('Fayl ölçüsü maksimum 30MB ola bilər.');
+      return;
+    }
+
+    setIsUploadingSyllabus(true);
+    setUploadSyllabusError(null);
+
+    const { url, fileName, error } = await uploadSyllabusFile(file);
+    setIsUploadingSyllabus(false);
+
+    if (error) {
+      setUploadSyllabusError(
+        `Fayl yüklənərkən xəta baş verdi: ${error.message || 'Storage xətası'}`
+      );
+    } else if (url) {
+      setModSyllabusUrl(url);
+      setModSyllabusFileName(fileName);
+    }
+  };
+
+  const handleRemoveSyllabusFile = () => {
+    setModSyllabusUrl('');
+    setModSyllabusFileName('');
+    setUploadSyllabusError(null);
   };
 
   const handleSaveModule = (e: React.FormEvent) => {
@@ -134,26 +201,29 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
     }
 
     if (editingModule) {
-      const updated = modulesList.map((m) =>
-        m.id === editingModule.id
-          ? {
-              ...m,
-              specialtyName: modSpecialty,
-              semester: modSemester,
-              name: modName.trim(),
-            }
-          : m
-      );
+      const updatedItem: SpecialtyModule = {
+        ...editingModule,
+        specialtyName: modSpecialty,
+        semester: modSemester,
+        name: modName.trim(),
+        syllabusUrl: modSyllabusUrl.trim() || undefined,
+        syllabusFileName: modSyllabusFileName.trim() || (modSyllabusUrl ? 'Sillabus Faylı' : undefined),
+      };
+      const updated = modulesList.map((m) => (m.id === editingModule.id ? updatedItem : m));
       saveModules(updated);
+      upsertModuleToDb(updatedItem);
     } else {
       const newMod: SpecialtyModule = {
         id: `mod-${Date.now()}`,
         specialtyName: modSpecialty,
         semester: modSemester,
         name: modName.trim(),
+        syllabusUrl: modSyllabusUrl.trim() || undefined,
+        syllabusFileName: modSyllabusFileName.trim() || (modSyllabusUrl ? 'Sillabus Faylı' : undefined),
         createdAt: new Date().toISOString(),
       };
       saveModules([newMod, ...modulesList]);
+      upsertModuleToDb(newMod);
     }
 
     setIsModuleModalOpen(false);
@@ -161,8 +231,13 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
 
   const handleDeleteModule = (id: string, name: string) => {
     if (window.confirm(`"${name}" modulunu silmək istədiyinizdən əminsiniz?`)) {
+      const target = modulesList.find((m) => m.id === id);
+      if (target?.syllabusUrl) {
+        deleteSyllabusFile(target.syllabusUrl);
+      }
       const updated = modulesList.filter((m) => m.id !== id);
       saveModules(updated);
+      deleteModuleFromDb(id);
     }
   };
 
@@ -763,6 +838,27 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                     <h3 className="font-bold text-base text-[#121c2a] leading-snug">
                       {m.name}
                     </h3>
+
+                    {/* Syllabus Badge / Download if available */}
+                    {m.syllabusUrl ? (
+                      <div className="pt-1">
+                        <a
+                          href={m.syllabusUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-[#5300b7] border border-purple-200 rounded-xl text-xs font-bold transition-all shadow-2xs hover:shadow-xs group"
+                          title="Sillabus sənədini aç / yüklə"
+                        >
+                          <FileText className="w-3.5 h-3.5 text-[#5300b7] group-hover:scale-110 transition-transform" />
+                          <span className="truncate max-w-[180px]">
+                            {m.syllabusFileName || 'Sillabusa Bax (PDF)'}
+                          </span>
+                          <ExternalLink className="w-3 h-3 opacity-70" />
+                        </a>
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-slate-400 italic">Sillabus faylı əlavə edilməyib</p>
+                    )}
                   </div>
 
                   {/* Actions Footer */}
@@ -888,6 +984,79 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                   />
                 </div>
 
+                {/* Syllabus Attachment (Supabase 'syllabuses' bucket) */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Sillabus Sənədi (Supabase Storage: <code className="text-[#5300b7]">syllabuses</code>)
+                  </label>
+
+                  {uploadSyllabusError && (
+                    <div className="mb-2 p-2.5 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <span>{uploadSyllabusError}</span>
+                    </div>
+                  )}
+
+                  {modSyllabusUrl ? (
+                    <div className="p-3 bg-purple-50/70 border border-purple-200 rounded-xl flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-8 h-8 rounded-lg bg-[#5300b7] text-white flex items-center justify-center shrink-0">
+                          <FileText className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-slate-800 truncate">
+                            {modSyllabusFileName || 'Sillabus Faylı'}
+                          </p>
+                          <a
+                            href={modSyllabusUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[11px] text-[#5300b7] font-semibold hover:underline inline-flex items-center gap-1 mt-0.5"
+                          >
+                            <span>Faylı Görüntülə</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleRemoveSyllabusFile}
+                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer shrink-0"
+                        title="Faylı çıxart"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="relative border-2 border-dashed border-[#ccc3d7] hover:border-[#5300b7] rounded-xl p-4 text-center transition-all bg-[#f8f9ff] hover:bg-purple-50/20 group">
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx,.ppt,.pptx,.txt"
+                        onChange={handleFileUpload}
+                        disabled={isUploadingSyllabus}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-10"
+                      />
+                      {isUploadingSyllabus ? (
+                        <div className="flex items-center justify-center gap-2 text-xs font-bold text-[#5300b7] py-2">
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          <span>Supabase 'syllabuses' bucketinə yüklənir...</span>
+                        </div>
+                      ) : (
+                        <div className="space-y-1.5 py-1">
+                          <UploadCloud className="w-7 h-7 mx-auto text-[#5300b7] opacity-80 group-hover:scale-110 transition-transform" />
+                          <p className="text-xs font-bold text-slate-700">
+                            Sillabus faylını seçin və ya buraya sürükləyin
+                          </p>
+                          <p className="text-[11px] text-slate-500">
+                            PDF, Word (.docx) • Maksimum 30 MB
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
                 <div className="flex gap-3 pt-3">
                   <button
                     type="button"
@@ -898,7 +1067,8 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 py-2.5 bg-[#5300b7] hover:bg-[#430093] text-white rounded-xl text-sm font-semibold transition-colors shadow-md shadow-purple-900/15 cursor-pointer"
+                    disabled={isUploadingSyllabus}
+                    className="flex-1 py-2.5 bg-[#5300b7] hover:bg-[#430093] disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-colors shadow-md shadow-purple-900/15 cursor-pointer"
                   >
                     {editingModule ? 'Yadda Saxla' : 'Modulu Əlavə Et'}
                   </button>

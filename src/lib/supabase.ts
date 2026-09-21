@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { ExamSession, GradeBookCourse, SpecialtyItem, Student } from '../types';
+import { ExamSession, GradeBookCourse, SpecialtyItem, SpecialtyModule, Student } from '../types';
 
 const getEnvVar = (key: string, fallback: string): string => {
   try {
@@ -268,3 +268,122 @@ export async function deleteSpecialtyFromDb(id: string): Promise<void> {
     console.error('Error deleting specialty from Supabase:', error);
   }
 }
+
+// ==================== STORAGE: SYLLABUSES ====================
+
+export const BUCKET_SYLLABUSES = 'syllabuses';
+
+export async function uploadSyllabusFile(file: File): Promise<{
+  url: string | null;
+  fileName: string;
+  error: any;
+}> {
+  try {
+    const cleanFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const filePath = `${Date.now()}_${cleanFileName}`;
+
+    const { data, error } = await supabase.storage
+      .from(BUCKET_SYLLABUSES)
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: true,
+      });
+
+    if (error) {
+      console.error('Supabase storage upload error:', error);
+      return { url: null, fileName: file.name, error };
+    }
+
+    const { data: publicData } = supabase.storage
+      .from(BUCKET_SYLLABUSES)
+      .getPublicUrl(data.path);
+
+    return { url: publicData.publicUrl, fileName: file.name, error: null };
+  } catch (err) {
+    console.error('Exception during syllabus upload:', err);
+    return { url: null, fileName: file.name, error: err };
+  }
+}
+
+export async function deleteSyllabusFile(fileUrlOrPath: string): Promise<void> {
+  try {
+    let filePath = fileUrlOrPath;
+    if (fileUrlOrPath.includes(`/${BUCKET_SYLLABUSES}/`)) {
+      filePath = fileUrlOrPath.split(`/${BUCKET_SYLLABUSES}/`).pop()?.split('?')[0] || fileUrlOrPath;
+    }
+    const { error } = await supabase.storage.from(BUCKET_SYLLABUSES).remove([filePath]);
+    if (error) {
+      console.error('Supabase storage delete error:', error);
+    }
+  } catch (err) {
+    console.error('Exception during syllabus delete:', err);
+  }
+}
+
+// ==================== SPECIALTY MODULES ====================
+
+export const mapDbToModule = (row: any): SpecialtyModule => ({
+  id: row.id,
+  specialtyId: row.specialty_id || undefined,
+  specialtyName: row.specialty_name || row.specialty || '',
+  semester: row.semester || '',
+  code: row.code || undefined,
+  name: row.name || '',
+  creditHours: row.credit_hours ? Number(row.credit_hours) : undefined,
+  credits: row.credits ? Number(row.credits) : undefined,
+  instructor: row.instructor || undefined,
+  syllabusTopics: row.syllabus_topics || undefined,
+  syllabusUrl: row.syllabus_url || undefined,
+  syllabusFileName: row.syllabus_file_name || undefined,
+  description: row.description || undefined,
+  createdAt: row.created_at || undefined,
+});
+
+export const mapModuleToDb = (m: SpecialtyModule) => ({
+  id: m.id,
+  specialty_name: m.specialtyName,
+  semester: m.semester,
+  code: m.code || null,
+  name: m.name,
+  credit_hours: m.creditHours || null,
+  credits: m.credits || null,
+  instructor: m.instructor || null,
+  syllabus_topics: m.syllabusTopics || null,
+  syllabus_url: m.syllabusUrl || null,
+  syllabus_file_name: m.syllabusFileName || null,
+  description: m.description || null,
+});
+
+export async function fetchModulesFromDb(): Promise<SpecialtyModule[]> {
+  try {
+    const { data, error } = await supabase
+      .from('modules')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      return [];
+    }
+    return (data || []).map(mapDbToModule);
+  } catch {
+    return [];
+  }
+}
+
+export async function upsertModuleToDb(m: SpecialtyModule): Promise<void> {
+  try {
+    const dbPayload = mapModuleToDb(m);
+    await supabase.from('modules').upsert(dbPayload, { onConflict: 'id' });
+  } catch (err) {
+    console.error('Error saving module to Supabase:', err);
+  }
+}
+
+export async function deleteModuleFromDb(id: string): Promise<void> {
+  try {
+    await supabase.from('modules').delete().eq('id', id);
+  } catch (err) {
+    console.error('Error deleting module from Supabase:', err);
+  }
+}
+

@@ -12,12 +12,15 @@ import {
   BarChart3,
   Shield,
   Building2,
-  Check,
   Sparkles,
   Percent,
+  FileText,
+  ExternalLink,
+  Download,
 } from 'lucide-react';
 import { ExamSession, GradeBookCourse, SpecialtyModule, StudentGrade, StudentUser } from '../types';
 import { getStoredModules, SEMESTERS_LIST } from '../data/mockData';
+import { fetchModulesFromDb } from '../lib/supabase';
 
 interface PublicPortalViewProps {
   student: StudentUser;
@@ -33,7 +36,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
   onLogout,
 }) => {
   const [activeTab, setActiveTab] = useState<
-    'grades' | 'modules' | 'schedule' | 'attendance' | 'rules'
+    'grades' | 'modules' | 'schedule' | 'rules'
   >('grades');
   const [selectedSemesterForModules, setSelectedSemesterForModules] = useState<string>('all');
 
@@ -44,9 +47,15 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
   const studentFin = (student?.finCode || '').trim();
   const studentName = (student?.name || '').trim();
 
-  // Load modules list from localStorage or fallback
-  const allModules: SpecialtyModule[] = React.useMemo(() => {
-    return getStoredModules() || [];
+  // Load modules list from localStorage and Supabase
+  const [allModules, setAllModules] = useState<SpecialtyModule[]>(() => getStoredModules() || []);
+
+  React.useEffect(() => {
+    fetchModulesFromDb().then((dbMods) => {
+      if (dbMods && dbMods.length > 0) {
+        setAllModules(dbMods);
+      }
+    });
   }, []);
 
   // Filter modules for this student's specialty
@@ -303,31 +312,13 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
             </div>
           </div>
 
-          {/* KPI Mini Badges */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
-            <div className="p-2.5 sm:p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 text-center">
-              <span className="text-[10px] sm:text-[11px] text-purple-200 uppercase font-semibold block">
-                Semestr Fənləri
-              </span>
-              <span className="text-lg sm:text-2xl font-black text-white">
-                {totalCourses} fənn
-              </span>
-            </div>
-
-            <div className="p-2.5 sm:p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 text-center">
-              <span className="text-[10px] sm:text-[11px] text-purple-200 uppercase font-semibold block">
-                Orta Giriş Balı
-              </span>
-              <span className="text-lg sm:text-2xl font-black text-amber-300 font-mono">
-                {averageEntryScore} / 50
-              </span>
-            </div>
-
-            <div className="p-2.5 sm:p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 text-center col-span-2 sm:col-span-1">
+          {/* Education level badge */}
+          <div className="flex items-center">
+            <div className="p-2.5 sm:p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 text-left">
               <span className="text-[10px] sm:text-[11px] text-purple-200 uppercase font-semibold block">
                 Təhsil Pilləsi
               </span>
-              <span className="text-xs font-bold text-emerald-300 block mt-0.5 sm:mt-1">
+              <span className="text-xs sm:text-sm font-bold text-emerald-300 block mt-0.5">
                 YTP (Yüksək Texniki Peşə)
               </span>
             </div>
@@ -372,18 +363,6 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
           >
             <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span>İmtahan Cədvəli ({studentSessions.length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('attendance')}
-            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
-              activeTab === 'attendance'
-                ? 'bg-[#5300b7] text-white shadow-sm'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-            }`}
-          >
-            <Percent className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span>Davamiyyət İcmalı</span>
           </button>
 
           <button
@@ -655,18 +634,39 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                     return (
                       <div
                         key={m.id}
-                        className="bg-white p-5 rounded-2xl sm:rounded-3xl border border-slate-200 hover:border-[#5300b7] transition-all shadow-xs space-y-2.5"
+                        className="bg-white p-5 rounded-2xl sm:rounded-3xl border border-slate-200 hover:border-[#5300b7] transition-all shadow-xs space-y-3 flex flex-col justify-between"
                       >
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="text-xs font-semibold text-slate-500 truncate">
-                            {m.specialtyName}
-                          </span>
-                          <span className="text-xs font-bold text-purple-800 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-200 shrink-0">
-                            {m.semester}
-                          </span>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-xs font-semibold text-slate-500 truncate">
+                              {m.specialtyName}
+                            </span>
+                            <span className="text-xs font-bold text-purple-800 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-200 shrink-0">
+                              {m.semester}
+                            </span>
+                          </div>
+
+                          <h3 className="font-bold text-base text-slate-900">{m.name}</h3>
                         </div>
 
-                        <h3 className="font-bold text-base text-slate-900">{m.name}</h3>
+                        {/* Syllabus Download/View Action */}
+                        <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
+                          <span className="text-[11px] text-slate-500 font-medium">Fənn Sillabusu:</span>
+                          {m.syllabusUrl ? (
+                            <a
+                              href={m.syllabusUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#5300b7] hover:bg-[#430093] text-white rounded-xl text-xs font-bold transition-all shadow-xs group"
+                            >
+                              <FileText className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+                              <span className="truncate max-w-[150px]">{m.syllabusFileName || 'Sillabusu Aç'}</span>
+                              <ExternalLink className="w-3 h-3 opacity-80" />
+                            </a>
+                          ) : (
+                            <span className="text-[11px] text-slate-400 italic">Mövcud deyil</span>
+                          )}
+                        </div>
                       </div>
                     );
                   })}
@@ -744,55 +744,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
           </div>
         )}
 
-        {/* TAB 3: ATTENDANCE */}
-        {activeTab === 'attendance' && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-xl font-bold text-slate-900">
-                Davamiyyət və Dərsdə İştirak Monitorinqi
-              </h2>
-              <p className="text-xs text-slate-500">
-                YTP (Yüksək Texniki Peşə) təhsil standartları üzrə fənlər üzrə qayıb limitləri və iştirak payı
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs text-center">
-                <span className="text-xs text-slate-500 font-semibold block mb-1">
-                  Ümumi İştirak Payı
-                </span>
-                <span className="text-3xl font-black text-emerald-600">100%</span>
-                <p className="text-[11px] text-slate-400 mt-2">
-                  Qayıb limiti aşılmayıb
-                </p>
-              </div>
-
-              <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs text-center">
-                <span className="text-xs text-slate-500 font-semibold block mb-1">
-                  İcazə Verilən Maksimum Qayıb
-                </span>
-                <span className="text-3xl font-black text-slate-800">25%</span>
-                <p className="text-[11px] text-slate-400 mt-2">
-                  25%-dən çox qayıb imtahandan məhrumiyyətdir
-                </p>
-              </div>
-
-              <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs text-center">
-                <span className="text-xs text-slate-500 font-semibold block mb-1">
-                  Status
-                </span>
-                <span className="text-lg font-bold text-emerald-600 mt-2 block">
-                  İmtahana İcazəli
-                </span>
-                <p className="text-[11px] text-slate-400 mt-2">
-                  Davamiyyət üzrə heç bir məhdudiyyət yoxdur
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 5: YTP RULES */}
+        {/* TAB 4: YTP RULES */}
         {activeTab === 'rules' && (
           <div className="max-w-4xl mx-auto space-y-6">
             <div className="text-center">

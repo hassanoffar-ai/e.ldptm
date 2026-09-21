@@ -81,6 +81,7 @@ export interface SpecialtyModule {
   instructor?: string; // Tədris edən müəllim
   syllabusTopics?: string; // Sillabus mövzuları və planı
   syllabusUrl?: string; // Sənəd / Link
+  syllabusFileName?: string; // Faylın adı
   description?: string;
   createdAt?: string;
 }
