@@ -283,9 +283,6 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                 <h1 className="text-xl sm:text-3xl font-black tracking-tight break-words leading-tight">
                   {student.name}
                 </h1>
-                <span className="px-2 sm:px-2.5 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-400/40 text-emerald-200 text-[11px] sm:text-xs font-bold shrink-0">
-                  Aktiv Tələbə
-                </span>
               </div>
 
               <div className="flex flex-wrap items-center gap-x-3 sm:gap-x-4 gap-y-1 text-xs text-purple-100/90 font-medium">
