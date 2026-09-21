@@ -427,13 +427,27 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
 
                                       if (!myGrade) return null;
 
-                                      const entryTotal = (myGrade.attendance || 0) + (myGrade.seminar || 0) + (myGrade.colloquium1 || 0) + (myGrade.colloquium2 || 0);
-                                      const hasAnyGrade = myGrade.attendance !== null || myGrade.seminar !== null || myGrade.colloquium1 !== null || myGrade.colloquium2 !== null || myGrade.examScore !== null;
+                                      const isEntryComplete =
+                                        myGrade.attendance !== null && myGrade.attendance !== undefined &&
+                                        myGrade.seminar !== null && myGrade.seminar !== undefined &&
+                                        myGrade.colloquium1 !== null && myGrade.colloquium1 !== undefined &&
+                                        myGrade.colloquium2 !== null && myGrade.colloquium2 !== undefined;
+
+                                      const entryTotal = isEntryComplete
+                                        ? Number(myGrade.attendance) + Number(myGrade.seminar) + Number(myGrade.colloquium1) + Number(myGrade.colloquium2)
+                                        : null;
+
+                                      const hasAnyGrade =
+                                        myGrade.attendance !== null ||
+                                        myGrade.seminar !== null ||
+                                        myGrade.colloquium1 !== null ||
+                                        myGrade.colloquium2 !== null ||
+                                        myGrade.examScore !== null;
 
                                       if (!hasAnyGrade) return null;
 
-                                      const finalScore = myGrade.examScore !== null && myGrade.examScore !== undefined ? entryTotal + myGrade.examScore : null;
-                                      const isPassed = finalScore !== null && myGrade.examScore >= 17 && finalScore > 50;
+                                      const hasExam = myGrade.examScore !== null && myGrade.examScore !== undefined;
+                                      const finalScore = isEntryComplete && hasExam ? (entryTotal! + Number(myGrade.examScore)) : null;
 
                                       const gradeEval = getGradeEvaluation(finalScore, myGrade.examScore);
 
@@ -447,9 +461,13 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                                               <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${gradeEval.badgeClass}`}>
                                                 {gradeEval.letter} — {gradeEval.label} ({finalScore} bal)
                                               </span>
-                                            ) : (
+                                            ) : entryTotal !== null ? (
                                               <span className="text-[10px] text-purple-700 font-bold bg-purple-100 px-2 py-0.5 rounded-md">
                                                 Giriş Balı: {entryTotal} / 50
+                                              </span>
+                                            ) : (
+                                              <span className="text-[10px] text-slate-500 font-medium bg-slate-100 px-2 py-0.5 rounded-md">
+                                                Giriş balı gözlənilir (bütün ballar daxil edilməyib)
                                               </span>
                                             )}
                                           </div>
@@ -473,7 +491,7 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                                             </div>
                                             <div className="bg-purple-50 p-1 rounded border border-purple-200 font-bold text-[#5300b7]">
                                               <span className="text-purple-600 block">Giriş</span>
-                                              <strong>{entryTotal}</strong>
+                                              <strong>{entryTotal !== null ? entryTotal : '-'}</strong>
                                             </div>
                                             <div className="bg-amber-50 p-1 rounded border border-amber-200 font-bold text-amber-900">
                                               <span className="text-amber-700 block">İmtahan</span>
@@ -481,7 +499,7 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                                             </div>
                                             <div className="bg-purple-100/70 p-1 rounded border border-purple-300 font-bold text-purple-950">
                                               <span className="text-purple-800 block">Yekun</span>
-                                              <strong>{finalScore ?? entryTotal}</strong>
+                                              <strong>{finalScore !== null ? finalScore : (entryTotal !== null ? entryTotal : '-')}</strong>
                                             </div>
                                           </div>
                                         </div>

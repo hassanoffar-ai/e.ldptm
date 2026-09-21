@@ -1638,8 +1638,18 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                               examScore: null,
                             };
 
-                            const entryTotal = (g.attendance || 0) + (g.seminar || 0) + (g.colloquium1 || 0) + (g.colloquium2 || 0);
-                            const finalTotal = entryTotal + (g.examScore || 0);
+                            const isEntryComplete =
+                              g.attendance !== null && g.attendance !== undefined &&
+                              g.seminar !== null && g.seminar !== undefined &&
+                              g.colloquium1 !== null && g.colloquium1 !== undefined &&
+                              g.colloquium2 !== null && g.colloquium2 !== undefined;
+
+                            const entryTotal = isEntryComplete
+                              ? Number(g.attendance) + Number(g.seminar) + Number(g.colloquium1) + Number(g.colloquium2)
+                              : null;
+
+                            const hasExam = g.examScore !== null && g.examScore !== undefined;
+                            const finalTotal = isEntryComplete && hasExam ? (entryTotal! + Number(g.examScore)) : null;
 
                             let statusBadge = (
                               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">
@@ -1647,32 +1657,32 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                               </span>
                             );
 
-                            if (g.examScore !== null && g.examScore !== undefined) {
-                              if (g.examScore < 17 || finalTotal <= 50) {
+                            if (isEntryComplete && hasExam) {
+                              if (Number(g.examScore) < 17 || finalTotal! <= 50) {
                                 statusBadge = (
                                   <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-300">
                                     F — Kəsildi
                                   </span>
                                 );
-                              } else if (finalTotal >= 91) {
+                              } else if (finalTotal! >= 91) {
                                 statusBadge = (
                                   <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
                                     A — Əla
                                   </span>
                                 );
-                              } else if (finalTotal >= 81) {
+                              } else if (finalTotal! >= 81) {
                                 statusBadge = (
                                   <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800 border border-blue-300">
                                     B — Çox yaxşı
                                   </span>
                                 );
-                              } else if (finalTotal >= 71) {
+                              } else if (finalTotal! >= 71) {
                                 statusBadge = (
                                   <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-purple-100 text-purple-900 border border-purple-300">
                                     C — Yaxşı
                                   </span>
                                 );
-                              } else if (finalTotal >= 61) {
+                              } else if (finalTotal! >= 61) {
                                 statusBadge = (
                                   <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
                                     D — Kafi
@@ -1685,10 +1695,10 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                                   </span>
                                 );
                               }
-                            } else if (entryTotal > 0) {
+                            } else if (isEntryComplete) {
                               statusBadge = (
                                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-[#5300b7] border border-purple-200">
-                                  Giriş: {entryTotal}
+                                  Giriş: {entryTotal} / 50
                                 </span>
                               );
                             }
@@ -1756,10 +1766,10 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                                   />
                                 </td>
 
-                                {/* Entry Total */}
+                                {/* Entry Total (Only calculated when all 4 are entered) */}
                                 <td className="py-2 px-2 text-center bg-purple-50/40">
                                   <span className="font-mono font-black text-[#5300b7] text-sm">
-                                    {entryTotal}
+                                    {entryTotal !== null ? entryTotal : '-'}
                                   </span>
                                 </td>
 
@@ -1778,12 +1788,12 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                                   />
                                 </td>
 
-                                {/* Final Total */}
+                                {/* Final Total (Only when Entry is complete and Exam is entered) */}
                                 <td className="py-2 px-2 text-center bg-purple-100/40">
                                   <span className={`font-mono font-black text-sm ${
-                                    g.examScore !== null && (g.examScore < 17 || finalTotal <= 50) ? 'text-rose-600' : 'text-[#5300b7]'
+                                    finalTotal !== null && (Number(g.examScore) < 17 || finalTotal <= 50) ? 'text-rose-600' : 'text-[#5300b7]'
                                   }`}>
-                                    {g.examScore !== null ? finalTotal : `${entryTotal} (Giriş)`}
+                                    {finalTotal !== null ? finalTotal : (entryTotal !== null ? `${entryTotal} (Giriş)` : '-')}
                                   </span>
                                 </td>
 
