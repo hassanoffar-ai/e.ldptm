@@ -37,7 +37,7 @@ import {
   Loader2,
   Paperclip,
 } from 'lucide-react';
-import { ActiveTab, ExamSession, GradeBookCourse, SpecialtyItem, SpecialtyModule, Student } from '../types';
+import { ActiveTab, ExamSession, GradeBookCourse, SpecialtyItem, SpecialtyModule, Student, StudentGrade } from '../types';
 import { GROUPS_LIST, ROOMS_LIST, SUBJECTS_LIST, INITIAL_SPECIALTIES, getStoredModules, SEMESTERS_LIST } from '../data/mockData';
 import {
   fetchModulesFromDb,
@@ -80,6 +80,8 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
   const [selectedGroupFilter, setSelectedGroupFilter] = useState<string>('all');
   const [selectedSpecialtyFilter, setSelectedSpecialtyFilter] = useState<string>('all');
   const [selectedCourseYearFilter, setSelectedCourseYearFilter] = useState<string>('all');
+  const [specialtySearch, setSpecialtySearch] = useState<string>('');
+  const [directionFilter, setDirectionFilter] = useState<string>('all');
   const [editingSpecialty, setEditingSpecialty] = useState<SpecialtyItem | null>(null);
   const [isSpecialtyModalOpen, setIsSpecialtyModalOpen] = useState(false);
 
@@ -90,7 +92,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
   const [specDuration, setSpecDuration] = useState('3 illik');
   const [specEducationType, setSpecEducationType] = useState<'Əyani' | 'Qiyabi'>('Əyani');
   const [specDescription, setSpecDescription] = useState('');
-  const [specError, setSpecError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   // Modules (Fənlər) management state
   const [modulesList, setModulesList] = useState<SpecialtyModule[]>(() => getStoredModules());

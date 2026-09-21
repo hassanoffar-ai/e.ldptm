@@ -7,6 +7,7 @@ import {
   ChevronRight,
   Users,
   BookOpen,
+  GraduationCap,
 } from 'lucide-react';
 import { ActiveTab, ExamSession, GradeBookCourse, Student } from '../types';
 
@@ -51,8 +52,30 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <h2 className="text-lg font-bold text-[#121c2a] mb-4">
           Əsas İdarəetmə və Tədris Bölmələri
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
-          {/* Card 1: Tələbələr */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Card 1: İxtisaslar */}
+          <div
+            onClick={() => setActiveTab('specialties')}
+            className="group bg-white p-5 rounded-2xl border border-[#ccc3d7] hover:border-[#6d28d9] shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
+          >
+            <div>
+              <div className="w-11 h-11 rounded-2xl bg-[#eff4ff] text-[#5300b7] flex items-center justify-center mb-3 group-hover:bg-[#6d28d9] group-hover:text-white transition-colors">
+                <GraduationCap className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-bold text-[#121c2a] mb-1.5">
+                İxtisaslar
+              </h3>
+              <p className="text-xs text-[#64748b] leading-relaxed mb-3">
+                Rəsmi YTP ixtisasları, təhsil pilləsi və müddətlərinin idarə edilməsi.
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5 text-xs font-bold text-[#5300b7] group-hover:translate-x-1 transition-transform pt-2 border-t border-slate-100">
+              <span>İxtisaslara Bax</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </div>
+          </div>
+
+          {/* Card 2: Tələbələr */}
           <div
             onClick={() => setActiveTab('students')}
             className="group bg-white p-5 rounded-2xl border border-[#ccc3d7] hover:border-[#6d28d9] shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
@@ -74,7 +97,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
           </div>
 
-          {/* Card 2: Fənlər */}
+          {/* Card 3: Fənlər */}
           <div
             onClick={() => setActiveTab('subjects')}
             className="group bg-white p-5 rounded-2xl border border-[#ccc3d7] hover:border-[#6d28d9] shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
@@ -87,7 +110,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 Fənlər və İmtahan
               </h3>
               <p className="text-xs text-[#64748b] leading-relaxed mb-3">
-                İxtisaslar və semestrlər üzrə tədris olunan fənlər, sillabuslar və imtahan cədvəli.
+                İxtisaslar və semestrlər üzrə tədris olunan fənlər, sillabuslar və cədvəllər.
               </p>
             </div>
             <div className="flex items-center gap-1.5 text-xs font-bold text-[#5300b7] group-hover:translate-x-1 transition-transform pt-2 border-t border-slate-100">
@@ -96,7 +119,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
           </div>
 
-          {/* Card 3: Kollokvium və Qiymətlər */}
+          {/* Card 4: Kollokvium və Qiymətlər */}
           <div
             onClick={() => setActiveTab('grades')}
             className="group bg-white p-5 rounded-2xl border border-[#ccc3d7] hover:border-[#6d28d9] shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
