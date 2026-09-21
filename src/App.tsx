@@ -65,7 +65,14 @@ const loadSpecialtiesFromStorage = (): SpecialtyItem[] => {
     if (item) {
       const parsed = JSON.parse(item);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        const hasLegacy = parsed.some((s: SpecialtyItem) =>
+        const cleaned = parsed.map((s: SpecialtyItem) => ({
+          ...s,
+          direction:
+            !s.direction || s.direction === 'Texniki' || s.direction === 'Qeyri-texniki'
+              ? 'YTP (Yüksək Texniki Peşə)'
+              : s.direction,
+        }));
+        const hasLegacy = cleaned.some((s: SpecialtyItem) =>
           [
             'Veb tərtibatı və dizaynı',
             'Kompüter sistemlərində proqram təminatı',
@@ -74,7 +81,7 @@ const loadSpecialtiesFromStorage = (): SpecialtyItem[] => {
           ].includes(s.name)
         );
         if (hasLegacy) {
-          const customOnes = parsed.filter(
+          const customOnes = cleaned.filter(
             (s: SpecialtyItem) =>
               ![
                 'Veb tərtibatı və dizaynı',
@@ -90,7 +97,8 @@ const loadSpecialtiesFromStorage = (): SpecialtyItem[] => {
           localStorage.setItem('eldptm_specialties', JSON.stringify(migrated));
           return migrated;
         }
-        const sorted = [...parsed].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'az'));
+        const sorted = [...cleaned].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'az'));
+        localStorage.setItem('eldptm_specialties', JSON.stringify(sorted));
         return sorted;
       }
     }

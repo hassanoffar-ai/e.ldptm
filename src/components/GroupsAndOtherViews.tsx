@@ -323,13 +323,20 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
   // İxtisaslar View
   if (activeTab === 'specialties') {
     const rawList = sortedSpecialties.length > 0 ? sortedSpecialties : INITIAL_SPECIALTIES;
+    const sanitizeDirection = (dir?: string) => {
+      if (!dir || dir === 'Texniki' || dir === 'Qeyri-texniki' || !dir.trim()) {
+        return 'YTP (Yüksək Texniki Peşə)';
+      }
+      return dir;
+    };
+
     const safeSpecialties = rawList
       .map((spec, idx) => ({
         ...spec,
         id: spec.id || `spec-${idx}`,
         name: spec.name || 'İxtisas',
         code: spec.code || '',
-        direction: spec.direction || 'YTP (Yüksək Texniki Peşə)',
+        direction: sanitizeDirection(spec.direction),
         duration: spec.duration || '3 illik',
         educationType: spec.educationType || 'Əyani',
         description: spec.description || '',

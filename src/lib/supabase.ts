@@ -220,26 +220,38 @@ export async function deleteCourseFromDb(id: string): Promise<void> {
 
 // ==================== SPECIALTIES ====================
 
-export const mapDbToSpecialty = (row: any): SpecialtyItem => ({
-  id: row.id,
-  name: row.name || '',
-  code: row.code || '',
-  direction: row.direction || row.department || 'YTP (Yüksək Texniki Peşə)',
-  duration: row.duration || '3 illik',
-  educationType: (row.education_type || row.educationType || 'Əyani') as 'Əyani' | 'Qiyabi',
-  description: row.description || '',
-  createdAt: row.created_at || row.createdAt,
-});
+export const mapDbToSpecialty = (row: any): SpecialtyItem => {
+  let direction = row.direction || row.department || 'YTP (Yüksək Texniki Peşə)';
+  if (direction === 'Texniki' || direction === 'Qeyri-texniki' || !direction.trim()) {
+    direction = 'YTP (Yüksək Texniki Peşə)';
+  }
+  return {
+    id: row.id,
+    name: row.name || '',
+    code: row.code || '',
+    direction: direction,
+    duration: row.duration || '3 illik',
+    educationType: (row.education_type || row.educationType || 'Əyani') as 'Əyani' | 'Qiyabi',
+    description: row.description || '',
+    createdAt: row.created_at || row.createdAt,
+  };
+};
 
-export const mapSpecialtyToDb = (s: SpecialtyItem) => ({
-  id: s.id,
-  name: s.name,
-  code: s.code || '',
-  direction: s.direction || 'YTP (Yüksək Texniki Peşə)',
-  duration: s.duration || '3 illik',
-  department: s.direction || 'Texniki',
-  status: 'active',
-});
+export const mapSpecialtyToDb = (s: SpecialtyItem) => {
+  const dir =
+    s.direction && s.direction !== 'Texniki' && s.direction !== 'Qeyri-texniki'
+      ? s.direction
+      : 'YTP (Yüksək Texniki Peşə)';
+  return {
+    id: s.id,
+    name: s.name,
+    code: s.code || '',
+    direction: dir,
+    duration: s.duration || '3 illik',
+    department: dir,
+    status: 'active',
+  };
+};
 
 export async function fetchSpecialtiesFromDb(): Promise<SpecialtyItem[]> {
   const { data, error } = await supabase
