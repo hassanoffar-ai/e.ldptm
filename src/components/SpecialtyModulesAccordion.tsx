@@ -143,39 +143,35 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
         {/* 2. Accordion Expanded Content */}
         {isAccordionOpen && (
           <div className="p-4 sm:p-6 border-t border-slate-200 space-y-6 animate-in fade-in-50 duration-200">
-            {/* Semester Filter Pills */}
-            <div className="flex items-center justify-between flex-wrap gap-2 pb-2">
-              <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-                <Layers className="w-4 h-4 text-[#5300b7]" />
-                <span>Semestr seçimi:</span>
-              </div>
-
-              <div className="flex flex-wrap gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => setSelectedSemesterFilter('all')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    selectedSemesterFilter === 'all'
-                      ? 'bg-[#5300b7] text-white shadow-xs'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                  }`}
+            {/* Semestr Seçim Formu (Optgroup Dropdown - Screenshot dizaynı) */}
+            <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#ccc3d7] shadow-xs space-y-2">
+              <label className="block text-xs font-bold text-slate-700">
+                Semestr Seçin *
+              </label>
+              <div className="relative">
+                <select
+                  value={selectedSemesterFilter}
+                  onChange={(e) => setSelectedSemesterFilter(e.target.value)}
+                  className="w-full bg-[#f8f9ff] border-2 border-[#5300b7] rounded-xl px-4 py-3 text-sm font-semibold text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer shadow-xs"
                 >
-                  Hamısı (8 Semestr)
-                </button>
-                {SEMESTERS_LIST.map((sem) => (
-                  <button
-                    key={sem}
-                    type="button"
-                    onClick={() => setSelectedSemesterFilter(sem)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                      selectedSemesterFilter === sem
-                        ? 'bg-[#5300b7] text-white shadow-xs'
-                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                    }`}
-                  >
-                    {sem}
-                  </button>
-                ))}
+                  <option value="all">Bütün semestrlər üzrə (1-4-cü kurslar)</option>
+                  <optgroup label="1-ci kurs">
+                    <option value="1-ci kurs 1-ci semestr">1-ci kurs 1-ci semestr</option>
+                    <option value="1-ci kurs 2-ci semestr">1-ci kurs 2-ci semestr</option>
+                  </optgroup>
+                  <optgroup label="2-ci kurs">
+                    <option value="2-ci kurs 1-ci semestr">2-ci kurs 1-ci semestr</option>
+                    <option value="2-ci kurs 2-ci semestr">2-ci kurs 2-ci semestr</option>
+                  </optgroup>
+                  <optgroup label="3-cü kurs">
+                    <option value="3-cü kurs 1-ci semestr">3-cü kurs 1-ci semestr</option>
+                    <option value="3-cü kurs 2-ci semestr">3-cü kurs 2-ci semestr</option>
+                  </optgroup>
+                  <optgroup label="4-cü kurs">
+                    <option value="4-cü kurs 1-ci semestr">4-cü kurs 1-ci semestr</option>
+                    <option value="4-cü kurs 2-ci semestr">4-cü kurs 2-ci semestr</option>
+                  </optgroup>
+                </select>
               </div>
             </div>
 
