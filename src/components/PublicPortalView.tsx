@@ -37,7 +37,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
   onLogout,
 }) => {
   const [activeTab, setActiveTab] = useState<
-    'grades' | 'modules' | 'schedule' | 'rules'
+    'grades' | 'subjects' | 'rules'
   >('grades');
   const [selectedSemesterForModules, setSelectedSemesterForModules] = useState<string>('all');
 
@@ -331,27 +331,15 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
           </button>
 
           <button
-            onClick={() => setActiveTab('modules')}
+            onClick={() => setActiveTab('subjects')}
             className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
-              activeTab === 'modules'
+              activeTab === 'subjects'
                 ? 'bg-[#5300b7] text-white shadow-sm'
                 : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
             <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span>Modullar</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('schedule')}
-            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
-              activeTab === 'schedule'
-                ? 'bg-[#5300b7] text-white shadow-sm'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-            }`}
-          >
-            <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span>İmtahan Cədvəli ({studentSessions.length})</span>
+            <span>Fənlər və İmtahan</span>
           </button>
 
           <button
@@ -403,7 +391,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h2 className="text-xl font-bold text-slate-900">
-                  Cari Semestr Modulları və Qiymətləndirmə Nəticələri
+                  Cari Semestr Fənləri və Qiymətləndirmə Nəticələri
                 </h2>
               </div>
               <div className="text-xs font-bold text-purple-700 bg-purple-50 border border-purple-200 px-3.5 py-1.5 rounded-xl">
@@ -558,78 +546,9 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
           </div>
         )}
 
-        {/* TAB 1.5: MODULES & SYLLABUSES (8 SEMESTERS ACCORDION) */}
-        {activeTab === 'modules' && (
+        {/* TAB 2: FƏNLƏR VƏ İMTAHAN (8 SEMESTERS ACCORDION + EXAM SCHEDULE) */}
+        {activeTab === 'subjects' && (
           <SpecialtyModulesAccordion student={student} modules={allModules} />
-        )}
-
-        {/* TAB 2: EXAM SCHEDULE */}
-        {activeTab === 'schedule' && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-xl font-bold text-slate-900">
-                Qrupunuz Üzrə İmtahan Cədvəli
-              </h2>
-              <p className="text-xs text-slate-500">
-                YTP {student.group} qrupu üçün planlaşdırılmış imtahan sessiyaları
-              </p>
-            </div>
-
-            {studentSessions.length === 0 ? (
-              <div className="p-8 sm:p-12 text-center bg-white rounded-2xl sm:rounded-3xl border border-slate-200 text-slate-400 text-xs">
-                Qrupunuz üçün hazırda heç bir imtahan sessiyası təyin edilməyib.
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {studentSessions.map((s) => (
-                  <div
-                    key={s.id}
-                    className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs space-y-3"
-                  >
-                    <div className="flex justify-between items-start">
-                      {s.subjectCode && !s.subjectCode.endsWith('-CS') && !s.subjectCode.endsWith('-EX') && s.subjectCode !== s.group ? (
-                        <span className="px-2.5 py-1 bg-purple-50 text-[#5300b7] rounded-lg font-mono font-bold text-xs">
-                          {s.subjectCode}
-                        </span>
-                      ) : <div />}
-                      <span
-                        className={`text-xs px-2.5 py-0.5 rounded-full font-bold ${
-                          s.status === 'upcoming'
-                            ? 'bg-blue-50 text-blue-700'
-                            : s.status === 'ongoing'
-                            ? 'bg-amber-50 text-amber-700'
-                            : 'bg-emerald-50 text-emerald-700'
-                        }`}
-                      >
-                        {s.status === 'upcoming'
-                          ? 'Planlaşdırılır'
-                          : s.status === 'ongoing'
-                          ? 'İmtahan Gedir'
-                          : 'Tamamlandı'}
-                      </span>
-                    </div>
-
-                    <h3 className="font-bold text-base text-slate-900">{s.subject}</h3>
-
-                    <div className="space-y-2 text-xs text-slate-600 pt-2 border-t border-slate-100">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-purple-600" />
-                        <span>Tarix: <strong>{s.date}</strong> saat <strong>{s.time}</strong></span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Building2 className="w-4 h-4 text-purple-600" />
-                        <span>İmtahan Zalı: <strong>{s.room}</strong></span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <User className="w-4 h-4 text-purple-600" />
-                        <span>Nəzarətçi: <strong>{s.supervisor || 'Təyin olunur'}</strong></span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
         )}
 
         {/* TAB 4: YTP RULES */}

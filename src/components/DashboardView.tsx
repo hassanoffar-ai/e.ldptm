@@ -74,7 +74,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
           </div>
 
-          {/* Card 2: Modullar */}
+          {/* Card 2: Fənlər */}
           <div
             onClick={() => setActiveTab('subjects')}
             className="group bg-white p-5 rounded-2xl border border-[#ccc3d7] hover:border-[#6d28d9] shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
@@ -84,14 +84,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <BookOpen className="w-5 h-5" />
               </div>
               <h3 className="text-base font-bold text-[#121c2a] mb-1.5">
-                Modullar
+                Fənlər və İmtahan
               </h3>
               <p className="text-xs text-[#64748b] leading-relaxed mb-3">
-                İxtisaslar və semestrlər üzrə tədris olunan modullar.
+                İxtisaslar və semestrlər üzrə tədris olunan fənlər, sillabuslar və imtahan cədvəli.
               </p>
             </div>
             <div className="flex items-center gap-1.5 text-xs font-bold text-[#5300b7] group-hover:translate-x-1 transition-transform pt-2 border-t border-slate-100">
-              <span>Modullara Bax</span>
+              <span>Fənlərə Bax</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </div>
           </div>

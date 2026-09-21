@@ -14,6 +14,7 @@ import {
   Monitor,
   CheckCircle2,
   Clock,
+  MapPin,
   Sparkles,
   Award,
   Search,
@@ -39,43 +40,37 @@ import {
 import { ActiveTab, ExamSession, GradeBookCourse, SpecialtyItem, SpecialtyModule, Student } from '../types';
 import { GROUPS_LIST, ROOMS_LIST, SUBJECTS_LIST, INITIAL_SPECIALTIES, getStoredModules, SEMESTERS_LIST } from '../data/mockData';
 import {
-  uploadSyllabusFile,
-  deleteSyllabusFile,
   fetchModulesFromDb,
   upsertModuleToDb,
   deleteModuleFromDb,
+  uploadSyllabusFile,
+  deleteSyllabusFile,
 } from '../lib/supabase';
 
 interface GroupsAndOtherViewsProps {
   activeTab: ActiveTab;
   setActiveTab: (tab: ActiveTab) => void;
-  students: Student[];
-  sessions: ExamSession[];
   courses: GradeBookCourse[];
-  specialties?: SpecialtyItem[];
-  onAddSpecialty?: (specialty: SpecialtyItem) => void;
-  onUpdateSpecialty?: (specialty: SpecialtyItem) => void;
-  onDeleteSpecialty?: (id: string) => void;
-  onOpenNewStudentModal?: (defaultGroup?: string, defaultSpecialty?: string) => void;
+  sessions: ExamSession[];
+  students: Student[];
+  specialties: SpecialtyItem[];
+  onSaveSpecialties?: (specialties: SpecialtyItem[]) => void;
 }
 
 export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
   activeTab,
   setActiveTab,
-  students,
-  sessions,
   courses,
-  specialties = [],
-  onAddSpecialty,
-  onUpdateSpecialty,
-  onDeleteSpecialty,
-  onOpenNewStudentModal,
+  sessions,
+  students,
+  specialties,
+  onSaveSpecialties,
 }) => {
-  // Specialty management states
-  const [specialtySearch, setSpecialtySearch] = useState('');
-  const [directionFilter, setDirectionFilter] = useState('all');
-  const [isSpecialtyModalOpen, setIsSpecialtyModalOpen] = useState(false);
+  const [selectedGroupFilter, setSelectedGroupFilter] = useState<string>('all');
+  const [selectedSpecialtyFilter, setSelectedSpecialtyFilter] = useState<string>('all');
+  const [selectedCourseYearFilter, setSelectedCourseYearFilter] = useState<string>('all');
   const [editingSpecialty, setEditingSpecialty] = useState<SpecialtyItem | null>(null);
+  const [isSpecialtyModalOpen, setIsSpecialtyModalOpen] = useState(false);
 
   // Form states for Add/Edit Specialty
   const [specName, setSpecName] = useState('');
@@ -84,9 +79,9 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
   const [specDuration, setSpecDuration] = useState('3 illik');
   const [specEducationType, setSpecEducationType] = useState<'Əyani' | 'Qiyabi'>('Əyani');
   const [specDescription, setSpecDescription] = useState('');
-  const [formError, setFormError] = useState<string | null>(null);
+  const [specError, setSpecError] = useState<string | null>(null);
 
-  // Modules and Syllabuses Management States
+  // Modules (Fənlər) management state
   const [modulesList, setModulesList] = useState<SpecialtyModule[]>(() => getStoredModules());
   const [isUploadingSyllabus, setIsUploadingSyllabus] = useState(false);
   const [modSyllabusUrl, setModSyllabusUrl] = useState('');
@@ -116,12 +111,17 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
   const [isModuleModalOpen, setIsModuleModalOpen] = useState(false);
   const [editingModule, setEditingModule] = useState<SpecialtyModule | null>(null);
 
-  // Form states for Add/Edit Module
+  // Form states for Add/Edit Module (Fənn)
   const [modSpecialty, setModSpecialty] = useState(
     sortedSpecialties[0]?.name || 'Kompüter sistemlərində proqramlaşdırma'
   );
   const [modSemester, setModSemester] = useState(SEMESTERS_LIST[0] || '1-ci kurs 1-ci semestr');
   const [modName, setModName] = useState('');
+  const [modCode, setModCode] = useState('');
+  const [modCredits, setModCredits] = useState<string>('');
+  const [modExamDate, setModExamDate] = useState('');
+  const [modExamTime, setModExamTime] = useState('');
+  const [modExamRoom, setModExamRoom] = useState('');
   const [modError, setModError] = useState<string | null>(null);
 
   const saveModules = (updated: SpecialtyModule[]) => {
@@ -142,6 +142,11 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
     );
     setModSemester(selectedModuleSemester !== 'all' ? selectedModuleSemester : SEMESTERS_LIST[0] || '1-ci kurs 1-ci semestr');
     setModName('');
+    setModCode('');
+    setModCredits('');
+    setModExamDate('');
+    setModExamTime('');
+    setModExamRoom('');
     setModSyllabusUrl('');
     setModSyllabusFileName('');
     setUploadSyllabusError(null);
@@ -154,6 +159,11 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
     setModSpecialty(m.specialtyName);
     setModSemester(m.semester);
     setModName(m.name);
+    setModCode(m.code || '');
+    setModCredits(m.credits ? String(m.credits) : '');
+    setModExamDate(m.examDate || '');
+    setModExamTime(m.examTime || '');
+    setModExamRoom(m.examRoom || '');
     setModSyllabusUrl(m.syllabusUrl || '');
     setModSyllabusFileName(m.syllabusFileName || '');
     setUploadSyllabusError(null);
@@ -196,7 +206,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
   const handleSaveModule = (e: React.FormEvent) => {
     e.preventDefault();
     if (!modName.trim()) {
-      setModError('Modulun adı mütləq daxil edilməlidir.');
+      setModError('Fənnin adı mütləq daxil edilməlidir.');
       return;
     }
 
@@ -206,6 +216,11 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
         specialtyName: modSpecialty,
         semester: modSemester,
         name: modName.trim(),
+        code: modCode.trim() || undefined,
+        credits: modCredits.trim() ? Number(modCredits.trim()) : undefined,
+        examDate: modExamDate.trim() || undefined,
+        examTime: modExamTime.trim() || undefined,
+        examRoom: modExamRoom.trim() || undefined,
         syllabusUrl: modSyllabusUrl.trim() || undefined,
         syllabusFileName: modSyllabusFileName.trim() || (modSyllabusUrl ? 'Sillabus Faylı' : undefined),
       };
@@ -218,6 +233,11 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
         specialtyName: modSpecialty,
         semester: modSemester,
         name: modName.trim(),
+        code: modCode.trim() || undefined,
+        credits: modCredits.trim() ? Number(modCredits.trim()) : undefined,
+        examDate: modExamDate.trim() || undefined,
+        examTime: modExamTime.trim() || undefined,
+        examRoom: modExamRoom.trim() || undefined,
         syllabusUrl: modSyllabusUrl.trim() || undefined,
         syllabusFileName: modSyllabusFileName.trim() || (modSyllabusUrl ? 'Sillabus Faylı' : undefined),
         createdAt: new Date().toISOString(),
@@ -230,7 +250,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
   };
 
   const handleDeleteModule = (id: string, name: string) => {
-    if (window.confirm(`"${name}" modulunu silmək istədiyinizdən əminsiniz?`)) {
+    if (window.confirm(`"${name}" fənnini silmək istədiyinizdən əminsiniz?`)) {
       const target = modulesList.find((m) => m.id === id);
       if (target?.syllabusUrl) {
         deleteSyllabusFile(target.syllabusUrl);
@@ -707,7 +727,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
     );
   }
 
-  // Modullar View
+  // Fənlər və İmtahan Cədvəli View
   if (activeTab === 'subjects') {
     const filteredModules = modulesList.filter((m) => {
       const matchesSpecialty =
@@ -728,11 +748,11 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                 <BookOpen className="w-5 h-5" />
               </div>
               <h2 className="text-2xl md:text-3xl font-bold text-[#121c2a]">
-                Modullar
+                Fənlər və İmtahan Cədvəli
               </h2>
             </div>
             <p className="text-sm text-[#64748b]">
-              İxtisaslar və semestrlər üzrə tədris olunan modullar
+              İxtisaslar və semestrlər üzrə tədris olunan fənlər, sillabuslar və imtahan tarixləri
             </p>
           </div>
 
@@ -741,7 +761,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
             className="flex items-center gap-2 px-4 py-2.5 bg-[#5300b7] hover:bg-[#430094] text-white rounded-xl text-xs font-semibold shadow-xs transition-all cursor-pointer w-fit"
           >
             <Plus className="w-4 h-4" />
-            <span>Yeni Modul Əlavə Et</span>
+            <span>Yeni Fənn Əlavə Et</span>
           </button>
         </div>
 
@@ -758,7 +778,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                 onChange={(e) => setSelectedModuleSpecialty(e.target.value)}
                 className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer"
               >
-                <option value="all">Bütün İxtisaslar ({modulesList.length} modul)</option>
+                <option value="all">Bütün İxtisaslar ({modulesList.length} fənn)</option>
                 {sortedSpecialties.map((s) => (
                   <option key={s.id} value={s.name}>
                     {s.name} ({s.code})
@@ -808,21 +828,22 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
           <div className="p-12 text-center bg-white rounded-2xl border border-slate-200 text-slate-400">
             <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-30 text-purple-600" />
             <h3 className="text-base font-bold text-slate-700">
-              Bu seçim üzrə heç bir modul tapılmadı
+              Bu seçim üzrə heç bir fənn tapılmadı
             </h3>
             <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-              Seçilmiş ixtisas və ya semestr üçün yeni modul əlavə edə bilərsiniz.
+              Seçilmiş ixtisas və ya semestr üçün yeni fənn əlavə edə bilərsiniz.
             </p>
             <button
               onClick={openAddModuleModal}
               className="mt-4 px-4 py-2 bg-[#5300b7] hover:bg-[#430094] text-white text-xs font-semibold rounded-xl cursor-pointer"
             >
-              + Modul Əlavə Et
+              + Fənn Əlavə Et
             </button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredModules.map((m) => {
+              const hasExamInfo = m.examDate || m.examTime || m.examRoom;
               return (
                 <div
                   key={m.id}
@@ -834,6 +855,11 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                       <span className="text-xs font-bold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
                         {m.semester}
                       </span>
+                      {m.code && (
+                        <span className="text-[11px] font-mono font-bold text-[#5300b7] bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200">
+                          {m.code}
+                        </span>
+                      )}
                     </div>
 
                     {/* Specialty label */}
@@ -841,10 +867,53 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                       {m.specialtyName}
                     </p>
 
-                    {/* Title */}
-                    <h3 className="font-bold text-base text-[#121c2a] leading-snug">
-                      {m.name}
-                    </h3>
+                    {/* Title & Credits */}
+                    <div>
+                      <h3 className="font-bold text-base text-[#121c2a] leading-snug">
+                        {m.name}
+                      </h3>
+                      {m.credits && (
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          {m.credits} kredit {m.creditHours ? `(${m.creditHours} saat)` : ''}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Exam Schedule Details Badge */}
+                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-[#5300b7]">
+                        <Calendar className="w-3.5 h-3.5" />
+                        <span>İmtahan Cədvəli</span>
+                      </div>
+                      {hasExamInfo ? (
+                        <div className="grid grid-cols-1 gap-1 text-[11px] text-slate-700 pt-0.5">
+                          {m.examDate && (
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-slate-500">Tarix:</span>
+                              <strong className="font-semibold text-slate-900">{m.examDate}</strong>
+                            </div>
+                          )}
+                          {m.examTime && (
+                            <div className="flex items-center gap-1.5">
+                              <Clock className="w-3 h-3 text-slate-400" />
+                              <span className="text-slate-500">Saat:</span>
+                              <strong className="font-semibold text-slate-900">{m.examTime}</strong>
+                            </div>
+                          )}
+                          {m.examRoom && (
+                            <div className="flex items-center gap-1.5">
+                              <MapPin className="w-3 h-3 text-slate-400" />
+                              <span className="text-slate-500">Otaq:</span>
+                              <strong className="font-semibold text-slate-900">{m.examRoom}</strong>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-[11px] text-slate-400 italic">
+                          İmtahan vaxtı hələ təyin edilməyib
+                        </p>
+                      )}
+                    </div>
 
                     {/* Syllabus Badge / Download if available */}
                     {m.syllabusUrl ? (
@@ -900,7 +969,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
           </div>
         )}
 
-        {/* Modal: Add/Edit Module */}
+        {/* Modal: Add/Edit Fənn & Exam Schedule */}
         {isModuleModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-xs">
             <div className="bg-white rounded-2xl shadow-2xl border border-[#ccc3d7] w-full max-w-lg max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
@@ -910,7 +979,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                     <BookOpen className="w-4 h-4" />
                   </div>
                   <h3 className="font-bold text-base text-[#121c2a]">
-                    {editingModule ? 'Modulu Redaktə Et' : 'Yeni Modul Əlavə Et'}
+                    {editingModule ? 'Fənni və İmtahanı Redaktə Et' : 'Yeni Fənn və İmtahan Əlavə Et'}
                   </h3>
                 </div>
                 <button
@@ -979,7 +1048,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                 {/* Name */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Modulun Adı *
+                    Fənnin Adı *
                   </label>
                   <input
                     type="text"
@@ -989,6 +1058,89 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                     onChange={(e) => setModName(e.target.value)}
                     className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7]"
                   />
+                </div>
+
+                {/* Code & Credits */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Fənn Kodu (İstəyə bağlı)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Məs: KSP-101"
+                      value={modCode}
+                      onChange={(e) => setModCode(e.target.value)}
+                      className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl px-3.5 py-2 text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Kredit Sayı (İstəyə bağlı)
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="30"
+                      placeholder="Məs: 4"
+                      value={modCredits}
+                      onChange={(e) => setModCredits(e.target.value)}
+                      className="w-full bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl px-3.5 py-2 text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
+                    />
+                  </div>
+                </div>
+
+                {/* Exam Schedule Block */}
+                <div className="p-4 rounded-xl bg-purple-50/60 border border-purple-200 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-[#5300b7]" />
+                    <h4 className="text-xs font-bold text-[#5300b7] uppercase tracking-wide">
+                      İmtahan Cədvəli Məlumatları
+                    </h4>
+                  </div>
+                  <p className="text-[11px] text-slate-600">
+                    Daxil etdiyiniz imtahan günü, saatı və otaq tələbənin şəxsi kabinetində cari anda görünəcəkdir.
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        İmtahan Günü
+                      </label>
+                      <input
+                        type="date"
+                        value={modExamDate}
+                        onChange={(e) => setModExamDate(e.target.value)}
+                        className="w-full bg-white border border-[#ccc3d7] rounded-xl px-2.5 py-1.5 text-xs outline-none focus:ring-2 focus:ring-[#5300b7]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        İmtahan Saatı
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Məs: 10:00"
+                        value={modExamTime}
+                        onChange={(e) => setModExamTime(e.target.value)}
+                        className="w-full bg-white border border-[#ccc3d7] rounded-xl px-2.5 py-1.5 text-xs outline-none focus:ring-2 focus:ring-[#5300b7]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        İmtahan Otağı
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Məs: Otaq 204"
+                        value={modExamRoom}
+                        onChange={(e) => setModExamRoom(e.target.value)}
+                        className="w-full bg-white border border-[#ccc3d7] rounded-xl px-2.5 py-1.5 text-xs outline-none focus:ring-2 focus:ring-[#5300b7]"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 {/* Syllabus Attachment (Supabase 'syllabuses' bucket) */}
@@ -1077,7 +1229,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                     disabled={isUploadingSyllabus}
                     className="flex-1 py-2.5 bg-[#5300b7] hover:bg-[#430093] disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-colors shadow-md shadow-purple-900/15 cursor-pointer"
                   >
-                    {editingModule ? 'Yadda Saxla' : 'Modulu Əlavə Et'}
+                    {editingModule ? 'Yadda Saxla' : 'Fənni Əlavə Et'}
                   </button>
                 </div>
               </form>

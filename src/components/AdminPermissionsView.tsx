@@ -367,10 +367,10 @@ export const AdminPermissionsView: React.FC<AdminPermissionsViewProps> = ({
           <div className="p-4 rounded-xl border border-slate-200 flex items-center justify-between hover:bg-slate-50 transition-colors">
             <div>
               <h4 className="text-sm font-bold text-slate-800">
-                Fənlər Bazası
+                Fənlər və İmtahan Cədvəli
               </h4>
               <p className="text-xs text-slate-500">
-                Tədris fənlərinin kataloqu və fənn kodları
+                İxtisaslar üzrə tədris fənlərini, sillabusları və imtahan tarixlərini idarə etmək hüququ
               </p>
             </div>
             <button

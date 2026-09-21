@@ -73,7 +73,7 @@ export interface SpecialtyModule {
   id: string;
   specialtyId?: string;
   specialtyName: string;
-  semester: string; // e.g. "I Semestr", "II Semestr", "III Semestr", "IV Semestr"
+  semester: string; // e.g. "1-ci kurs 1-ci semestr"
   code?: string;
   name: string;
   creditHours?: number; // e.g. 60 saat
@@ -82,6 +82,9 @@ export interface SpecialtyModule {
   syllabusTopics?: string; // Sillabus mövzuları və planı
   syllabusUrl?: string; // Sənəd / Link
   syllabusFileName?: string; // Faylın adı
+  examDate?: string; // İmtahan tarixi (məs: "2026-06-15")
+  examTime?: string; // İmtahan saatı (məs: "10:00 - 12:00")
+  examRoom?: string; // İmtahan otağı (məs: "Otaq 204")
   description?: string;
   createdAt?: string;
 }

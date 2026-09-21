@@ -155,7 +155,7 @@ export const NewGradeCourseModal: React.FC<NewGradeCourseModalProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-              Fənn / Modul Adı *
+              Fənnin Adı *
             </label>
             <div className="space-y-1.5">
               <select
@@ -179,7 +179,7 @@ export const NewGradeCourseModal: React.FC<NewGradeCourseModalProps> = ({
                     {sub}
                   </option>
                 ))}
-                <option value="__custom__">+ Digər Fənn / Modul yazın</option>
+                <option value="__custom__">+ Digər Fənn yazın</option>
               </select>
 
               {(!availableSubjectsForModal.includes(subject) || subject === '') && (
@@ -188,7 +188,7 @@ export const NewGradeCourseModal: React.FC<NewGradeCourseModalProps> = ({
                   required
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  placeholder="Fənnin / Modulun adını daxil edin..."
+                  placeholder="Fənnin adını daxil edin..."
                   className="w-full px-3.5 py-2 bg-white border border-[#ccc3d7] rounded-xl text-xs outline-none focus:ring-2 focus:ring-[#5300b7]"
                 />
               )}

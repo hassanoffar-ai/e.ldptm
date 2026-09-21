@@ -347,6 +347,9 @@ export const mapDbToModule = (row: any): SpecialtyModule => ({
   syllabusTopics: row.syllabus_topics || undefined,
   syllabusUrl: row.syllabus_url || undefined,
   syllabusFileName: row.syllabus_file_name || undefined,
+  examDate: row.exam_date || row.examDate || undefined,
+  examTime: row.exam_time || row.examTime || undefined,
+  examRoom: row.exam_room || row.examRoom || undefined,
   description: row.description || undefined,
   createdAt: row.created_at || undefined,
 });
@@ -363,6 +366,9 @@ export const mapModuleToDb = (m: SpecialtyModule) => ({
   syllabus_topics: m.syllabusTopics || null,
   syllabus_url: m.syllabusUrl || null,
   syllabus_file_name: m.syllabusFileName || null,
+  exam_date: m.examDate || null,
+  exam_time: m.examTime || null,
+  exam_room: m.examRoom || null,
   description: m.description || null,
 });
 

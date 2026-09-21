@@ -11,6 +11,9 @@ import {
   GraduationCap,
   Sparkles,
   Layers,
+  Calendar,
+  Clock,
+  MapPin,
 } from 'lucide-react';
 import { SpecialtyModule, StudentUser } from '../types';
 import { SEMESTERS_LIST } from '../data/mockData';
@@ -112,7 +115,7 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-1">
                 <h2 className="text-lg sm:text-xl font-black text-slate-900">
-                  Bütün semestrlər üzrə Tədris Planı və Modullar
+                  Bütün semestrlər üzrə Tədris Planı, Fənlər və İmtahan Cədvəli
                 </h2>
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-[#5300b7] border border-purple-200">
                   {student.specialty}
@@ -176,27 +179,27 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
             </div>
 
             {/* 8 Semester Blocks */}
-            <div className="space-y-6">
+            <div className="space-y-5">
               {semesterBlocks
                 .filter((block) => {
                   if (selectedSemesterFilter === 'all') return true;
-                  return block.semesterName.toLowerCase() === selectedSemesterFilter.toLowerCase();
+                  return block.semesterName === selectedSemesterFilter;
                 })
                 .map((block) => {
                   return (
                     <div
                       key={block.semesterName}
-                      className={`rounded-2xl sm:rounded-3xl border transition-all overflow-hidden ${
+                      className={`rounded-2xl border transition-all overflow-hidden ${
                         block.isLocked
-                          ? 'bg-slate-50/70 border-slate-200'
+                          ? 'border-slate-200 bg-slate-50/50 opacity-90'
                           : block.isCurrentCourse
-                          ? 'bg-white border-purple-200 ring-2 ring-purple-500/10 shadow-sm'
-                          : 'bg-white border-slate-200'
+                          ? 'border-purple-300 bg-white shadow-sm ring-1 ring-purple-200'
+                          : 'border-slate-200 bg-white'
                       }`}
                     >
                       {/* Block Header */}
                       <div
-                        className={`px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3 border-b ${
+                        className={`px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b ${
                           block.isLocked
                             ? 'bg-slate-100/70 border-slate-200 text-slate-500'
                             : block.isCurrentCourse
@@ -239,12 +242,12 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                           )}
 
                           <span className="text-xs font-bold text-slate-500 bg-white px-2 py-0.5 rounded-md border border-slate-200">
-                            {block.modules.length} modul
+                            {block.modules.length} fənn
                           </span>
                         </div>
                       </div>
 
-                      {/* Block Body: Modules List */}
+                      {/* Block Body: Fənlər List */}
                       <div className="p-4 sm:p-6">
                         {block.isLocked ? (
                           /* Locked State Display */
@@ -256,7 +259,7 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                               Bu semestr hazırda sizin üçün bağlıdır
                             </h4>
                             <p className="text-xs text-slate-500 max-w-md mx-auto">
-                              Siz hazırda {activeCourseYear}-ci kursda təhsil alırsınız. {block.courseYear}-ci kursun tədris modulları və sillabusları növbəti tədris ilinə keçdikdə aktivləşəcəkdir.
+                              Siz hazırda {activeCourseYear}-ci kursda təhsil alırsınız. {block.courseYear}-ci kursun tədris fənləri və sillabusları növbəti tədris ilinə keçdikdə aktivləşəcəkdir.
                             </p>
                           </div>
                         ) : block.modules.length === 0 ? (
@@ -264,68 +267,117 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                           <div className="p-6 text-center rounded-2xl bg-slate-50 border border-dashed border-slate-200 text-slate-400 space-y-1.5">
                             <BookOpen className="w-8 h-8 mx-auto opacity-40 text-purple-600" />
                             <p className="text-xs font-bold text-slate-600">
-                              Bu semestr üzrə hələ modul daxil edilməyib
+                              Bu semestr üzrə hələ fənn daxil edilməyib
                             </p>
                             <p className="text-[11px] text-slate-400">
-                              Admin tərəfindən modullar yükləndikdə burada əks olunacaq.
+                              Admin tərəfindən fənlər və imtahan cədvəli əlavə edildikdə burada əks olunacaq.
                             </p>
                           </div>
                         ) : (
                           /* Modules Grid for Unlocked Semester */
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {block.modules.map((m) => (
-                              <div
-                                key={m.id}
-                                className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 hover:border-[#5300b7] transition-all shadow-xs space-y-3 flex flex-col justify-between"
-                              >
-                                <div className="space-y-2">
-                                  <div className="flex items-center justify-between gap-2">
-                                    <span className="text-[11px] font-mono font-bold text-[#5300b7] bg-purple-50 px-2.5 py-0.5 rounded-md border border-purple-200">
-                                      {m.code || 'YTP-MODUL'}
-                                    </span>
-                                    <span className="text-xs font-bold text-slate-500">
-                                      {m.credits ? `${m.credits} kredit` : 'YTP Modulu'}
-                                    </span>
+                            {block.modules.map((m) => {
+                              const hasExamInfo = m.examDate || m.examTime || m.examRoom;
+                              return (
+                                <div
+                                  key={m.id}
+                                  className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 hover:border-[#5300b7] transition-all shadow-xs space-y-3.5 flex flex-col justify-between"
+                                >
+                                  <div className="space-y-2.5">
+                                    <div className="flex items-center justify-between gap-2">
+                                      <span className="text-[11px] font-mono font-bold text-[#5300b7] bg-purple-50 px-2.5 py-0.5 rounded-md border border-purple-200">
+                                        {m.code || 'YTP-FƏNN'}
+                                      </span>
+                                      <span className="text-xs font-bold text-slate-500">
+                                        {m.credits ? `${m.credits} kredit` : 'YTP Fənni'}
+                                      </span>
+                                    </div>
+
+                                    <h4 className="font-bold text-base text-slate-900 leading-snug">
+                                      {m.name}
+                                    </h4>
+
+                                    {m.description && (
+                                      <p className="text-xs text-slate-600 line-clamp-2">
+                                        {m.description}
+                                      </p>
+                                    )}
+
+                                    {/* Exam Schedule Card Inside Fənn */}
+                                    <div className="p-3 rounded-xl bg-gradient-to-r from-purple-50/70 via-indigo-50/40 to-white border border-purple-100 space-y-1.5">
+                                      <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-1.5 text-xs font-bold text-[#5300b7]">
+                                          <Calendar className="w-3.5 h-3.5" />
+                                          <span>İmtahan Cədvəli</span>
+                                        </div>
+                                        {hasExamInfo ? (
+                                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                            Elan Edilib
+                                          </span>
+                                        ) : (
+                                          <span className="text-[10px] font-semibold text-slate-400">
+                                            Gözlənilir
+                                          </span>
+                                        )}
+                                      </div>
+
+                                      {hasExamInfo ? (
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs pt-1.5 border-t border-purple-100/60">
+                                          {m.examDate && (
+                                            <div>
+                                              <span className="text-[10px] text-slate-500 block">Tarix</span>
+                                              <strong className="font-bold text-slate-900">{m.examDate}</strong>
+                                            </div>
+                                          )}
+                                          {m.examTime && (
+                                            <div>
+                                              <span className="text-[10px] text-slate-500 block">Saat</span>
+                                              <strong className="font-bold text-slate-900">{m.examTime}</strong>
+                                            </div>
+                                          )}
+                                          {m.examRoom && (
+                                            <div>
+                                              <span className="text-[10px] text-slate-500 block">Otaq</span>
+                                              <strong className="font-bold text-slate-900">{m.examRoom}</strong>
+                                            </div>
+                                          )}
+                                        </div>
+                                      ) : (
+                                        <p className="text-[11px] text-slate-400 italic">
+                                          İmtahan tarixi və saatı təyin edildikdə burada görünəcək.
+                                        </p>
+                                      )}
+                                    </div>
                                   </div>
 
-                                  <h4 className="font-bold text-base text-slate-900 leading-snug">
-                                    {m.name}
-                                  </h4>
-
-                                  {m.description && (
-                                    <p className="text-xs text-slate-600 line-clamp-2">
-                                      {m.description}
-                                    </p>
-                                  )}
-                                </div>
-
-                                {/* Syllabus Action Button */}
-                                <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                                  <span className="text-xs text-slate-500 font-medium">
-                                    Fənn Sillabusu:
-                                  </span>
-                                  {m.syllabusUrl ? (
-                                    <a
-                                      href={m.syllabusUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#5300b7] hover:bg-[#430093] text-white rounded-xl text-xs font-bold transition-all shadow-xs group cursor-pointer"
-                                      title="Sillabus faylını aç və ya yüklə"
-                                    >
-                                      <FileText className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
-                                      <span className="truncate max-w-[150px]">
-                                        {m.syllabusFileName || 'Sillabusu Yüklə (PDF)'}
-                                      </span>
-                                      <ExternalLink className="w-3 h-3 opacity-80" />
-                                    </a>
-                                  ) : (
-                                    <span className="text-xs text-slate-400 italic">
-                                      Sillabus yüklənməyib
+                                  {/* Syllabus Action Button */}
+                                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                                    <span className="text-xs text-slate-500 font-medium">
+                                      Fənn Sillabusu:
                                     </span>
-                                  )}
+                                    {m.syllabusUrl ? (
+                                      <a
+                                        href={m.syllabusUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#5300b7] hover:bg-[#430093] text-white rounded-xl text-xs font-bold transition-all shadow-xs group cursor-pointer"
+                                        title="Sillabus faylını aç və ya yüklə"
+                                      >
+                                        <FileText className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+                                        <span className="truncate max-w-[150px]">
+                                          {m.syllabusFileName || 'Sillabusu Yüklə (PDF)'}
+                                        </span>
+                                        <ExternalLink className="w-3 h-3 opacity-80" />
+                                      </a>
+                                    ) : (
+                                      <span className="text-xs text-slate-400 italic">
+                                        Sillabus yüklənməyib
+                                      </span>
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         )}
                       </div>
