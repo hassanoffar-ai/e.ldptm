@@ -894,8 +894,8 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
     );
   }
 
-  // Fənlər və İmtahan Cədvəli View
-  if (activeTab === 'subjects') {
+  // Fənlər, İmtahan Cədvəli və Qiymətləndirmə View
+  if (activeTab === 'subjects' || activeTab === 'grades') {
     const filteredModules = modulesList.filter((m) => {
       const matchesSpecialty =
         selectedModuleSpecialty === 'all' ||
@@ -915,11 +915,11 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                 <BookOpen className="w-5 h-5" />
               </div>
               <h2 className="text-2xl md:text-3xl font-bold text-[#121c2a]">
-                Fənlər və İmtahan Cədvəli
+                Fənlər, İmtahan Cədvəli və Qiymətləndirmə
               </h2>
             </div>
             <p className="text-sm text-[#64748b]">
-              İxtisaslar və semestrlər üzrə tədris olunan fənlər, sillabuslar və imtahan tarixləri
+              İxtisaslar və semestrlər üzrə fənlər, sillabuslar, kollokvium/imtahan cədvəli və tələbə qiymət jurnalı
             </p>
           </div>
 
@@ -1421,6 +1421,36 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                   </div>
                 </div>
 
+                {/* Qiymətləndirmə Şkalası (YTP Standartı: A-F) */}
+                <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Award className="w-4 h-4 text-amber-800" />
+                    <h4 className="text-xs font-bold text-amber-950 uppercase tracking-wide">
+                      Qiymətləndirmə Şkalası və Hərf Şərhələri
+                    </h4>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                    <div className="p-2 bg-white rounded-lg border border-amber-200">
+                      <span className="font-bold text-emerald-700">A (91 - 100):</span> <span className="text-slate-800 font-medium">Əla</span>
+                    </div>
+                    <div className="p-2 bg-white rounded-lg border border-amber-200">
+                      <span className="font-bold text-blue-700">B (81 - 90):</span> <span className="text-slate-800 font-medium">Çox yaxşı</span>
+                    </div>
+                    <div className="p-2 bg-white rounded-lg border border-amber-200">
+                      <span className="font-bold text-purple-700">C (71 - 80):</span> <span className="text-slate-800 font-medium">Yaxşı</span>
+                    </div>
+                    <div className="p-2 bg-white rounded-lg border border-amber-200">
+                      <span className="font-bold text-amber-700">D (61 - 70):</span> <span className="text-slate-800 font-medium">Kafi</span>
+                    </div>
+                    <div className="p-2 bg-white rounded-lg border border-amber-200">
+                      <span className="font-bold text-teal-700">E (51 - 60):</span> <span className="text-slate-800 font-medium">Qənaətbəxş</span>
+                    </div>
+                    <div className="p-2 bg-white rounded-lg border border-amber-200">
+                      <span className="font-bold text-rose-700">F (0 - 50):</span> <span className="text-slate-800 font-medium">Kəsildi</span>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Syllabus Attachment (Supabase 'syllabuses' bucket) */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
@@ -1570,8 +1600,14 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                   </select>
                 </div>
 
-                <div className="text-[11px] text-purple-800 bg-purple-50 border border-purple-200 px-3 py-1 rounded-lg">
-                  YTP Standartı: Davamiyyət (10) + Sem (10) + Kol 1 (15) + Kol 2 (15) = Giriş (50) + İmtahan (50 / Min 17)
+                <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+                  <span className="font-bold text-slate-700 mr-1">Qiymət Şkalası:</span>
+                  <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">A: Əla (91-100)</span>
+                  <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-semibold">B: Çox yaxşı (81-90)</span>
+                  <span className="px-2 py-0.5 rounded bg-purple-100 text-purple-800 font-semibold">C: Yaxşı (71-80)</span>
+                  <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-semibold">D: Kafi (61-70)</span>
+                  <span className="px-2 py-0.5 rounded bg-teal-100 text-teal-800 font-semibold">E: Qənaətbəxş (51-60)</span>
+                  <span className="px-2 py-0.5 rounded bg-rose-100 text-rose-800 font-semibold">F: Kəsildi (&lt;51 və ya İmtahan &lt;17)</span>
                 </div>
               </div>
 
@@ -1614,7 +1650,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                             <th className="py-3 px-2 text-center w-24 bg-purple-50 text-[#5300b7]">Giriş Balı<br/><span className="text-[10px] text-purple-600 font-normal">(Max 50)</span></th>
                             <th className="py-3 px-2 text-center w-24 bg-amber-50 text-amber-900">İmtahan<br/><span className="text-[10px] text-amber-700 font-normal">(Max 50 / Min 17)</span></th>
                             <th className="py-3 px-2 text-center w-24 bg-purple-100/60 text-purple-900">Yekun Bal<br/><span className="text-[10px] text-purple-700 font-normal">(Max 100)</span></th>
-                            <th className="py-3 px-3 text-center">Nəticə</th>
+                            <th className="py-3 px-3 text-center">Nəticə və Hərf</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -1644,14 +1680,38 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                             if (g.examScore !== null && g.examScore !== undefined) {
                               if (g.examScore < 17 || finalTotal <= 50) {
                                 statusBadge = (
-                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200">
-                                    Qeyri-müvəffəq (F)
+                                  <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-300">
+                                    F — Kəsildi
+                                  </span>
+                                );
+                              } else if (finalTotal >= 91) {
+                                statusBadge = (
+                                  <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                    A — Əla
+                                  </span>
+                                );
+                              } else if (finalTotal >= 81) {
+                                statusBadge = (
+                                  <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800 border border-blue-300">
+                                    B — Çox yaxşı
+                                  </span>
+                                );
+                              } else if (finalTotal >= 71) {
+                                statusBadge = (
+                                  <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-purple-100 text-purple-900 border border-purple-300">
+                                    C — Yaxşı
+                                  </span>
+                                );
+                              } else if (finalTotal >= 61) {
+                                statusBadge = (
+                                  <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                                    D — Kafi
                                   </span>
                                 );
                               } else {
                                 statusBadge = (
-                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                    Müvəffəq
+                                  <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-teal-100 text-teal-900 border border-teal-300">
+                                    E — Qənaətbəxş
                                   </span>
                                 );
                               }

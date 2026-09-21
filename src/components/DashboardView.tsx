@@ -97,7 +97,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
           </div>
 
-          {/* Card 3: Fənlər */}
+          {/* Card 3: Fənlər və Qiymətlər */}
           <div
             onClick={() => setActiveTab('subjects')}
             className="group bg-white p-5 rounded-2xl border border-[#ccc3d7] hover:border-[#6d28d9] shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
@@ -107,36 +107,36 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <BookOpen className="w-5 h-5" />
               </div>
               <h3 className="text-base font-bold text-[#121c2a] mb-1.5">
-                Fənlər və İmtahan
+                Fənlər və Qiymətlər
               </h3>
               <p className="text-xs text-[#64748b] leading-relaxed mb-3">
-                İxtisaslar və semestrlər üzrə tədris olunan fənlər, sillabuslar və cədvəllər.
+                Fənlər, sillabuslar, kollokvium/imtahan cədvəli və semestr qiymətləndirməsi.
               </p>
             </div>
             <div className="flex items-center gap-1.5 text-xs font-bold text-[#5300b7] group-hover:translate-x-1 transition-transform pt-2 border-t border-slate-100">
-              <span>Fənlərə Bax</span>
+              <span>Fənlər və Jurnal</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </div>
           </div>
 
-          {/* Card 4: Kollokvium və Qiymətlər */}
+          {/* Card 4: İmtahan Protokolları */}
           <div
-            onClick={() => setActiveTab('grades')}
+            onClick={() => setActiveTab('exams')}
             className="group bg-white p-5 rounded-2xl border border-[#ccc3d7] hover:border-[#6d28d9] shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
           >
             <div>
               <div className="w-11 h-11 rounded-2xl bg-[#eff4ff] text-[#5300b7] flex items-center justify-center mb-3 group-hover:bg-[#6d28d9] group-hover:text-white transition-colors">
-                <Award className="w-5 h-5" />
+                <FileText className="w-5 h-5" />
               </div>
               <h3 className="text-base font-bold text-[#121c2a] mb-1.5">
-                Kollokvium və Qiymətlər
+                İmtahan Protokolu
               </h3>
               <p className="text-xs text-[#64748b] leading-relaxed mb-3">
-                50 bal giriş (10 qayıb, 10 seminar, 30 kollokvium) və 50 bal imtahan.
+                Sessiya cədvəli, imtahan biletləri və iştirakçı protokolları.
               </p>
             </div>
             <div className="flex items-center gap-1.5 text-xs font-bold text-[#5300b7] group-hover:translate-x-1 transition-transform pt-2 border-t border-slate-100">
-              <span>Jurnala Keç</span>
+              <span>Protokola Keç</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </div>
           </div>

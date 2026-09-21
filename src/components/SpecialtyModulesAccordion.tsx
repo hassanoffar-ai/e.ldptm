@@ -47,6 +47,55 @@ export const extractStudentCourseYear = (groupStr?: string): number => {
   return 1; // Default to 1-ci kurs
 };
 
+/**
+ * Helper to determine how many course years a specialty has based on its duration (e.g. "3 illik" -> 3 years).
+ */
+export const findSpecialtyDurationYears = (specialtyName?: string): number => {
+  if (!specialtyName) return 3;
+  let specList: any[] = [];
+  try {
+    const saved = localStorage.getItem('eldptm_specialties');
+    if (saved) specList = JSON.parse(saved);
+  } catch {}
+
+  const target = specialtyName.toLowerCase().trim();
+  const matched = specList.find((s) => {
+    const sName = (s.name || '').toLowerCase().trim();
+    return sName === target || sName.includes(target) || target.includes(sName);
+  });
+
+  const durStr = (matched?.duration || '').toLowerCase();
+  if (durStr.includes('4')) return 4;
+  if (durStr.includes('3')) return 3;
+  if (durStr.includes('2')) return 2;
+  if (durStr.includes('1')) return 1;
+
+  return 3; // default to 3-year YTP
+};
+
+/**
+ * Returns letter grade and verbal label (A - Əla, B - Çox yaxşı, etc.)
+ */
+export const getGradeEvaluation = (finalScore: number | null, examScore: number | null) => {
+  if (finalScore === null || examScore === null || examScore === undefined) return null;
+  if (examScore < 17 || finalScore <= 50) {
+    return { letter: 'F', label: 'Kəsildi', badgeClass: 'bg-rose-100 text-rose-800 border-rose-300' };
+  }
+  if (finalScore >= 91) {
+    return { letter: 'A', label: 'Əla', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300' };
+  }
+  if (finalScore >= 81) {
+    return { letter: 'B', label: 'Çox yaxşı', badgeClass: 'bg-blue-100 text-blue-800 border-blue-300' };
+  }
+  if (finalScore >= 71) {
+    return { letter: 'C', label: 'Yaxşı', badgeClass: 'bg-purple-100 text-purple-900 border-purple-300' };
+  }
+  if (finalScore >= 61) {
+    return { letter: 'D', label: 'Kafi', badgeClass: 'bg-amber-100 text-amber-900 border-amber-300' };
+  }
+  return { letter: 'E', label: 'Qənaətbəxş', badgeClass: 'bg-teal-100 text-teal-900 border-teal-300' };
+};
+
 export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps> = ({
   student,
   modules = [],
@@ -54,6 +103,11 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
 }) => {
   // Determine current active course year for this student
   const activeCourseYear = studentCourseYear ?? extractStudentCourseYear(student.group);
+
+  // Determine total valid course years for student's specialty (1, 2, 3, or 4)
+  const totalSpecialtyYears = useMemo(() => {
+    return findSpecialtyDurationYears(student?.specialty);
+  }, [student?.specialty]);
 
   // Accordion open/collapse state (expanded by default)
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
@@ -71,11 +125,12 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
     });
   }, [modules, student?.specialty]);
 
-  // Group the 8 standard semesters
+  // Only take semesters up to the specialty's exact duration (e.g. 3 years = 6 semesters, no 4th year!)
   const semesterBlocks = useMemo(() => {
-    return SEMESTERS_LIST.map((semName, index) => {
-      // Determine which course year this semester belongs to
-      // 0, 1 -> 1-ci kurs; 2, 3 -> 2-ci kurs; 4, 5 -> 3-cü kurs; 6, 7 -> 4-cü kurs
+    const validSemestersCount = totalSpecialtyYears * 2;
+    const relevantSemesters = SEMESTERS_LIST.slice(0, validSemestersCount);
+
+    return relevantSemesters.map((semName, index) => {
       const courseYear = Math.floor(index / 2) + 1;
       const semesterNumInYear = (index % 2) + 1;
       const isLocked = courseYear > activeCourseYear;
@@ -97,7 +152,7 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
         modules: semModules,
       };
     });
-  }, [specialtyModules, activeCourseYear]);
+  }, [specialtyModules, activeCourseYear, totalSpecialtyYears]);
 
   return (
     <div className="space-y-6">
@@ -118,13 +173,13 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                   Bütün semestrlər üzrə Tədris Planı, Fənlər və İmtahan Cədvəli
                 </h2>
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-[#5300b7] border border-purple-200">
-                  {student.specialty}
+                  {student.specialty} ({totalSpecialtyYears} illik)
                 </span>
               </div>
               <p className="text-xs text-slate-500 flex flex-wrap items-center gap-x-2 gap-y-1">
                 <span>Cari statusunuz: <strong className="text-purple-700 font-bold">{activeCourseYear}-ci kurs tələbəsi</strong> ({student.group})</span>
                 <span>•</span>
-                <span>YTP 8 Semestr Tədris Proqramı</span>
+                <span>YTP {totalSpecialtyYears} İllik Tədris Proqramı</span>
               </p>
             </div>
           </div>
@@ -146,7 +201,7 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
         {/* 2. Accordion Expanded Content */}
         {isAccordionOpen && (
           <div className="p-4 sm:p-6 border-t border-slate-200 space-y-6 animate-in fade-in-50 duration-200">
-            {/* Semestr Seçim Formu (Optgroup Dropdown - Screenshot dizaynı) */}
+            {/* Semestr Seçim Formu (Yalnız ixtisasın illəri üzrə dinamik) */}
             <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#ccc3d7] shadow-xs space-y-2">
               <label className="block text-xs font-bold text-slate-700">
                 Semestr Seçin *
@@ -157,28 +212,23 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                   onChange={(e) => setSelectedSemesterFilter(e.target.value)}
                   className="w-full bg-[#f8f9ff] border-2 border-[#5300b7] rounded-xl px-4 py-3 text-sm font-semibold text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer shadow-xs"
                 >
-                  <option value="all">Bütün semestrlər üzrə (1-4-cü kurslar)</option>
-                  <optgroup label="1-ci kurs">
-                    <option value="1-ci kurs 1-ci semestr">1-ci kurs 1-ci semestr</option>
-                    <option value="1-ci kurs 2-ci semestr">1-ci kurs 2-ci semestr</option>
-                  </optgroup>
-                  <optgroup label="2-ci kurs">
-                    <option value="2-ci kurs 1-ci semestr">2-ci kurs 1-ci semestr</option>
-                    <option value="2-ci kurs 2-ci semestr">2-ci kurs 2-ci semestr</option>
-                  </optgroup>
-                  <optgroup label="3-cü kurs">
-                    <option value="3-cü kurs 1-ci semestr">3-cü kurs 1-ci semestr</option>
-                    <option value="3-cü kurs 2-ci semestr">3-cü kurs 2-ci semestr</option>
-                  </optgroup>
-                  <optgroup label="4-cü kurs">
-                    <option value="4-cü kurs 1-ci semestr">4-cü kurs 1-ci semestr</option>
-                    <option value="4-cü kurs 2-ci semestr">4-cü kurs 2-ci semestr</option>
-                  </optgroup>
+                  <option value="all">Bütün semestrlər üzrə (1-{totalSpecialtyYears}-ci kurslar)</option>
+                  {Array.from({ length: totalSpecialtyYears }).map((_, i) => {
+                    const year = i + 1;
+                    const sem1 = `${year}-ci kurs 1-ci semestr`;
+                    const sem2 = `${year}-ci kurs 2-ci semestr`;
+                    return (
+                      <optgroup key={year} label={`${year}-ci kurs`}>
+                        <option value={sem1}>{sem1}</option>
+                        <option value={sem2}>{sem2}</option>
+                      </optgroup>
+                    );
+                  })}
                 </select>
               </div>
             </div>
 
-            {/* 8 Semester Blocks */}
+            {/* Semester Blocks for Specialty Duration */}
             <div className="space-y-5">
               {semesterBlocks
                 .filter((block) => {
@@ -192,9 +242,7 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                       className={`rounded-2xl border transition-all overflow-hidden ${
                         block.isLocked
                           ? 'border-slate-200 bg-slate-50/50 opacity-90'
-                          : block.isCurrentCourse
-                          ? 'border-purple-300 bg-white shadow-sm ring-1 ring-purple-200'
-                          : 'border-slate-200 bg-white'
+                          : 'border-purple-300 bg-white shadow-xs'
                       }`}
                     >
                       {/* Block Header */}
@@ -202,9 +250,7 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                         className={`px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b ${
                           block.isLocked
                             ? 'bg-slate-100/70 border-slate-200 text-slate-500'
-                            : block.isCurrentCourse
-                            ? 'bg-purple-50/80 border-purple-100 text-slate-900'
-                            : 'bg-slate-50 border-slate-200 text-slate-900'
+                            : 'bg-purple-50/80 border-purple-100 text-slate-900'
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
@@ -228,18 +274,9 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                           {block.isLocked ? (
                             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-200/80 text-slate-600 border border-slate-300">
                               <Lock className="w-3 h-3" />
-                              <span>Kilidlidir (Yalnız {block.courseYear}-ci kursda açılacaq)</span>
+                              <span>Kilidlidir ({block.courseYear}-ci kursda açılacaq)</span>
                             </span>
-                          ) : block.isCurrentCourse ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                              <Sparkles className="w-3 h-3 text-emerald-600" />
-                              <span>Cari Aktiv Tədris Semestri</span>
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
-                              <span>Keçmiş Semestr</span>
-                            </span>
-                          )}
+                          ) : null}
 
                           <span className="text-xs font-bold text-slate-500 bg-white px-2 py-0.5 rounded-md border border-slate-200">
                             {block.modules.length} fənn
@@ -259,7 +296,7 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                               Bu semestr hazırda sizin üçün bağlıdır
                             </h4>
                             <p className="text-xs text-slate-500 max-w-md mx-auto">
-                              Siz hazırda {activeCourseYear}-ci kursda təhsil alırsınız. {block.courseYear}-ci kursun tədris fənləri və sillabusları növbəti tədris ilinə keçdikdə aktivləşəcəkdir.
+                              Siz hazırda {activeCourseYear}-ci kursda təhsil alırsınız. Bu fənlər və imtahanlar {block.courseYear}-ci kursa keçdikdə aktivləşəcəkdir.
                             </p>
                           </div>
                         ) : block.modules.length === 0 ? (
@@ -398,17 +435,17 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                                       const finalScore = myGrade.examScore !== null && myGrade.examScore !== undefined ? entryTotal + myGrade.examScore : null;
                                       const isPassed = finalScore !== null && myGrade.examScore >= 17 && finalScore > 50;
 
+                                      const gradeEval = getGradeEvaluation(finalScore, myGrade.examScore);
+
                                       return (
                                         <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
                                           <div className="flex items-center justify-between">
                                             <span className="text-[11px] font-bold text-slate-700">
                                               📊 Sizin Cari Qiymət Göstəriciləriniz:
                                             </span>
-                                            {finalScore !== null ? (
-                                              <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
-                                                isPassed ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-700'
-                                              }`}>
-                                                {isPassed ? 'Müvəffəq' : 'Qeyri-müvəffəq'}
+                                            {gradeEval ? (
+                                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${gradeEval.badgeClass}`}>
+                                                {gradeEval.letter} — {gradeEval.label} ({finalScore} bal)
                                               </span>
                                             ) : (
                                               <span className="text-[10px] text-purple-700 font-bold bg-purple-100 px-2 py-0.5 rounded-md">

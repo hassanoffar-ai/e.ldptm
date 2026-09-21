@@ -730,17 +730,6 @@ export default function App() {
               )}
 
 
-              {/* SCREEN 3: QİYMƏT DAXİLETMƏ */}
-              {activeTab === 'grades' && (
-                <GradeEntryView
-                  courses={courses}
-                  onUpdateCourses={handleUpdateCourses}
-                  onOpenNewCourseModal={() => setIsNewCourseModalOpen(true)}
-                  onDeleteCourse={handleDeleteCourse}
-                  specialties={specialties}
-                />
-              )}
-
               {/* Tələbələr Database View */}
               {activeTab === 'students' && (
                 <StudentsView
@@ -759,11 +748,12 @@ export default function App() {
                 />
               )}
 
-              {/* Additional tab views (Qruplar, İxtisaslar, Fənlər, Otaqlar, Davamiyyət, Jurnal, Hesabatlar, Ayarlar) */}
+              {/* Additional tab views (Qruplar, İxtisaslar, Fənlər və Qiymətlər, Hesabatlar, Ayarlar) */}
               {[
                 'groups',
                 'specialties',
                 'subjects',
+                'grades',
                 'journal',
                 'attendance',
                 'reports',
