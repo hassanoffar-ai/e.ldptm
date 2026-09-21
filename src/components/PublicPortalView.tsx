@@ -21,6 +21,7 @@ import {
 import { ExamSession, GradeBookCourse, SpecialtyModule, StudentGrade, StudentUser } from '../types';
 import { getStoredModules, SEMESTERS_LIST } from '../data/mockData';
 import { fetchModulesFromDb } from '../lib/supabase';
+import { SpecialtyModulesAccordion } from './SpecialtyModulesAccordion';
 
 interface PublicPortalViewProps {
   student: StudentUser;
@@ -569,110 +570,9 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
           </div>
         )}
 
-        {/* TAB 1.5: MODULES & SYLLABUSES (NEW) */}
+        {/* TAB 1.5: MODULES & SYLLABUSES (8 SEMESTERS ACCORDION) */}
         {activeTab === 'modules' && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <h2 className="text-xl font-bold text-slate-900">
-                  {student.specialty} — Tədris Modulları
-                </h2>
-                <p className="text-xs text-slate-500">
-                  Semestrlər üzrə tədris olunan modulların siyahısı
-                </p>
-              </div>
-
-              {/* Semester filter pills */}
-              <div className="flex flex-wrap gap-1.5">
-                <button
-                  onClick={() => setSelectedSemesterForModules('all')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    selectedSemesterForModules === 'all'
-                      ? 'bg-[#5300b7] text-white shadow-xs'
-                      : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
-                  }`}
-                >
-                  Bütün Semestrlər
-                </button>
-                {SEMESTERS_LIST.map((sem) => (
-                  <button
-                    key={sem}
-                    onClick={() => setSelectedSemesterForModules(sem)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                      selectedSemesterForModules === sem
-                        ? 'bg-[#5300b7] text-white shadow-xs'
-                        : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
-                    }`}
-                  >
-                    {sem}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {mySpecialtyModules.length === 0 ? (
-              <div className="p-8 sm:p-12 text-center bg-white rounded-2xl sm:rounded-3xl border border-slate-200 text-slate-400">
-                <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-30 text-purple-600" />
-                <h3 className="text-base font-bold text-slate-700">
-                  İxtisasınız üzrə modullar hələ admin tərəfindən daxil edilməyib
-                </h3>
-                <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-                  Admin panelindən modullar yerləşdirildikdə burada görünəcək.
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {mySpecialtyModules
-                  .filter((m) => {
-                    if (selectedSemesterForModules === 'all') return true;
-                    if (!m.semester) return false;
-                    const mSem = m.semester.toLowerCase();
-                    const sSem = selectedSemesterForModules.toLowerCase();
-                    return mSem === sSem || mSem.includes(sSem) || sSem.includes(mSem);
-                  })
-                  .map((m) => {
-                    return (
-                      <div
-                        key={m.id}
-                        className="bg-white p-5 rounded-2xl sm:rounded-3xl border border-slate-200 hover:border-[#5300b7] transition-all shadow-xs space-y-3 flex flex-col justify-between"
-                      >
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="text-xs font-semibold text-slate-500 truncate">
-                              {m.specialtyName}
-                            </span>
-                            <span className="text-xs font-bold text-purple-800 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-200 shrink-0">
-                              {m.semester}
-                            </span>
-                          </div>
-
-                          <h3 className="font-bold text-base text-slate-900">{m.name}</h3>
-                        </div>
-
-                        {/* Syllabus Download/View Action */}
-                        <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
-                          <span className="text-[11px] text-slate-500 font-medium">Fənn Sillabusu:</span>
-                          {m.syllabusUrl ? (
-                            <a
-                              href={m.syllabusUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#5300b7] hover:bg-[#430093] text-white rounded-xl text-xs font-bold transition-all shadow-xs group"
-                            >
-                              <FileText className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
-                              <span className="truncate max-w-[150px]">{m.syllabusFileName || 'Sillabusu Aç'}</span>
-                              <ExternalLink className="w-3 h-3 opacity-80" />
-                            </a>
-                          ) : (
-                            <span className="text-[11px] text-slate-400 italic">Mövcud deyil</span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-              </div>
-            )}
-          </div>
+          <SpecialtyModulesAccordion student={student} modules={allModules} />
         )}
 
         {/* TAB 2: EXAM SCHEDULE */}
