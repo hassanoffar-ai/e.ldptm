@@ -356,32 +356,32 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-xs">
-              <table className="w-full text-left border-collapse text-xs">
+            <div className="w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
+              <table className="w-full text-left border-collapse text-xs table-auto">
                 <thead>
-                  <tr className="bg-gradient-to-r from-[#5300b7] via-[#6415c4] to-[#7c3aed] text-white font-bold text-[11px] sm:text-xs">
-                    <th rowSpan={2} className="py-3 px-2.5 text-center border-r border-white/20 w-10">
+                  <tr className="bg-gradient-to-r from-[#5300b7] via-[#6415c4] to-[#7c3aed] text-white font-bold text-[10px] sm:text-xs">
+                    <th rowSpan={2} className="py-2 sm:py-3 px-1 sm:px-2.5 text-center border-r border-white/20 w-6 sm:w-10">
                       №
                     </th>
-                    <th rowSpan={2} className="py-3 px-3 text-center border-r border-white/20 whitespace-nowrap">
+                    <th rowSpan={2} className="py-2 sm:py-3 px-1.5 sm:px-3 text-center border-r border-white/20">
                       <div>Tədris İli</div>
-                      <div className="text-[10px] text-purple-200 font-normal">Semestr</div>
+                      <div className="text-[9px] sm:text-[10px] text-purple-200 font-normal">Semestr</div>
                     </th>
-                    <th rowSpan={2} className="py-3 px-4 border-r border-white/20 min-w-[300px]">
+                    <th rowSpan={2} className="py-2 sm:py-3 px-2 sm:px-4 border-r border-white/20">
                       Fənn və Sillabus
                     </th>
-                    <th colSpan={7} className="py-1.5 px-2 text-center border-b border-white/20 bg-white/10 uppercase tracking-wider text-[10px]">
+                    <th colSpan={7} className="py-1 px-1 sm:px-2 text-center border-b border-white/20 bg-white/10 uppercase tracking-wider text-[9px] sm:text-[10px]">
                       Qiymətləndirmə Göstəriciləri
                     </th>
                   </tr>
-                  <tr className="bg-[#48009e] text-white font-bold text-[11px] sm:text-xs text-center border-t border-white/15">
-                    <th className="py-2 px-2.5 border-r border-white/15 w-14" title="Davamiyyət">Dav.</th>
-                    <th className="py-2 px-2.5 border-r border-white/15 w-14" title="Seminar">Sem.</th>
-                    <th className="py-2 px-2.5 border-r border-white/15 w-14 bg-white/10 text-amber-200" title="1-ci Kollokvium">K1</th>
-                    <th className="py-2 px-2.5 border-r border-white/15 w-14 bg-white/10 text-amber-200" title="2-ci Kollokvium">K2</th>
-                    <th className="py-2 px-2.5 border-r border-white/15 w-14 text-emerald-200" title="Giriş Balı (Cəmi 50 baldan)">Giriş</th>
-                    <th className="py-2 px-2.5 border-r border-white/15 w-14 text-sky-200" title="İmtahan Balı (50 baldan)">İmtahan</th>
-                    <th className="py-2 px-3.5 min-w-[150px] text-white" title="Yekun Qiymət (100 baldan)">Yekun</th>
+                  <tr className="bg-[#48009e] text-white font-bold text-[10px] sm:text-xs text-center border-t border-white/15">
+                    <th className="py-1.5 sm:py-2 px-1 sm:px-2 border-r border-white/15" title="Davamiyyət">Dav.</th>
+                    <th className="py-1.5 sm:py-2 px-1 sm:px-2 border-r border-white/15" title="Seminar">Sem.</th>
+                    <th className="py-1.5 sm:py-2 px-1 sm:px-2 border-r border-white/15 bg-white/10 text-amber-200" title="1-ci Kollokvium">K1</th>
+                    <th className="py-1.5 sm:py-2 px-1 sm:px-2 border-r border-white/15 bg-white/10 text-amber-200" title="2-ci Kollokvium">K2</th>
+                    <th className="py-1.5 sm:py-2 px-1 sm:px-2 border-r border-white/15 text-emerald-200" title="Giriş Balı (Cəmi 50 baldan)">Giriş</th>
+                    <th className="py-1.5 sm:py-2 px-1 sm:px-2 border-r border-white/15 text-sky-200" title="İmtahan Balı (50 baldan)">İmt.</th>
+                    <th className="py-1.5 sm:py-2 px-1 sm:px-3 text-white" title="Yekun Qiymət (100 baldan)">Yekun</th>
                   </tr>
                 </thead>
 
@@ -401,26 +401,30 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                         }`}
                       >
                         {/* 1. № */}
-                        <td className="py-3 px-2.5 text-center border-r border-slate-200 text-slate-500 font-semibold">
+                        <td className="py-2 sm:py-3 px-1 sm:px-2 text-center border-r border-slate-200 text-slate-500 font-semibold text-[10px] sm:text-xs">
                           {row.index}
                         </td>
 
-                        {/* 2. Tədris ili / Semestr */}
-                        <td className="py-3 px-3 text-center border-r border-slate-200 whitespace-nowrap">
-                          <span className="font-mono text-xs text-slate-700 font-medium">{row.academicYear}</span>
-                          <span className="ml-2 px-2 py-0.5 bg-purple-100 text-[#5300b7] rounded-md font-bold text-xs">
-                            {row.semesterNum}-ci sem.
-                          </span>
+                        {/* 2. Tədris ili / Semestr (Stacked for mobile, horizontal on larger screens) */}
+                        <td className="py-2 sm:py-3 px-1.5 sm:px-3 text-center border-r border-slate-200">
+                          <div className="flex flex-col items-center justify-center gap-0.5">
+                            <span className="font-mono text-[10px] sm:text-xs text-slate-700 font-medium leading-tight">
+                              {row.academicYear}
+                            </span>
+                            <span className="px-1 sm:px-1.5 py-0.5 bg-purple-100 text-[#5300b7] rounded font-bold text-[9px] sm:text-xs whitespace-nowrap leading-none">
+                              {row.semesterNum}-ci sem.
+                            </span>
+                          </div>
                         </td>
 
                         {/* 3. Fənn (Title + Code + Dates underneath + Syllabus link) */}
-                        <td className="py-3 px-4 border-r border-slate-200 text-left">
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            <span className="font-bold text-slate-900 text-xs sm:text-sm">
+                        <td className="py-2 sm:py-3 px-2 sm:px-4 border-r border-slate-200 text-left min-w-0">
+                          <div className="flex flex-wrap items-center gap-1">
+                            <span className="font-bold text-slate-900 text-[11px] sm:text-sm break-words leading-tight">
                               {m.name}
                             </span>
                             {m.code && (
-                              <span className="px-1.5 py-0.5 bg-slate-100 text-slate-600 border border-slate-200 rounded text-[10px] font-mono font-semibold">
+                              <span className="px-1 py-0.5 bg-slate-100 text-slate-600 border border-slate-200 rounded text-[9px] sm:text-[10px] font-mono font-semibold">
                                 {m.code}
                               </span>
                             )}
@@ -428,24 +432,24 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
 
                           {/* Sub-text: Colloquium & Exam Schedule */}
                           {(m.colloquium1Date || m.colloquium2Date || m.examDate) && (
-                            <div className="text-[11px] text-slate-600 mt-2 flex flex-wrap items-center gap-1.5">
+                            <div className="text-[10px] sm:text-[11px] text-slate-600 mt-1.5 flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-1">
                               {m.colloquium1Date && (
-                                <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-900 px-2 py-0.5 rounded-md border border-amber-200 text-[10.5px] font-medium">
-                                  <Calendar className="w-3 h-3 text-amber-600 shrink-0" />
-                                  <span>1-ci Kol (K1):</span>
+                                <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-900 px-1.5 sm:px-2 py-0.5 rounded border border-amber-200 text-[9.5px] sm:text-[10.5px] font-medium leading-tight">
+                                  <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-600 shrink-0" />
+                                  <span>K1:</span>
                                   <strong className="font-semibold text-amber-950">{m.colloquium1Date} {m.colloquium1Time || ''} {m.colloquium1Room ? `(${m.colloquium1Room})` : ''}</strong>
                                 </span>
                               )}
                               {m.colloquium2Date && (
-                                <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-900 px-2 py-0.5 rounded-md border border-amber-200 text-[10.5px] font-medium">
-                                  <Calendar className="w-3 h-3 text-amber-600 shrink-0" />
-                                  <span>2-ci Kol (K2):</span>
+                                <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-900 px-1.5 sm:px-2 py-0.5 rounded border border-amber-200 text-[9.5px] sm:text-[10.5px] font-medium leading-tight">
+                                  <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-600 shrink-0" />
+                                  <span>K2:</span>
                                   <strong className="font-semibold text-amber-950">{m.colloquium2Date} {m.colloquium2Time || ''} {m.colloquium2Room ? `(${m.colloquium2Room})` : ''}</strong>
                                 </span>
                               )}
                               {m.examDate && (
-                                <span className="inline-flex items-center gap-1 bg-purple-50 text-purple-900 px-2 py-0.5 rounded-md border border-purple-200 text-[10.5px] font-medium">
-                                  <Calendar className="w-3 h-3 text-[#5300b7] shrink-0" />
+                                <span className="inline-flex items-center gap-1 bg-purple-50 text-purple-900 px-1.5 sm:px-2 py-0.5 rounded border border-purple-200 text-[9.5px] sm:text-[10.5px] font-medium leading-tight">
+                                  <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#5300b7] shrink-0" />
                                   <span>İmtahan:</span>
                                   <strong className="font-semibold text-purple-950">{m.examDate} {m.examTime || ''} {m.examRoom ? `(${m.examRoom})` : ''}</strong>
                                 </span>
@@ -460,10 +464,10 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                                 href={m.syllabusUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#5300b7] hover:bg-[#430094] text-white rounded-lg text-[11px] font-bold transition-all shadow-2xs group cursor-pointer"
+                                className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 bg-[#5300b7] hover:bg-[#430094] text-white rounded-md sm:rounded-lg text-[10px] sm:text-[11px] font-bold transition-all shadow-2xs group cursor-pointer"
                                 title="Fənn sillabusunu aç və ya yüklə"
                               >
-                                <FileText className="w-3 h-3 group-hover:scale-110 transition-transform" />
+                                <FileText className="w-2.5 h-2.5 sm:w-3 sm:h-3 group-hover:scale-110 transition-transform" />
                                 <span>Sillabus ({m.syllabusFileName || 'PDF'})</span>
                                 <ExternalLink className="w-2.5 h-2.5 opacity-80" />
                               </a>
@@ -471,8 +475,8 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                           ) : null}
                         </td>
 
-                        {/* 5. Davamiyyət */}
-                        <td className="py-3 px-2.5 text-center border-r border-slate-200 text-slate-800 font-mono text-xs">
+                        {/* 4. Davamiyyət */}
+                        <td className="py-2 sm:py-3 px-0.5 sm:px-2 text-center border-r border-slate-200 text-slate-800 font-mono text-[10px] sm:text-xs">
                           {g?.attendance !== null && g?.attendance !== undefined ? (
                             <span className="font-semibold text-slate-900">{g.attendance}</span>
                           ) : (
@@ -480,8 +484,8 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                           )}
                         </td>
 
-                        {/* 6. Seminar */}
-                        <td className="py-3 px-2.5 text-center border-r border-slate-200 text-slate-800 font-mono text-xs">
+                        {/* 5. Seminar */}
+                        <td className="py-2 sm:py-3 px-0.5 sm:px-2 text-center border-r border-slate-200 text-slate-800 font-mono text-[10px] sm:text-xs">
                           {g?.seminar !== null && g?.seminar !== undefined ? (
                             <span className="font-semibold text-slate-900">{g.seminar}</span>
                           ) : (
@@ -489,8 +493,8 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                           )}
                         </td>
 
-                        {/* 7. K1 (1-ci Kollokvium) */}
-                        <td className="py-3 px-2.5 text-center border-r border-slate-200 font-mono text-xs bg-amber-50/30">
+                        {/* 6. K1 (1-ci Kollokvium) */}
+                        <td className="py-2 sm:py-3 px-0.5 sm:px-2 text-center border-r border-slate-200 font-mono text-[10px] sm:text-xs bg-amber-50/30">
                           {g?.colloquium1 !== null && g?.colloquium1 !== undefined ? (
                             <span className="font-bold text-amber-900">{g.colloquium1}</span>
                           ) : (
@@ -498,8 +502,8 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                           )}
                         </td>
 
-                        {/* 8. K2 (2-ci Kollokvium) */}
-                        <td className="py-3 px-2.5 text-center border-r border-slate-200 font-mono text-xs bg-amber-50/30">
+                        {/* 7. K2 (2-ci Kollokvium) */}
+                        <td className="py-2 sm:py-3 px-0.5 sm:px-2 text-center border-r border-slate-200 font-mono text-[10px] sm:text-xs bg-amber-50/30">
                           {g?.colloquium2 !== null && g?.colloquium2 !== undefined ? (
                             <span className="font-bold text-amber-900">{g.colloquium2}</span>
                           ) : (
@@ -507,8 +511,8 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                           )}
                         </td>
 
-                        {/* 9. Giriş Balı (Cəmi 50 baldan) */}
-                        <td className="py-3 px-2.5 text-center border-r border-slate-200 font-mono text-xs bg-purple-50/40">
+                        {/* 8. Giriş Balı (Cəmi 50 baldan) */}
+                        <td className="py-2 sm:py-3 px-0.5 sm:px-2 text-center border-r border-slate-200 font-mono text-[10px] sm:text-xs bg-purple-50/40">
                           {entryTotal !== null && entryTotal !== undefined ? (
                             <span className="font-extrabold text-[#5300b7]">{entryTotal}</span>
                           ) : (
@@ -516,8 +520,8 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                           )}
                         </td>
 
-                        {/* 10. İmtahan Balı (50 baldan) */}
-                        <td className="py-3 px-2.5 text-center border-r border-slate-200 font-mono text-xs bg-sky-50/40">
+                        {/* 9. İmtahan Balı (50 baldan) */}
+                        <td className="py-2 sm:py-3 px-0.5 sm:px-2 text-center border-r border-slate-200 font-mono text-[10px] sm:text-xs bg-sky-50/40">
                           {g?.examScore !== null && g?.examScore !== undefined ? (
                             <span className="font-extrabold text-sky-950">{g.examScore}</span>
                           ) : (
@@ -525,18 +529,19 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                           )}
                         </td>
 
-                        {/* 11. Yekun Nəticə */}
-                        <td className="py-3 px-3.5 text-center text-xs whitespace-nowrap">
+                        {/* 10. Yekun Nəticə */}
+                        <td className="py-2 sm:py-3 px-1 sm:px-2.5 text-center text-[9px] sm:text-xs">
                           {gradeEval && finalScore !== null ? (
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-bold border text-[11px] ${gradeEval.badgeClass}`}>
-                              {finalScore} bal ({gradeEval.letter} — {gradeEval.label})
+                            <span className={`inline-flex flex-col sm:flex-row items-center justify-center px-1 sm:px-2 py-0.5 rounded font-bold border text-[9px] sm:text-[11px] leading-tight ${gradeEval.badgeClass}`}>
+                              <span>{finalScore} bal</span>
+                              <span className="text-[8px] sm:text-[10px] sm:ml-1 opacity-80">({gradeEval.letter})</span>
                             </span>
                           ) : entryTotal !== null ? (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-purple-100 text-[#5300b7] text-[11px] font-bold">
-                              Giriş: {entryTotal} bal
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-purple-100 text-[#5300b7] text-[9.5px] sm:text-[11px] font-bold">
+                              Gir: {entryTotal}
                             </span>
                           ) : (
-                            <span className="text-slate-400 text-[11px] italic">Gözlənilir</span>
+                            <span className="text-slate-400 text-[9px] sm:text-[11px] italic">Gözlənilir</span>
                           )}
                         </td>
                       </tr>
