@@ -140,6 +140,7 @@ export const getStoredStudentSession = (): StudentUser | null => {
           name: String(parsed.name || 'Tələbə'),
           group: String(parsed.group || ''),
           specialty: String(parsed.specialty || ''),
+          semester: parsed.semester ? String(parsed.semester) : undefined,
           email: parsed.email ? String(parsed.email) : undefined,
           phone: parsed.phone ? String(parsed.phone) : undefined,
         };

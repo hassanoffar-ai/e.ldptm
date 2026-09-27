@@ -69,7 +69,7 @@ export const extractStudentSemesterIndex = (semesterStr?: string, groupStr?: str
     if (gClean.includes('2-c') || gClean.includes('2.') || gClean.includes('2-k') || gClean.includes('20') || gClean.includes('2-ci kurs')) {
       return gClean.includes('2-ci sem') || gClean.includes('2. sem') ? 3 : 2;
     }
-    if (gClean.includes('1-c') || clean.includes('1.') || gClean.includes('1-k') || gClean.includes('10') || gClean.includes('1-ci kurs')) {
+    if (gClean.includes('1-c') || gClean.includes('1.') || gClean.includes('1-k') || gClean.includes('10') || gClean.includes('1-ci kurs')) {
       return gClean.includes('2-ci sem') || gClean.includes('2. sem') ? 1 : 0;
     }
   }
