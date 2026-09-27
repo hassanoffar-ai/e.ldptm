@@ -367,10 +367,7 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                       <div>Tədris İli</div>
                       <div className="text-[10px] text-purple-200 font-normal">Semestr</div>
                     </th>
-                    <th rowSpan={2} className="py-3 px-3 text-center border-r border-white/20 whitespace-nowrap min-w-[120px]">
-                      Tarix
-                    </th>
-                    <th rowSpan={2} className="py-3 px-4 border-r border-white/20 min-w-[260px]">
+                    <th rowSpan={2} className="py-3 px-4 border-r border-white/20 min-w-[300px]">
                       Fənn və Sillabus
                     </th>
                     <th colSpan={7} className="py-1.5 px-2 text-center border-b border-white/20 bg-white/10 uppercase tracking-wider text-[10px]">
@@ -396,15 +393,6 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                     const entryTotal = row.gradeInfo?.entryTotal;
                     const finalScore = row.gradeInfo?.finalScore;
 
-                    // Display exam or colloquium date in Tarix column
-                    const displayDate = m.examDate
-                      ? `${m.examDate} ${m.examTime || ''}`
-                      : m.colloquium1Date
-                      ? `${m.colloquium1Date} ${m.colloquium1Time || ''}`
-                      : m.colloquium2Date
-                      ? `${m.colloquium2Date} ${m.colloquium2Time || ''}`
-                      : '';
-
                     return (
                       <tr
                         key={m.id}
@@ -425,19 +413,7 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                           </span>
                         </td>
 
-                        {/* 3. Tarix */}
-                        <td className="py-3 px-3 text-center border-r border-slate-200 text-slate-700 whitespace-nowrap font-mono text-[11px]">
-                          {displayDate ? (
-                            <span className="inline-flex items-center gap-1 text-slate-800 font-semibold">
-                              <Calendar className="w-3 h-3 text-[#5300b7]" />
-                              {displayDate}
-                            </span>
-                          ) : (
-                            <span className="text-slate-400 italic">-</span>
-                          )}
-                        </td>
-
-                        {/* 4. Fənn (Title + Code + Sub-schedule + Syllabus link) */}
+                        {/* 3. Fənn (Title + Code + Dates underneath + Syllabus link) */}
                         <td className="py-3 px-4 border-r border-slate-200 text-left">
                           <div className="flex flex-wrap items-center gap-1.5">
                             <span className="font-bold text-slate-900 text-xs sm:text-sm">
@@ -450,22 +426,28 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                             )}
                           </div>
 
-                          {/* Sub-text: Colloquium / Exam schedule */}
+                          {/* Sub-text: Colloquium & Exam Schedule */}
                           {(m.colloquium1Date || m.colloquium2Date || m.examDate) && (
-                            <div className="text-[11px] text-slate-500 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+                            <div className="text-[11px] text-slate-600 mt-2 flex flex-wrap items-center gap-1.5">
                               {m.colloquium1Date && (
-                                <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-900 px-2 py-0.5 rounded border border-amber-200 text-[10px] font-medium">
-                                  <span>K1:</span> <strong>{m.colloquium1Date} {m.colloquium1Time || ''} {m.colloquium1Room ? `(${m.colloquium1Room})` : ''}</strong>
+                                <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-900 px-2 py-0.5 rounded-md border border-amber-200 text-[10.5px] font-medium">
+                                  <Calendar className="w-3 h-3 text-amber-600 shrink-0" />
+                                  <span>1-ci Kol (K1):</span>
+                                  <strong className="font-semibold text-amber-950">{m.colloquium1Date} {m.colloquium1Time || ''} {m.colloquium1Room ? `(${m.colloquium1Room})` : ''}</strong>
                                 </span>
                               )}
                               {m.colloquium2Date && (
-                                <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-900 px-2 py-0.5 rounded border border-amber-200 text-[10px] font-medium">
-                                  <span>K2:</span> <strong>{m.colloquium2Date} {m.colloquium2Time || ''} {m.colloquium2Room ? `(${m.colloquium2Room})` : ''}</strong>
+                                <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-900 px-2 py-0.5 rounded-md border border-amber-200 text-[10.5px] font-medium">
+                                  <Calendar className="w-3 h-3 text-amber-600 shrink-0" />
+                                  <span>2-ci Kol (K2):</span>
+                                  <strong className="font-semibold text-amber-950">{m.colloquium2Date} {m.colloquium2Time || ''} {m.colloquium2Room ? `(${m.colloquium2Room})` : ''}</strong>
                                 </span>
                               )}
                               {m.examDate && (
-                                <span className="inline-flex items-center gap-1 bg-purple-50 text-purple-900 px-2 py-0.5 rounded border border-purple-200 text-[10px] font-medium">
-                                  <span>İmtahan:</span> <strong>{m.examDate} {m.examTime || ''} {m.examRoom ? `(${m.examRoom})` : ''}</strong>
+                                <span className="inline-flex items-center gap-1 bg-purple-50 text-purple-900 px-2 py-0.5 rounded-md border border-purple-200 text-[10.5px] font-medium">
+                                  <Calendar className="w-3 h-3 text-[#5300b7] shrink-0" />
+                                  <span>İmtahan:</span>
+                                  <strong className="font-semibold text-purple-950">{m.examDate} {m.examTime || ''} {m.examRoom ? `(${m.examRoom})` : ''}</strong>
                                 </span>
                               )}
                             </div>
