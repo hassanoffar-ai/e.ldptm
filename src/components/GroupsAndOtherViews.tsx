@@ -1055,114 +1055,113 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-3.5">
             {filteredModules.map((m) => {
-              const hasExamInfo = m.examDate || m.examTime || m.examRoom;
               return (
                 <div
                   key={m.id}
-                  className="bg-white p-5 rounded-2xl border border-[#ccc3d7] hover:border-[#6d28d9] transition-all flex flex-col justify-between shadow-xs hover:shadow-md"
+                  className="bg-white p-3.5 sm:p-4 rounded-xl border border-[#ccc3d7] hover:border-[#6d28d9] transition-all flex flex-col justify-between shadow-xs hover:shadow-sm"
                 >
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {/* Badge */}
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs font-bold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+                      <span className="text-[11px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
                         {m.semester}
                       </span>
                       {m.code && (
-                        <span className="text-[11px] font-mono font-bold text-[#5300b7] bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200">
+                        <span className="text-[10px] font-mono font-bold text-[#5300b7] bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200">
                           {m.code}
                         </span>
                       )}
                     </div>
 
                     {/* Specialty label */}
-                    <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-tight line-clamp-1">
+                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-tight line-clamp-1">
                       {m.specialtyName}
                     </p>
 
                     {/* Title & Credits */}
                     <div>
-                      <h3 className="font-bold text-base text-[#121c2a] leading-snug">
+                      <h3 className="font-bold text-sm text-[#121c2a] leading-tight">
                         {m.name}
                       </h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs font-semibold text-slate-500">
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-[11px] font-semibold text-slate-500">
                           {m.credits ? `${m.credits} kredit` : 'YTP Fənni'}
                         </span>
                       </div>
                     </div>
 
                     {m.description && (
-                      <p className="text-xs text-[#64748b] line-clamp-2">
+                      <p className="text-[11px] text-[#64748b] line-clamp-2">
                         {m.description}
                       </p>
                     )}
 
                     {/* Schedule Details Badge */}
-                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
+                    <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
                       {/* 1. Kollokvium 1 */}
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between text-xs font-bold text-indigo-700">
-                          <div className="flex items-center gap-1.5">
-                            <Calendar className="w-3.5 h-3.5" />
+                      <div className="space-y-0.5">
+                        <div className="flex items-center justify-between text-[11px] font-bold text-indigo-700">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
                             <span>1-ci Kollokvium</span>
                           </div>
                           {(m.colloquium1Date || m.colloquium1Time || m.colloquium1Room) ? (
-                            <span className="text-[10px] px-2 py-0.2 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 font-semibold">Təyin edilib</span>
+                            <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 font-semibold">Təyin edilib</span>
                           ) : (
-                            <span className="text-[10px] text-slate-400 font-normal">Təyin edilməyib</span>
+                            <span className="text-[9px] text-slate-400 font-normal">Təyin edilməyib</span>
                           )}
                         </div>
                         {(m.colloquium1Date || m.colloquium1Time || m.colloquium1Room) && (
-                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-700 pl-4">
-                            {m.colloquium1Date && <span>Tarix: <strong>{m.colloquium1Date}</strong></span>}
-                            {m.colloquium1Time && <span>Saat: <strong>{m.colloquium1Time}</strong></span>}
-                            {m.colloquium1Room && <span>Otaq: <strong>{m.colloquium1Room}</strong></span>}
+                          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-slate-700 pl-4 leading-tight">
+                            {m.colloquium1Date && <span>T: <strong>{m.colloquium1Date}</strong></span>}
+                            {m.colloquium1Time && <span>S: <strong>{m.colloquium1Time}</strong></span>}
+                            {m.colloquium1Room && <span>O: <strong>{m.colloquium1Room}</strong></span>}
                           </div>
                         )}
                       </div>
 
                       {/* 2. Kollokvium 2 */}
-                      <div className="space-y-1 pt-1.5 border-t border-slate-200/60">
-                        <div className="flex items-center justify-between text-xs font-bold text-purple-700">
-                          <div className="flex items-center gap-1.5">
-                            <Calendar className="w-3.5 h-3.5" />
+                      <div className="space-y-0.5 pt-1 border-t border-slate-200/60">
+                        <div className="flex items-center justify-between text-[11px] font-bold text-purple-700">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
                             <span>2-ci Kollokvium</span>
                           </div>
                           {(m.colloquium2Date || m.colloquium2Time || m.colloquium2Room) ? (
-                            <span className="text-[10px] px-2 py-0.2 rounded-full bg-purple-50 text-purple-700 border border-purple-200 font-semibold">Təyin edilib</span>
+                            <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-purple-50 text-purple-700 border border-purple-200 font-semibold">Təyin edilib</span>
                           ) : (
-                            <span className="text-[10px] text-slate-400 font-normal">Təyin edilməyib</span>
+                            <span className="text-[9px] text-slate-400 font-normal">Təyin edilməyib</span>
                           )}
                         </div>
                         {(m.colloquium2Date || m.colloquium2Time || m.colloquium2Room) && (
-                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-700 pl-4">
-                            {m.colloquium2Date && <span>Tarix: <strong>{m.colloquium2Date}</strong></span>}
-                            {m.colloquium2Time && <span>Saat: <strong>{m.colloquium2Time}</strong></span>}
-                            {m.colloquium2Room && <span>Otaq: <strong>{m.colloquium2Room}</strong></span>}
+                          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-slate-700 pl-4 leading-tight">
+                            {m.colloquium2Date && <span>T: <strong>{m.colloquium2Date}</strong></span>}
+                            {m.colloquium2Time && <span>S: <strong>{m.colloquium2Time}</strong></span>}
+                            {m.colloquium2Room && <span>O: <strong>{m.colloquium2Room}</strong></span>}
                           </div>
                         )}
                       </div>
 
                       {/* 3. Yekun İmtahan */}
-                      <div className="space-y-1 pt-1.5 border-t border-slate-200/60">
-                        <div className="flex items-center justify-between text-xs font-bold text-[#5300b7]">
-                          <div className="flex items-center gap-1.5">
-                            <Award className="w-3.5 h-3.5" />
+                      <div className="space-y-0.5 pt-1 border-t border-slate-200/60">
+                        <div className="flex items-center justify-between text-[11px] font-bold text-[#5300b7]">
+                          <div className="flex items-center gap-1">
+                            <Award className="w-3 h-3" />
                             <span>Yekun İmtahan</span>
                           </div>
                           {(m.examDate || m.examTime || m.examRoom) ? (
-                            <span className="text-[10px] px-2 py-0.2 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold">Təyin edilib</span>
+                            <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold">Təyin edilib</span>
                           ) : (
-                            <span className="text-[10px] text-slate-400 font-normal">Təyin edilməyib</span>
+                            <span className="text-[9px] text-slate-400 font-normal">Təyin edilməyib</span>
                           )}
                         </div>
                         {(m.examDate || m.examTime || m.examRoom) && (
-                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-700 pl-4">
-                            {m.examDate && <span>Tarix: <strong>{m.examDate}</strong></span>}
-                            {m.examTime && <span>Saat: <strong>{m.examTime}</strong></span>}
-                            {m.examRoom && <span>Otaq: <strong>{m.examRoom}</strong></span>}
+                          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-slate-700 pl-4 leading-tight">
+                            {m.examDate && <span>T: <strong>{m.examDate}</strong></span>}
+                            {m.examTime && <span>S: <strong>{m.examTime}</strong></span>}
+                            {m.examRoom && <span>O: <strong>{m.examRoom}</strong></span>}
                           </div>
                         )}
                       </div>
@@ -1170,19 +1169,19 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
 
                     {/* Syllabus Badge / Download if available */}
                     {m.syllabusUrl ? (
-                      <div className="pt-1 flex flex-wrap items-center gap-2">
+                      <div className="pt-1 flex flex-wrap items-center gap-1.5">
                         <a
                           href={m.syllabusUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-[#5300b7] border border-purple-200 rounded-xl text-xs font-bold transition-all shadow-2xs hover:shadow-xs group"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-50 hover:bg-purple-100 text-[#5300b7] border border-purple-200 rounded-lg text-[11px] font-semibold transition-all shadow-2xs group"
                           title="Sillabus sənədini aç / yüklə"
                         >
-                          <FileText className="w-3.5 h-3.5 text-[#5300b7] group-hover:scale-110 transition-transform" />
-                          <span className="truncate max-w-[150px]">
+                          <FileText className="w-3 h-3 text-[#5300b7] group-hover:scale-110 transition-transform" />
+                          <span className="truncate max-w-[140px]">
                             {m.syllabusFileName || 'Sillabusa Bax (PDF)'}
                           </span>
-                          <ExternalLink className="w-3 h-3 opacity-70" />
+                          <ExternalLink className="w-2.5 h-2.5 opacity-70" />
                         </a>
                         <button
                           type="button"
@@ -1194,7 +1193,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                         </button>
                       </div>
                     ) : (
-                      <p className="text-[11px] text-slate-400 italic">Sillabus faylı əlavə edilməyib</p>
+                      <p className="text-[10px] text-slate-400 italic">Sillabus faylı əlavə edilməyib</p>
                     )}
                   </div>
 
