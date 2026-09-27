@@ -1,10 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import {
   BookOpen,
-  Lock,
-  Unlock,
-  ChevronDown,
-  ChevronUp,
   FileText,
   ExternalLink,
   Download,
@@ -109,10 +105,7 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
     return findSpecialtyDurationYears(student?.specialty);
   }, [student?.specialty]);
 
-  // Accordion open/collapse state (expanded by default)
-  const [isAccordionOpen, setIsAccordionOpen] = useState(true);
-
-  // Filter state inside the accordion: 'all' or specific semester
+  // Filter state: 'all' or specific semester
   const [selectedSemesterFilter, setSelectedSemesterFilter] = useState<string>('all');
 
   // Filter modules for this student's specialty
@@ -133,7 +126,6 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
     return relevantSemesters.map((semName, index) => {
       const courseYear = Math.floor(index / 2) + 1;
       const semesterNumInYear = (index % 2) + 1;
-      const isLocked = courseYear > activeCourseYear;
       const isCurrentCourse = courseYear === activeCourseYear;
 
       const semModules = specialtyModules.filter((m) => {
@@ -147,7 +139,6 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
         semesterName: semName,
         courseYear,
         semesterNumInYear,
-        isLocked,
         isCurrentCourse,
         modules: semModules,
       };
@@ -156,12 +147,9 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
 
   return (
     <div className="space-y-6">
-      {/* 1. Header Banner & Accordion Trigger */}
+      {/* 1. Header Banner */}
       <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs overflow-hidden transition-all">
-        <div
-          onClick={() => setIsAccordionOpen(!isAccordionOpen)}
-          className="p-5 sm:p-6 bg-gradient-to-r from-purple-50/80 via-indigo-50/50 to-white flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:bg-purple-50/90 transition-colors select-none"
-        >
+        <div className="p-5 sm:p-6 bg-gradient-to-r from-purple-50/80 via-indigo-50/50 to-white flex flex-col md:flex-row md:items-center justify-between gap-4 select-none">
           <div className="flex items-start sm:items-center gap-3.5">
             <div className="w-12 h-12 rounded-2xl bg-[#5300b7] text-white flex items-center justify-center shrink-0 shadow-md shadow-purple-900/15">
               <BookOpen className="w-6 h-6" />
@@ -183,136 +171,92 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
               </p>
             </div>
           </div>
-
-          <div className="flex items-center gap-3 self-end md:self-auto">
-            <span className="text-xs font-bold text-slate-600 hidden sm:inline-block">
-              {isAccordionOpen ? 'Bağla' : 'Aç və Göstər'}
-            </span>
-            <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 hover:text-[#5300b7] hover:border-[#5300b7] transition-all">
-              {isAccordionOpen ? (
-                <ChevronUp className="w-5 h-5" />
-              ) : (
-                <ChevronDown className="w-5 h-5" />
-              )}
-            </div>
-          </div>
         </div>
 
-        {/* 2. Accordion Expanded Content */}
-        {isAccordionOpen && (
-          <div className="p-4 sm:p-6 border-t border-slate-200 space-y-6 animate-in fade-in-50 duration-200">
-            {/* Semestr Seçim Formu (Yalnız ixtisasın illəri üzrə dinamik) */}
-            <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#ccc3d7] shadow-xs space-y-2">
-              <label className="block text-xs font-bold text-slate-700">
-                Semestr Seçin *
-              </label>
-              <div className="relative">
-                <select
-                  value={selectedSemesterFilter}
-                  onChange={(e) => setSelectedSemesterFilter(e.target.value)}
-                  className="w-full bg-[#f8f9ff] border-2 border-[#5300b7] rounded-xl px-4 py-3 text-sm font-semibold text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer shadow-xs"
-                >
-                  <option value="all">Bütün semestrlər üzrə (1-{totalSpecialtyYears}-ci kurslar)</option>
-                  {Array.from({ length: totalSpecialtyYears }).map((_, i) => {
-                    const year = i + 1;
-                    const sem1 = `${year}-ci kurs 1-ci semestr`;
-                    const sem2 = `${year}-ci kurs 2-ci semestr`;
-                    return (
-                      <optgroup key={year} label={`${year}-ci kurs`}>
-                        <option value={sem1}>{sem1}</option>
-                        <option value={sem2}>{sem2}</option>
-                      </optgroup>
-                    );
-                  })}
-                </select>
-              </div>
-            </div>
-
-            {/* Semester Blocks for Specialty Duration */}
-            <div className="space-y-5">
-              {semesterBlocks
-                .filter((block) => {
-                  if (selectedSemesterFilter === 'all') return true;
-                  return block.semesterName === selectedSemesterFilter;
-                })
-                .map((block) => {
+        {/* 2. Main Content */}
+        <div className="p-4 sm:p-6 border-t border-slate-200 space-y-6">
+          {/* Semestr Seçim Formu (Yalnız ixtisasın illəri üzrə dinamik) */}
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#ccc3d7] shadow-xs space-y-2">
+            <label className="block text-xs font-bold text-slate-700">
+              Semestr Seçin *
+            </label>
+            <div className="relative">
+              <select
+                value={selectedSemesterFilter}
+                onChange={(e) => setSelectedSemesterFilter(e.target.value)}
+                className="w-full bg-[#f8f9ff] border-2 border-[#5300b7] rounded-xl px-4 py-3 text-sm font-semibold text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer shadow-xs"
+              >
+                <option value="all">Bütün semestrlər üzrə (1-{totalSpecialtyYears}-ci kurslar)</option>
+                {Array.from({ length: totalSpecialtyYears }).map((_, i) => {
+                  const year = i + 1;
+                  const sem1 = `${year}-ci kurs 1-ci semestr`;
+                  const sem2 = `${year}-ci kurs 2-ci semestr`;
                   return (
-                    <div
-                      key={block.semesterName}
-                      className={`rounded-2xl border transition-all overflow-hidden ${
-                        block.isLocked
-                          ? 'border-slate-200 bg-slate-50/50 opacity-90'
-                          : 'border-purple-300 bg-white shadow-xs'
-                      }`}
-                    >
-                      {/* Block Header */}
-                      <div
-                        className={`px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b ${
-                          block.isLocked
-                            ? 'bg-slate-100/70 border-slate-200 text-slate-500'
-                            : 'bg-purple-50/80 border-purple-100 text-slate-900'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          {block.isLocked ? (
-                            <div className="w-7 h-7 rounded-lg bg-slate-200 text-slate-500 flex items-center justify-center">
-                              <Lock className="w-4 h-4" />
-                            </div>
-                          ) : (
-                            <div className="w-7 h-7 rounded-lg bg-purple-100 text-[#5300b7] flex items-center justify-center">
-                              <Unlock className="w-4 h-4" />
-                            </div>
-                          )}
+                    <optgroup key={year} label={`${year}-ci kurs`}>
+                      <option value={sem1}>{sem1}</option>
+                      <option value={sem2}>{sem2}</option>
+                    </optgroup>
+                  );
+                })}
+              </select>
+            </div>
+          </div>
 
-                          <h3 className="font-bold text-sm sm:text-base">
-                            {block.semesterName}
-                          </h3>
+          {/* Semester Blocks for Specialty Duration */}
+          <div className="space-y-5">
+            {semesterBlocks
+              .filter((block) => {
+                if (selectedSemesterFilter === 'all') return true;
+                return block.semesterName === selectedSemesterFilter;
+              })
+              .map((block) => {
+                return (
+                  <div
+                    key={block.semesterName}
+                    className="rounded-2xl border border-purple-200 bg-white shadow-xs transition-all overflow-hidden"
+                  >
+                    {/* Block Header */}
+                    <div className="px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b bg-purple-50/80 border-purple-100 text-slate-900">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-lg bg-purple-100 text-[#5300b7] flex items-center justify-center">
+                          <Layers className="w-4 h-4" />
                         </div>
 
-                        {/* Status Badges */}
-                        <div className="flex items-center gap-2">
-                          {block.isLocked ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-200/80 text-slate-600 border border-slate-300">
-                              <Lock className="w-3 h-3" />
-                              <span>Kilidlidir ({block.courseYear}-ci kursda açılacaq)</span>
-                            </span>
-                          ) : null}
+                        <h3 className="font-bold text-sm sm:text-base">
+                          {block.semesterName}
+                        </h3>
 
-                          <span className="text-xs font-bold text-slate-500 bg-white px-2 py-0.5 rounded-md border border-slate-200">
-                            {block.modules.length} fənn
+                        {block.isCurrentCourse && (
+                          <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#5300b7] text-white">
+                            Cari Kurs
                           </span>
-                        </div>
+                        )}
                       </div>
 
-                      {/* Block Body: Fənlər List */}
-                      <div className="p-4 sm:p-6">
-                        {block.isLocked ? (
-                          /* Locked State Display */
-                          <div className="p-6 text-center rounded-2xl bg-white/60 border border-dashed border-slate-300 space-y-2">
-                            <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
-                              <Lock className="w-5 h-5" />
-                            </div>
-                            <h4 className="text-sm font-bold text-slate-700">
-                              Bu semestr hazırda sizin üçün bağlıdır
-                            </h4>
-                            <p className="text-xs text-slate-500 max-w-md mx-auto">
-                              Siz hazırda {activeCourseYear}-ci kursda təhsil alırsınız. Bu fənlər və imtahanlar {block.courseYear}-ci kursa keçdikdə aktivləşəcəkdir.
-                            </p>
-                          </div>
-                        ) : block.modules.length === 0 ? (
-                          /* Empty State Display for active semester */
-                          <div className="p-6 text-center rounded-2xl bg-slate-50 border border-dashed border-slate-200 text-slate-400 space-y-1.5">
-                            <BookOpen className="w-8 h-8 mx-auto opacity-40 text-purple-600" />
-                            <p className="text-xs font-bold text-slate-600">
-                              Bu semestr üzrə hələ fənn daxil edilməyib
-                            </p>
-                            <p className="text-[11px] text-slate-400">
-                              Admin tərəfindən fənlər və imtahan cədvəli əlavə edildikdə burada əks olunacaq.
-                            </p>
-                          </div>
-                        ) : (
-                          /* Modules Grid for Unlocked Semester */
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Status Badges */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-purple-800 bg-purple-100/80 px-2.5 py-1 rounded-md border border-purple-200">
+                          {block.modules.length} fənn
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Block Body: Fənlər List */}
+                    <div className="p-4 sm:p-6">
+                      {block.modules.length === 0 ? (
+                        /* Empty State Display */
+                        <div className="p-6 text-center rounded-2xl bg-slate-50 border border-dashed border-slate-200 text-slate-400 space-y-1.5">
+                          <BookOpen className="w-8 h-8 mx-auto opacity-40 text-purple-600" />
+                          <p className="text-xs font-bold text-slate-600">
+                            Bu semestr üzrə hələ fənn daxil edilməyib
+                          </p>
+                          <p className="text-[11px] text-slate-400">
+                            Admin tərəfindən fənlər və imtahan cədvəli əlavə edildikdə burada əks olunacaq.
+                          </p>
+                        </div>
+                      ) : (
+                        /* Modules Grid for Semester */
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {block.modules.map((m) => {
                               const hasExamInfo = m.examDate || m.examTime || m.examRoom;
                               return (
@@ -543,7 +487,6 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                 })}
             </div>
           </div>
-        )}
       </div>
     </div>
   );
