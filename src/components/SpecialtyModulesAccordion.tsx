@@ -801,10 +801,6 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                       </span>
                     </div>
 
-                    {/* Informative text */}
-                    <p className="text-xs sm:text-sm text-slate-600 max-w-md mt-4 leading-relaxed bg-white/90 border border-slate-200 p-3.5 rounded-2xl shadow-xs">
-                      Bu fənn üçün rəsmi tədris sillabusu <strong>{fileTypeLabel}</strong> formatında yerləşdirilmişdir. Faylı telefonunuza və ya kompüterinizə endirərək Microsoft Word / WPS Office proqramında aça və ya Google Docs vasitəsilə onlayn oxuya bilərsiniz.
-                    </p>
 
                     {/* Action buttons */}
                     <div className="flex flex-col sm:flex-row items-center gap-3 mt-6 w-full max-w-md">
