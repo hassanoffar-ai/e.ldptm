@@ -7,9 +7,7 @@ import {
   X,
   Eye,
   Loader2,
-  Globe,
   CheckCircle2,
-  Sparkles,
   FileSpreadsheet,
 } from 'lucide-react';
 import { SpecialtyModule, StudentUser } from '../types';
@@ -165,13 +163,9 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
     subjectName: string;
     fileName?: string;
   } | null>(null);
-  const [syllabusViewTab, setSyllabusViewTab] = useState<'info' | 'online'>('info');
   const [isDownloading, setIsDownloading] = useState(false);
 
   const openSyllabusModal = (syllabus: { url: string; subjectName: string; fileName?: string }) => {
-    const fn = (syllabus.fileName || syllabus.url).toLowerCase();
-    const isPdf = fn.endsWith('.pdf') || syllabus.url.toLowerCase().includes('.pdf');
-    setSyllabusViewTab(isPdf ? 'online' : 'info');
     setViewingSyllabus(syllabus);
   };
 
@@ -701,44 +695,10 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                 </div>
               </div>
 
-              {/* Sub-bar / Mode Tabs for Non-PDF Office Documents */}
-              {(!isPdf || isDocx || isExcel || isPpt) && (
-                <div className="px-4 py-2 bg-slate-50 border-b border-slate-200 flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-1.5 bg-slate-200/80 p-1 rounded-xl">
-                    <button
-                      type="button"
-                      onClick={() => setSyllabusViewTab('info')}
-                      className={`px-3 py-1 rounded-lg font-bold text-xs transition-all cursor-pointer ${
-                        syllabusViewTab === 'info'
-                          ? 'bg-white text-slate-900 shadow-xs'
-                          : 'text-slate-600 hover:text-slate-900'
-                      }`}
-                    >
-                      📄 Sənəd Məlumatı & Yükləmə
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSyllabusViewTab('online')}
-                      className={`px-3 py-1 rounded-lg font-bold text-xs transition-all cursor-pointer flex items-center gap-1 ${
-                        syllabusViewTab === 'online'
-                          ? 'bg-white text-[#5300b7] shadow-xs'
-                          : 'text-slate-600 hover:text-slate-900'
-                      }`}
-                    >
-                      <Globe className="w-3 h-3" />
-                      <span>Onlayn Baxış (Google Docs)</span>
-                    </button>
-                  </div>
-                  <span className="text-[11px] text-slate-500 hidden md:inline">
-                    Lənkəran Dövlət Peşə Təhsil Mərkəzi
-                  </span>
-                </div>
-              )}
-
               {/* Modal Body */}
               <div className="flex-1 min-h-[360px] max-h-[68vh] bg-slate-50 relative overflow-y-auto flex flex-col justify-center">
                 {/* 1. PDF View */}
-                {isPdf && syllabusViewTab === 'online' && (
+                {isPdf && (
                   <iframe
                     src={`${viewingSyllabus.url}#toolbar=0&navpanes=0`}
                     className="w-full h-full min-h-[480px] border-none"
@@ -757,19 +717,8 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                   </div>
                 )}
 
-                {/* 3. Non-PDF / Office Document (Word DOCX, Excel, PPTX): Google Docs Viewer Mode */}
-                {(!isPdf || isDocx || isExcel || isPpt) && syllabusViewTab === 'online' && !isImage && (
-                  <div className="w-full h-full min-h-[480px] relative bg-white">
-                    <iframe
-                      src={`https://docs.google.com/viewer?url=${encodeURIComponent(viewingSyllabus.url)}&embedded=true`}
-                      className="w-full h-full min-h-[480px] border-none"
-                      title={`${viewingSyllabus.subjectName} Sillabus Viewer`}
-                    />
-                  </div>
-                )}
-
-                {/* 4. Non-PDF / Office Document (Word DOCX, Excel, PPTX): Rich Document Card Mode */}
-                {syllabusViewTab === 'info' && (
+                {/* 3. Non-PDF / Office Document (Word DOCX, Excel, PPTX): Rich Document Card Mode */}
+                {!isPdf && !isImage && (
                   <div className="p-6 sm:p-10 flex flex-col items-center justify-center text-center my-auto">
                     {/* Glowing Icon Banner */}
                     <div className="relative mb-5">
@@ -795,12 +744,7 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                         <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
                         Təsdiq Olunmuş Sillabus
                       </span>
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-50 text-purple-700 border border-purple-200 text-xs font-semibold">
-                        <Sparkles className="w-3.5 h-3.5 text-purple-600" />
-                        Lənkəran Dövlət Peşə Təhsil Mərkəzi
-                      </span>
                     </div>
-
 
                     {/* Action buttons */}
                     <div className="flex flex-col sm:flex-row items-center gap-3 mt-6 w-full max-w-md">
@@ -814,7 +758,7 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                           )
                         }
                         disabled={isDownloading}
-                        className="w-full flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-[#5300b7] to-[#7c3aed] hover:from-[#430094] hover:to-[#6d28d9] text-white rounded-2xl font-bold text-sm shadow-lg shadow-purple-500/25 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer disabled:opacity-50"
+                        className="w-full flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-[#5300b7] to-[#7c3aed] hover:from-[#430094] hover:to-[#6d28d9] text-white rounded-2xl font-bold text-sm shadow-lg shadow-purple-500/25 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer disabled:opacity-50"
                       >
                         {isDownloading ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
@@ -822,15 +766,6 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                           <Download className="w-4 h-4" />
                         )}
                         <span>Sillabusu Cihazına Yüklə</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setSyllabusViewTab('online')}
-                        className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-3 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-2xl font-bold text-xs sm:text-sm transition-all cursor-pointer shadow-xs"
-                      >
-                        <Globe className="w-4 h-4 text-[#5300b7]" />
-                        <span>Google Docs ilə Oxu</span>
                       </button>
                     </div>
                   </div>
