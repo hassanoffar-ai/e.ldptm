@@ -30,6 +30,7 @@ export const EditStudentModal: React.FC<EditStudentModalProps> = ({
   const [name, setName] = useState('');
   const [studentId, setStudentId] = useState('');
   const [group, setGroup] = useState('');
+  const [semester, setSemester] = useState('');
   const [specialty, setSpecialty] = useState('');
   const [customSpecialty, setCustomSpecialty] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +39,9 @@ export const EditStudentModal: React.FC<EditStudentModalProps> = ({
     if (student) {
       setName(student.name || '');
       setStudentId(student.studentId || student.finCode || '');
-      setGroup(student.group || GROUPS_LIST[0] || '');
+      const studentGroup = student.group || GROUPS_LIST[0] || '';
+      setGroup(studentGroup);
+      setSemester(student.semester || `${studentGroup} 1-ci semestr`);
 
       const specList = (
         specialties.length > 0 ? specialties.map((s) => s.name) : SPECIALTIES_LIST
@@ -55,6 +58,11 @@ export const EditStudentModal: React.FC<EditStudentModalProps> = ({
       setError(null);
     }
   }, [student, specialties, isOpen]);
+
+  const handleGroupChange = (newGroup: string) => {
+    setGroup(newGroup);
+    setSemester(`${newGroup} 1-ci semestr`);
+  };
 
   if (!isOpen || !student) return null;
 
@@ -104,6 +112,7 @@ export const EditStudentModal: React.FC<EditStudentModalProps> = ({
       finCode: cleanId,
       group: group || student.group,
       specialty: resolvedSpecialty,
+      semester: semester || student.semester || `${group || '1-ci kurs'} 1-ci semestr`,
       status: student.status || 'active',
       // Əlaqə nömrəsi, gmail və şifrə tələbənin portaldakı öz qeydiyyatı ilə idarə olunur
       phone: student.phone || '',
@@ -181,22 +190,38 @@ export const EditStudentModal: React.FC<EditStudentModalProps> = ({
             </div>
           </div>
 
-          {/* Kurs */}
-          <div>
-            <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-              Kurs <span className="text-rose-500">*</span>
-            </label>
-            <select
-              value={group}
-              onChange={(e) => setGroup(e.target.value)}
-              className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
-            >
-              {GROUPS_LIST.map((g) => (
-                <option key={g} value={g}>
-                  {g}
-                </option>
-              ))}
-            </select>
+          {/* Kurs və Semestr */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-[#4a4455] mb-1">
+                Kurs <span className="text-rose-500">*</span>
+              </label>
+              <select
+                value={group}
+                onChange={(e) => handleGroupChange(e.target.value)}
+                className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer"
+              >
+                {GROUPS_LIST.map((g) => (
+                  <option key={g} value={g}>
+                    {g}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#4a4455] mb-1">
+                Cari Semestr <span className="text-rose-500">*</span>
+              </label>
+              <select
+                value={semester}
+                onChange={(e) => setSemester(e.target.value)}
+                className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer"
+              >
+                <option value={`${group} 1-ci semestr`}>{group} 1-ci semestr</option>
+                <option value={`${group} 2-ci semestr`}>{group} 2-ci semestr</option>
+              </select>
+            </div>
           </div>
 
           {/* İxtisas */}

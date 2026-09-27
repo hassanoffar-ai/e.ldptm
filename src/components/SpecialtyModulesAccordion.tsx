@@ -23,7 +23,6 @@ interface SpecialtyModulesAccordionProps {
 
 /**
  * Extracts the student's current course year (1, 2, 3, or 4) from their group string or data.
- * Examples: "KSP-23" -> 1st/2nd course, "1-ci kurs", "101", "2-ci kurs" -> 2, etc.
  */
 export const extractStudentCourseYear = (groupStr?: string): number => {
   if (!groupStr) return 1;
@@ -34,13 +33,51 @@ export const extractStudentCourseYear = (groupStr?: string): number => {
   if (clean.includes('2-c') || clean.includes('2.') || clean.includes('2-k') || clean.includes('20')) return 2;
   if (clean.includes('1-c') || clean.includes('1.') || clean.includes('1-k') || clean.includes('10')) return 1;
 
-  // If group has year like -24 (2024 intake), -23 (2023 intake), etc.
   if (clean.includes('-24') || clean.includes('24-')) return 1;
   if (clean.includes('-23') || clean.includes('23-')) return 2;
   if (clean.includes('-22') || clean.includes('22-')) return 3;
   if (clean.includes('-21') || clean.includes('21-')) return 4;
 
   return 1; // Default to 1-ci kurs
+};
+
+/**
+ * Extracts the student's active semester index (0 to 7) in SEMESTERS_LIST.
+ * For example:
+ * "1-ci kurs 1-ci semestr" -> 0
+ * "1-ci kurs 2-ci semestr" -> 1
+ * "2-ci kurs 1-ci semestr" -> 2
+ * etc.
+ */
+export const extractStudentSemesterIndex = (semesterStr?: string, groupStr?: string): number => {
+  if (semesterStr) {
+    const sClean = semesterStr.toLowerCase().trim();
+    const foundIdx = SEMESTERS_LIST.findIndex(
+      (sem) =>
+        sem.toLowerCase().trim() === sClean ||
+        sClean.includes(sem.toLowerCase().trim()) ||
+        sem.toLowerCase().trim().includes(sClean)
+    );
+    if (foundIdx !== -1) return foundIdx;
+  }
+
+  if (groupStr) {
+    const gClean = groupStr.toLowerCase().trim();
+    if (gClean.includes('4-c') || gClean.includes('4.') || gClean.includes('4-k') || gClean.includes('40') || gClean.includes('4-cü kurs')) {
+      return gClean.includes('2-ci sem') || gClean.includes('2. sem') ? 7 : 6;
+    }
+    if (gClean.includes('3-c') || gClean.includes('3.') || gClean.includes('3-k') || gClean.includes('30') || gClean.includes('3-cü kurs')) {
+      return gClean.includes('2-ci sem') || gClean.includes('2. sem') ? 5 : 4;
+    }
+    if (gClean.includes('2-c') || gClean.includes('2.') || gClean.includes('2-k') || gClean.includes('20') || gClean.includes('2-ci kurs')) {
+      return gClean.includes('2-ci sem') || gClean.includes('2. sem') ? 3 : 2;
+    }
+    if (gClean.includes('1-c') || gClean.includes('1.') || gClean.includes('1-k') || gClean.includes('10') || gClean.includes('1-ci kurs')) {
+      return gClean.includes('2-ci sem') || gClean.includes('2. sem') ? 1 : 0;
+    }
+  }
+
+  return 0; // Default to 1-ci kurs 1-ci semestr (0)
 };
 
 /**
@@ -106,6 +143,13 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
   // Determine current active course year for this student
   const activeCourseYear = studentCourseYear ?? extractStudentCourseYear(student?.group);
 
+  // Determine active semester index (0 to 7) for this student
+  const activeSemesterIndex = useMemo(() => {
+    return extractStudentSemesterIndex(student?.semester, student?.group);
+  }, [student?.semester, student?.group]);
+
+  const activeSemesterName = SEMESTERS_LIST[activeSemesterIndex] || `${activeCourseYear}-ci kurs 1-ci semestr`;
+
   // Determine total valid course years for student's specialty (1, 2, 3, or 4)
   const totalSpecialtyYears = useMemo(() => {
     return findSpecialtyDurationYears(student?.specialty);
@@ -125,15 +169,16 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
     });
   }, [modules, student?.specialty]);
 
-  // Only take semesters up to the specialty's exact duration (e.g. 3 years = 6 semesters, no 4th year!)
+  // STRICTURE: Student can ONLY see semesters up to their current active semester (cannot see future semesters!)
   const semesterBlocks = useMemo(() => {
-    const validSemestersCount = (totalSpecialtyYears || 3) * 2;
-    const relevantSemesters = (SEMESTERS_LIST || []).slice(0, validSemestersCount);
+    const maxSpecialtySemesters = (totalSpecialtyYears || 3) * 2;
+    const allowedSemestersCount = Math.min(activeSemesterIndex + 1, maxSpecialtySemesters);
+    const relevantSemesters = (SEMESTERS_LIST || []).slice(0, allowedSemestersCount);
 
     return relevantSemesters.map((semName, index) => {
       const courseYear = Math.floor(index / 2) + 1;
       const semesterNumInYear = (index % 2) + 1;
-      const isCurrentCourse = courseYear === activeCourseYear;
+      const isCurrentSemester = index === activeSemesterIndex;
 
       const semModules = (specialtyModules || []).filter((m) => {
         if (!m || !m.semester) return false;
@@ -146,11 +191,11 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
         semesterName: semName,
         courseYear,
         semesterNumInYear,
-        isCurrentCourse,
+        isCurrentSemester,
         modules: semModules,
       };
     });
-  }, [specialtyModules, activeCourseYear, totalSpecialtyYears]);
+  }, [specialtyModules, activeSemesterIndex, totalSpecialtyYears]);
 
   return (
     <div className="space-y-6">
@@ -165,14 +210,14 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-1">
                 <h2 className="text-lg sm:text-xl font-black text-slate-900">
-                  Bütün semestrlər üzrə Tədris Planı, Fənlər və İmtahan Cədvəli
+                  Tədris Planı, Fənlər və İmtahan Cədvəli
                 </h2>
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-[#5300b7] border border-purple-200">
                   {student?.specialty || 'İxtisas'} ({totalSpecialtyYears} illik)
                 </span>
               </div>
               <p className="text-xs text-slate-500 flex flex-wrap items-center gap-x-2 gap-y-1">
-                <span>Cari statusunuz: <strong className="text-purple-700 font-bold">{activeCourseYear}-ci kurs tələbəsi</strong> ({student?.group || 'Qrup'})</span>
+                <span>Cari statusunuz: <strong className="text-purple-700 font-bold">{student?.semester || activeSemesterName}</strong> ({student?.group || 'Qrup'})</span>
                 <span>•</span>
                 <span>YTP {totalSpecialtyYears} İllik Tədris Proqramı</span>
               </p>
@@ -182,7 +227,7 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
 
         {/* 2. Main Content */}
         <div className="p-4 sm:p-6 border-t border-slate-200 space-y-6">
-          {/* Semestr Seçim Formu (Yalnız ixtisasın illəri üzrə dinamik) */}
+          {/* Semestr Seçim Formu (Yalnız tələbənin cari və keçmiş semestrləri görünür) */}
           <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#ccc3d7] shadow-xs space-y-2">
             <label className="block text-xs font-bold text-slate-700">
               Semestr Seçin *
@@ -193,23 +238,22 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                 onChange={(e) => setSelectedSemesterFilter(e.target.value)}
                 className="w-full bg-[#f8f9ff] border-2 border-[#5300b7] rounded-xl px-4 py-3 text-sm font-semibold text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer shadow-xs"
               >
-                <option value="all">Bütün semestrlər üzrə (1-{totalSpecialtyYears}-ci kurslar)</option>
-                {Array.from({ length: totalSpecialtyYears }).map((_, i) => {
-                  const year = i + 1;
-                  const sem1 = `${year}-ci kurs 1-ci semestr`;
-                  const sem2 = `${year}-ci kurs 2-ci semestr`;
-                  return (
-                    <optgroup key={year} label={`${year}-ci kurs`}>
-                      <option value={sem1}>{sem1}</option>
-                      <option value={sem2}>{sem2}</option>
-                    </optgroup>
-                  );
-                })}
+                <option value="all">
+                  {semesterBlocks.length === 1
+                    ? `${semesterBlocks[0]?.semesterName} (Cari Semestr)`
+                    : `Bütün aktiv semestrlər üzrə (1 - ${semesterBlocks.length}-ci semestr)`}
+                </option>
+                {semesterBlocks.length > 1 &&
+                  semesterBlocks.map((block) => (
+                    <option key={block.semesterName} value={block.semesterName}>
+                      {block.semesterName} {block.isCurrentSemester ? '★ (Cari Semestr)' : '✓ (Keçmiş Semestr)'}
+                    </option>
+                  ))}
               </select>
             </div>
           </div>
 
-          {/* Semester Blocks for Specialty Duration */}
+          {/* Semester Blocks for Permitted Duration */}
           <div className="space-y-5">
             {semesterBlocks
               .filter((block) => {
@@ -233,9 +277,9 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                           {block.semesterName}
                         </h3>
 
-                        {block.isCurrentCourse && (
-                          <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#5300b7] text-white">
-                            Cari Kurs
+                        {block.isCurrentSemester && (
+                          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#5300b7] text-white shadow-xs">
+                            Cari Semestr
                           </span>
                         )}
                       </div>

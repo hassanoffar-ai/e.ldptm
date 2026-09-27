@@ -560,6 +560,28 @@ export default function App() {
       prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s))
     );
     upsertStudentToDb(updatedStudent);
+
+    // If active session belongs to this student, immediately update student session
+    if (
+      currentStudentUser &&
+      (currentStudentUser.id === updatedStudent.id ||
+        (updatedStudent.studentId && currentStudentUser.studentId === updatedStudent.studentId) ||
+        (updatedStudent.finCode && currentStudentUser.finCode === updatedStudent.finCode))
+    ) {
+      const refreshed: StudentUser = {
+        id: updatedStudent.id,
+        studentId: updatedStudent.studentId || updatedStudent.finCode || '',
+        finCode: updatedStudent.finCode || updatedStudent.studentId || '',
+        name: updatedStudent.name,
+        group: updatedStudent.group,
+        specialty: updatedStudent.specialty,
+        semester: updatedStudent.semester,
+        email: updatedStudent.email,
+        phone: updatedStudent.phone,
+      };
+      setCurrentStudentUser(refreshed);
+      saveStoredStudentSession(refreshed);
+    }
   };
 
   const handleDeleteStudent = (id: string) => {
@@ -618,9 +640,30 @@ export default function App() {
       );
     }
 
+    const activeStudentData = students.find(
+      (s) =>
+        s.id === currentStudentUser.id ||
+        (s.studentId && s.studentId === currentStudentUser.studentId) ||
+        (s.finCode && s.finCode === currentStudentUser.finCode)
+    );
+
+    const resolvedStudentUser: StudentUser = activeStudentData
+      ? {
+          id: activeStudentData.id,
+          studentId: activeStudentData.studentId || activeStudentData.finCode || '',
+          finCode: activeStudentData.finCode || activeStudentData.studentId || '',
+          name: activeStudentData.name,
+          group: activeStudentData.group,
+          specialty: activeStudentData.specialty,
+          semester: activeStudentData.semester,
+          email: activeStudentData.email || currentStudentUser.email,
+          phone: activeStudentData.phone || currentStudentUser.phone,
+        }
+      : currentStudentUser;
+
     return (
       <PublicPortalView
-        student={currentStudentUser}
+        student={resolvedStudentUser}
         courses={courses}
         sessions={sessions}
         onLogout={handleStudentLogout}

@@ -42,6 +42,7 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
   const [name, setName] = useState('');
   const [studentId, setStudentId] = useState('');
   const [group, setGroup] = useState(defaultGroup || GROUPS_LIST[0] || '1-ci kurs');
+  const [semester, setSemester] = useState(`${defaultGroup || GROUPS_LIST[0] || '1-ci kurs'} 1-ci semestr`);
   const [specialty, setSpecialty] = useState(
     defaultSpecialty || effectiveSpecialties[0]?.name || ''
   );
@@ -50,7 +51,10 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      if (defaultGroup) setGroup(defaultGroup);
+      if (defaultGroup) {
+        setGroup(defaultGroup);
+        setSemester(`${defaultGroup} 1-ci semestr`);
+      }
       if (defaultSpecialty) {
         setSpecialty(defaultSpecialty);
       } else if (!specialty && effectiveSpecialties.length > 0) {
@@ -58,6 +62,11 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
       }
     }
   }, [isOpen, defaultGroup, defaultSpecialty, effectiveSpecialties]);
+
+  const handleGroupChange = (newGroup: string) => {
+    setGroup(newGroup);
+    setSemester(`${newGroup} 1-ci semestr`);
+  };
 
   if (!isOpen) return null;
 
@@ -101,6 +110,7 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
       name: name.trim(),
       group,
       specialty: resolvedSpecialty,
+      semester,
       email: '',
       phone: '',
       passwordHash: '123456',
@@ -184,15 +194,15 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
             </div>
           </div>
 
-          {/* Qrup və İxtisas */}
+          {/* Kurs və Semestr */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-                Kurs
+                Kurs *
               </label>
               <select
                 value={group}
-                onChange={(e) => setGroup(e.target.value)}
+                onChange={(e) => handleGroupChange(e.target.value)}
                 className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer"
               >
                 {GROUPS_LIST.map((g) => (
@@ -205,42 +215,57 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-[#4a4455] mb-1">
-                İxtisas / Peşə İstiqaməti
+                Cari Semestr *
               </label>
-              {effectiveSpecialties.length > 0 ? (
-                <div className="space-y-2">
-                  <select
-                    value={specialty}
-                    onChange={(e) => setSpecialty(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer"
-                  >
-                    {effectiveSpecialties.map((s) => (
-                      <option key={s.id} value={s.name}>
-                        {s.name} ({s.code})
-                      </option>
-                    ))}
-                    <option value="__custom__">+ Digər İxtisas Daxil Et</option>
-                  </select>
-                  {specialty === '__custom__' && (
-                    <input
-                      type="text"
-                      placeholder="İxtisasın adını yazın..."
-                      value={customSpecialty}
-                      onChange={(e) => setCustomSpecialty(e.target.value)}
-                      className="w-full px-3 py-2 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-xs outline-none focus:ring-2 focus:ring-[#5300b7]"
-                    />
-                  )}
-                </div>
-              ) : (
-                <input
-                  type="text"
-                  placeholder="məs: Kompüter sistemlərində proqramlaşdırma"
-                  value={customSpecialty}
-                  onChange={(e) => setCustomSpecialty(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
-                />
-              )}
+              <select
+                value={semester}
+                onChange={(e) => setSemester(e.target.value)}
+                className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm font-medium text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer"
+              >
+                <option value={`${group} 1-ci semestr`}>{group} 1-ci semestr</option>
+                <option value={`${group} 2-ci semestr`}>{group} 2-ci semestr</option>
+              </select>
             </div>
+          </div>
+
+          {/* İxtisas */}
+          <div>
+            <label className="block text-xs font-semibold text-[#4a4455] mb-1">
+              İxtisas / Peşə İstiqaməti *
+            </label>
+            {effectiveSpecialties.length > 0 ? (
+              <div className="space-y-2">
+                <select
+                  value={specialty}
+                  onChange={(e) => setSpecialty(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer"
+                >
+                  {effectiveSpecialties.map((s) => (
+                    <option key={s.id} value={s.name}>
+                      {s.name} ({s.code})
+                    </option>
+                  ))}
+                  <option value="__custom__">+ Digər İxtisas Daxil Et</option>
+                </select>
+                {specialty === '__custom__' && (
+                  <input
+                    type="text"
+                    placeholder="İxtisasın adını yazın..."
+                    value={customSpecialty}
+                    onChange={(e) => setCustomSpecialty(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-xs outline-none focus:ring-2 focus:ring-[#5300b7]"
+                  />
+                )}
+              </div>
+            ) : (
+              <input
+                type="text"
+                placeholder="məs: Kompüter sistemlərində proqramlaşdırma"
+                value={customSpecialty}
+                onChange={(e) => setCustomSpecialty(e.target.value)}
+                className="w-full px-3 py-2.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#5300b7]"
+              />
+            )}
           </div>
 
           {error && (

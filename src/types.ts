@@ -5,6 +5,7 @@ export interface Student {
   name: string;
   group: string;
   specialty: string;
+  semester?: string; // e.g. "1-ci kurs 1-ci semestr"
   avatar?: string;
   email?: string;
   phone?: string;
@@ -20,6 +21,7 @@ export interface StudentUser {
   name: string;
   group: string;
   specialty: string;
+  semester?: string; // e.g. "1-ci kurs 1-ci semestr"
   email?: string;
   phone?: string;
 }

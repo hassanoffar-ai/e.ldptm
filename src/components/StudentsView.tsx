@@ -269,9 +269,16 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                       </span>
                     </td>
                     <td className="p-4">
-                      <span className="px-2.5 py-1 bg-slate-100 rounded-lg text-xs font-semibold text-slate-800">
-                        {student.group}
-                      </span>
+                      <div className="space-y-0.5">
+                        <span className="px-2.5 py-1 bg-slate-100 rounded-lg text-xs font-semibold text-slate-800 inline-block">
+                          {student.group}
+                        </span>
+                        {student.semester && (
+                          <div className="text-[11px] font-medium text-purple-700">
+                            {student.semester}
+                          </div>
+                        )}
+                      </div>
                     </td>
                     <td className="p-4 text-xs text-[#4a4455] max-w-xs font-medium">
                       {student.specialty}

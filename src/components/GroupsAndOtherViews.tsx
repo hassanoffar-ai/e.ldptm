@@ -336,6 +336,8 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
       return;
     }
 
+    const previousUrl = modSyllabusUrl;
+
     setIsUploadingSyllabus(true);
     setUploadSyllabusError(null);
 
@@ -347,15 +349,47 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
         `Fayl yüklənərkən xəta baş verdi: ${error.message || 'Storage xətası'}`
       );
     } else if (url) {
+      // If replacing an old file, remove old one from storage
+      if (previousUrl && previousUrl !== url) {
+        deleteSyllabusFile(previousUrl).catch(console.error);
+      }
       setModSyllabusUrl(url);
       setModSyllabusFileName(fileName);
     }
   };
 
-  const handleRemoveSyllabusFile = () => {
+  const handleRemoveSyllabusFile = async () => {
+    if (modSyllabusUrl) {
+      try {
+        await deleteSyllabusFile(modSyllabusUrl);
+      } catch (e) {
+        console.error(e);
+      }
+    }
     setModSyllabusUrl('');
     setModSyllabusFileName('');
     setUploadSyllabusError(null);
+  };
+
+  const handleDeleteSyllabusDirectly = async (m: SpecialtyModule) => {
+    if (!m.syllabusUrl) return;
+    if (!window.confirm(`"${m.name}" fənninin mövcud sillabus faylını silmək istədiyinizdən əminsiniz?`)) return;
+
+    const fileUrl = m.syllabusUrl;
+    try {
+      await deleteSyllabusFile(fileUrl);
+    } catch (e) {
+      console.error(e);
+    }
+
+    const updatedItem: SpecialtyModule = {
+      ...m,
+      syllabusUrl: undefined,
+      syllabusFileName: undefined,
+    };
+    const updated = modulesList.map((item) => (item.id === m.id ? updatedItem : item));
+    saveModules(updated);
+    upsertModuleToDb(updatedItem);
   };
 
   const handleSaveModule = (e: React.FormEvent) => {
@@ -1123,7 +1157,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
 
                     {/* Syllabus Badge / Download if available */}
                     {m.syllabusUrl ? (
-                      <div className="pt-1">
+                      <div className="pt-1 flex flex-wrap items-center gap-2">
                         <a
                           href={m.syllabusUrl}
                           target="_blank"
@@ -1132,11 +1166,19 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                           title="Sillabus sənədini aç / yüklə"
                         >
                           <FileText className="w-3.5 h-3.5 text-[#5300b7] group-hover:scale-110 transition-transform" />
-                          <span className="truncate max-w-[180px]">
+                          <span className="truncate max-w-[150px]">
                             {m.syllabusFileName || 'Sillabusa Bax (PDF)'}
                           </span>
                           <ExternalLink className="w-3 h-3 opacity-70" />
                         </a>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSyllabusDirectly(m)}
+                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                          title="Bu fənnin sillabusunu sil"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     ) : (
                       <p className="text-[11px] text-slate-400 italic">Sillabus faylı əlavə edilməyib</p>
@@ -1435,35 +1477,54 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                   )}
 
                   {modSyllabusUrl ? (
-                    <div className="p-3 bg-purple-50/70 border border-purple-200 rounded-xl flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-8 h-8 rounded-lg bg-[#5300b7] text-white flex items-center justify-center shrink-0">
-                          <FileText className="w-4 h-4" />
+                    <div className="p-3.5 bg-purple-50/70 border border-purple-200 rounded-xl space-y-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-8 h-8 rounded-lg bg-[#5300b7] text-white flex items-center justify-center shrink-0 shadow-xs">
+                            <FileText className="w-4 h-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-slate-800 truncate">
+                              {modSyllabusFileName || 'Sillabus Faylı'}
+                            </p>
+                            <a
+                              href={modSyllabusUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[11px] text-[#5300b7] font-semibold hover:underline inline-flex items-center gap-1 mt-0.5"
+                            >
+                              <span>Mövcud Faylı Görüntülə</span>
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          </div>
                         </div>
-                        <div className="min-w-0">
-                          <p className="text-xs font-bold text-slate-800 truncate">
-                            {modSyllabusFileName || 'Sillabus Faylı'}
-                          </p>
-                          <a
-                            href={modSyllabusUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[11px] text-[#5300b7] font-semibold hover:underline inline-flex items-center gap-1 mt-0.5"
-                          >
-                            <span>Faylı Görüntülə</span>
-                            <ExternalLink className="w-3 h-3" />
-                          </a>
-                        </div>
+
+                        <button
+                          type="button"
+                          onClick={handleRemoveSyllabusFile}
+                          className="px-2.5 py-1.5 text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
+                          title="Sillabusu sil"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Sillabusu Sil</span>
+                        </button>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={handleRemoveSyllabusFile}
-                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer shrink-0"
-                        title="Faylı çıxart"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {/* Replace / Upload new syllabus button */}
+                      <div className="pt-2.5 border-t border-purple-100 flex items-center justify-between gap-2">
+                        <span className="text-[11px] text-slate-500 font-medium">Sillabusu dəyişmək istəyirsiniz?</span>
+                        <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-purple-50 text-[#5300b7] border border-[#5300b7] rounded-lg text-xs font-bold transition-all cursor-pointer shadow-2xs">
+                          <FileUp className="w-3.5 h-3.5" />
+                          <span>{isUploadingSyllabus ? 'Yüklənir...' : 'Yeni Sillabus Seç / Dəyişdir'}</span>
+                          <input
+                            type="file"
+                            accept=".pdf,.doc,.docx,.ppt,.pptx,.txt"
+                            onChange={handleFileUpload}
+                            disabled={isUploadingSyllabus}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
                     </div>
                   ) : (
                     <div className="relative border-2 border-dashed border-[#ccc3d7] hover:border-[#5300b7] rounded-xl p-4 text-center transition-all bg-[#f8f9ff] hover:bg-purple-50/20 group">
