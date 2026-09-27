@@ -33,7 +33,7 @@ export const mapDbToStudent = (row: any): Student => ({
   name: row.name,
   group: row.group_name,
   specialty: row.specialty,
-  semester: row.semester || undefined,
+  semester: row.semester || (row.group_name ? `${row.group_name} 1-ci semestr` : '1-ci kurs 1-ci semestr'),
   avatar: row.avatar || undefined,
   email: row.email || undefined,
   phone: row.phone || undefined,
@@ -45,11 +45,10 @@ export const mapDbToStudent = (row: any): Student => ({
 export const mapStudentToDb = (s: Student) => ({
   id: s.id,
   student_id: s.studentId,
-  fin_code: s.finCode || '',
+  fin_code: s.finCode || s.studentId || '',
   name: s.name,
   group_name: s.group,
   specialty: s.specialty,
-  semester: s.semester || null,
   avatar: s.avatar || null,
   email: s.email || null,
   phone: s.phone || null,
@@ -76,7 +75,15 @@ export async function upsertStudentToDb(student: Student): Promise<void> {
   const dbPayload = mapStudentToDb(student);
   const { error } = await supabase.from('students').upsert(dbPayload, { onConflict: 'id' });
   if (error) {
-    console.error('Error saving student to Supabase:', error);
+    console.warn('Upsert on id failed, trying update or student_id conflict:', error.message);
+    const { error: err2 } = await supabase.from('students').upsert(dbPayload, { onConflict: 'student_id' });
+    if (err2) {
+      console.warn('Upsert on student_id failed, trying direct update:', err2.message);
+      await supabase
+        .from('students')
+        .update(dbPayload)
+        .or(`id.eq.${student.id},student_id.eq.${student.studentId}`);
+    }
   }
 }
 
