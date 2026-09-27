@@ -372,32 +372,32 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
               </p>
             </div>
           ) : (
-            <div className="w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
-              <table className="w-full text-left border-collapse text-xs table-auto">
+            <div className="w-full overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-xs">
+              <table className="w-full text-left border-collapse text-xs min-w-[700px]">
                 <thead>
-                  <tr className="bg-gradient-to-r from-[#5300b7] via-[#6415c4] to-[#7c3aed] text-white font-bold text-[10px] sm:text-xs">
-                    <th rowSpan={2} className="py-2 sm:py-3 px-1 sm:px-2.5 text-center border-r border-white/20 w-6 sm:w-10">
+                  <tr className="bg-gradient-to-r from-[#5300b7] via-[#6415c4] to-[#7c3aed] text-white font-bold text-xs">
+                    <th rowSpan={2} className="py-3 px-2.5 text-center border-r border-white/20 w-10">
                       №
                     </th>
-                    <th rowSpan={2} className="py-2 sm:py-3 px-1.5 sm:px-3 text-center border-r border-white/20">
+                    <th rowSpan={2} className="py-3 px-3 text-center border-r border-white/20 whitespace-nowrap min-w-[110px]">
                       <div>Tədris İli</div>
-                      <div className="text-[9px] sm:text-[10px] text-purple-200 font-normal">Semestr</div>
+                      <div className="text-[10px] text-purple-200 font-normal">Semestr</div>
                     </th>
-                    <th rowSpan={2} className="py-2 sm:py-3 px-2 sm:px-4 border-r border-white/20">
+                    <th rowSpan={2} className="py-3 px-4 border-r border-white/20 min-w-[240px]">
                       Fənn və Sillabus
                     </th>
-                    <th colSpan={7} className="py-1 px-1 sm:px-2 text-center border-b border-white/20 bg-white/10 uppercase tracking-wider text-[9px] sm:text-[10px]">
+                    <th colSpan={7} className="py-1.5 px-2 text-center border-b border-white/20 bg-white/10 uppercase tracking-wider text-[10px]">
                       Qiymətləndirmə Göstəriciləri
                     </th>
                   </tr>
-                  <tr className="bg-[#48009e] text-white font-bold text-[10px] sm:text-xs text-center border-t border-white/15">
-                    <th className="py-1.5 sm:py-2 px-1 sm:px-2 border-r border-white/15" title="Davamiyyət">Dav.</th>
-                    <th className="py-1.5 sm:py-2 px-1 sm:px-2 border-r border-white/15" title="Seminar">Sem.</th>
-                    <th className="py-1.5 sm:py-2 px-1 sm:px-2 border-r border-white/15 bg-white/10 text-amber-200" title="1-ci Kollokvium">K1</th>
-                    <th className="py-1.5 sm:py-2 px-1 sm:px-2 border-r border-white/15 bg-white/10 text-amber-200" title="2-ci Kollokvium">K2</th>
-                    <th className="py-1.5 sm:py-2 px-1 sm:px-2 border-r border-white/15 text-emerald-200" title="Giriş Balı (Cəmi 50 baldan)">Giriş</th>
-                    <th className="py-1.5 sm:py-2 px-1 sm:px-2 border-r border-white/15 text-sky-200" title="İmtahan Balı (50 baldan)">İmt.</th>
-                    <th className="py-1.5 sm:py-2 px-1 sm:px-3 text-white" title="Yekun Qiymət (100 baldan)">Yekun</th>
+                  <tr className="bg-[#48009e] text-white font-bold text-xs text-center border-t border-white/15">
+                    <th className="py-2 px-2 border-r border-white/15 w-12" title="Davamiyyət">Dav.</th>
+                    <th className="py-2 px-2 border-r border-white/15 w-12" title="Seminar">Sem.</th>
+                    <th className="py-2 px-2 border-r border-white/15 w-12 bg-white/10 text-amber-200" title="1-ci Kollokvium">K1</th>
+                    <th className="py-2 px-2 border-r border-white/15 w-12 bg-white/10 text-amber-200" title="2-ci Kollokvium">K2</th>
+                    <th className="py-2 px-2 border-r border-white/15 w-14 text-emerald-200" title="Giriş Balı (Cəmi 50 baldan)">Giriş</th>
+                    <th className="py-2 px-2 border-r border-white/15 w-14 text-sky-200" title="İmtahan Balı (50 baldan)">İmt.</th>
+                    <th className="py-2 px-3 min-w-[130px] text-white" title="Yekun Qiymət (100 baldan)">Yekun</th>
                   </tr>
                 </thead>
 
