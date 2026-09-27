@@ -2,8 +2,11 @@ import React, { useState, useMemo } from 'react';
 import {
   BookOpen,
   FileText,
-  ExternalLink,
   Calendar,
+  Download,
+  X,
+  Eye,
+  Loader2,
 } from 'lucide-react';
 import { SpecialtyModule, StudentUser } from '../types';
 import { SEMESTERS_LIST } from '../data/mockData';
@@ -66,7 +69,7 @@ export const extractStudentSemesterIndex = (semesterStr?: string, groupStr?: str
     if (gClean.includes('2-c') || gClean.includes('2.') || gClean.includes('2-k') || gClean.includes('20') || gClean.includes('2-ci kurs')) {
       return gClean.includes('2-ci sem') || gClean.includes('2. sem') ? 3 : 2;
     }
-    if (gClean.includes('1-c') || gClean.includes('1.') || gClean.includes('1-k') || gClean.includes('10') || gClean.includes('1-ci kurs')) {
+    if (gClean.includes('1-c') || clean.includes('1.') || gClean.includes('1-k') || gClean.includes('10') || gClean.includes('1-ci kurs')) {
       return gClean.includes('2-ci sem') || gClean.includes('2. sem') ? 1 : 0;
     }
   }
@@ -151,6 +154,35 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
 
   // Filter state: 'all' or specific semester
   const [selectedSemesterFilter, setSelectedSemesterFilter] = useState<string>('all');
+
+  // Syllabus in-app preview and download state
+  const [viewingSyllabus, setViewingSyllabus] = useState<{
+    url: string;
+    subjectName: string;
+    fileName?: string;
+  } | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  // Clean in-memory Blob download (masks Supabase URL completely)
+  const handleDownloadBlob = async (url: string, subjectName: string, customFileName?: string) => {
+    try {
+      setIsDownloading(true);
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const objectUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = customFileName || `${subjectName} - Sillabus.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => window.URL.revokeObjectURL(objectUrl), 2000);
+    } catch {
+      window.open(url, '_blank');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   // Filter modules for this student's specialty
   const specialtyModules = useMemo(() => {
@@ -468,20 +500,25 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                             </div>
                           )}
 
-                          {/* Syllabus Link */}
+                          {/* Syllabus Action Button (Opens In-App Viewer, completely hides Supabase link) */}
                           {m.syllabusUrl ? (
-                            <div className="mt-1.5">
-                              <a
-                                href={m.syllabusUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 bg-[#5300b7] hover:bg-[#430094] text-white rounded-md sm:rounded-lg text-[10px] sm:text-[11px] font-bold transition-all shadow-2xs group cursor-pointer"
-                                title="Fənn sillabusunu aç və ya yüklə"
+                            <div className="mt-1.5 flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setViewingSyllabus({
+                                    url: m.syllabusUrl!,
+                                    subjectName: m.name,
+                                    fileName: m.syllabusFileName,
+                                  })
+                                }
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#5300b7] hover:bg-[#430094] text-white rounded-md sm:rounded-lg text-[10.5px] sm:text-[11px] font-bold transition-all shadow-2xs group cursor-pointer"
+                                title="Fənn sillabusuna bax və ya yüklə"
                               >
-                                <FileText className="w-2.5 h-2.5 sm:w-3 sm:h-3 group-hover:scale-110 transition-transform" />
+                                <FileText className="w-3 h-3 group-hover:scale-110 transition-transform" />
                                 <span>Sillabus ({m.syllabusFileName || 'PDF'})</span>
-                                <ExternalLink className="w-2.5 h-2.5 opacity-80" />
-                              </a>
+                                <Eye className="w-2.5 h-2.5 opacity-80" />
+                              </button>
                             </div>
                           ) : null}
                         </td>
@@ -560,6 +597,84 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
           )}
         </div>
       </div>
+
+      {/* IN-APP SYLLABUS VIEWER & DOWNLOAD MODAL (Masks Supabase URL completely) */}
+      {viewingSyllabus && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/70 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl w-full max-w-4xl h-[90vh] max-h-[850px] flex flex-col overflow-hidden">
+            {/* Modal Header */}
+            <div className="p-4 sm:p-5 bg-gradient-to-r from-purple-50/90 via-indigo-50/50 to-white border-b border-slate-200 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#5300b7] to-[#7c3aed] text-white flex items-center justify-center shrink-0 shadow-md">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 truncate">
+                    {viewingSyllabus.subjectName} — Tədris Sillabusu
+                  </h3>
+                  <p className="text-[11px] text-slate-500 truncate">
+                    {viewingSyllabus.fileName || 'Rəsmi Tədris Sillabusu'} • Lənkəran Dövlət Peşə Təhsil Mərkəzi
+                  </p>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleDownloadBlob(
+                      viewingSyllabus.url,
+                      viewingSyllabus.subjectName,
+                      viewingSyllabus.fileName
+                    )
+                  }
+                  disabled={isDownloading}
+                  className="flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-[#5300b7] hover:bg-[#430094] text-white rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                  title="Faylı birbaşa cihazınıza endirin"
+                >
+                  {isDownloading ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Download className="w-3.5 h-3.5" />
+                  )}
+                  <span className="hidden sm:inline">Sillabusu Yüklə</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setViewingSyllabus(null)}
+                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 flex items-center justify-center transition-colors cursor-pointer"
+                  title="Bağla"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body - PDF Document Frame */}
+            <div className="flex-1 bg-slate-100 relative overflow-hidden">
+              <iframe
+                src={`${viewingSyllabus.url}#toolbar=0&navpanes=0`}
+                className="w-full h-full border-none"
+                title={`${viewingSyllabus.subjectName} Sillabus`}
+              />
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-3 bg-white border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+              <span>Lənkəran Dövlət Peşə Təhsil Mərkəzi • Tədris və Metodiki İşlər Departamenti</span>
+              <button
+                type="button"
+                onClick={() => setViewingSyllabus(null)}
+                className="text-slate-600 hover:text-slate-900 font-bold px-3 py-1 bg-slate-100 rounded-lg cursor-pointer"
+              >
+                Pəncərəni Bağla
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
