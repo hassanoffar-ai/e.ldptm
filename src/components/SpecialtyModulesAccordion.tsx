@@ -662,12 +662,11 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
             </div>
 
             {/* Modal Footer */}
-            <div className="p-3 bg-white border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
-              <span>Lənkəran Dövlət Peşə Təhsil Mərkəzi • Tədris və Metodiki İşlər Departamenti</span>
+            <div className="p-3 bg-white border-t border-slate-200 flex items-center justify-end text-xs text-slate-500">
               <button
                 type="button"
                 onClick={() => setViewingSyllabus(null)}
-                className="text-slate-600 hover:text-slate-900 font-bold px-3 py-1 bg-slate-100 rounded-lg cursor-pointer"
+                className="text-slate-600 hover:text-slate-900 font-bold px-4 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
               >
                 Pəncərəni Bağla
               </button>
