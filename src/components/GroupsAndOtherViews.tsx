@@ -48,6 +48,7 @@ import {
   deleteSyllabusFile,
   upsertCourseToDb,
 } from '../lib/supabase';
+import { formatDateAZ, formatRoomLabel } from './SpecialtyModulesAccordion';
 
 interface GroupsAndOtherViewsProps {
   activeTab: ActiveTab;
@@ -1115,9 +1116,9 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                         </div>
                         {(m.colloquium1Date || m.colloquium1Time || m.colloquium1Room) && (
                           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-slate-700 pl-4 leading-tight">
-                            {m.colloquium1Date && <span>T: <strong>{m.colloquium1Date}</strong></span>}
-                            {m.colloquium1Time && <span>S: <strong>{m.colloquium1Time}</strong></span>}
-                            {m.colloquium1Room && <span>O: <strong>{m.colloquium1Room}</strong></span>}
+                            {m.colloquium1Date && <span>Tarix: <strong>{formatDateAZ(m.colloquium1Date)}</strong></span>}
+                            {m.colloquium1Time && <span>Saat: <strong>{m.colloquium1Time}</strong></span>}
+                            {m.colloquium1Room && <span>{formatRoomLabel(m.colloquium1Room)}</span>}
                           </div>
                         )}
                       </div>
@@ -1137,9 +1138,9 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                         </div>
                         {(m.colloquium2Date || m.colloquium2Time || m.colloquium2Room) && (
                           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-slate-700 pl-4 leading-tight">
-                            {m.colloquium2Date && <span>T: <strong>{m.colloquium2Date}</strong></span>}
-                            {m.colloquium2Time && <span>S: <strong>{m.colloquium2Time}</strong></span>}
-                            {m.colloquium2Room && <span>O: <strong>{m.colloquium2Room}</strong></span>}
+                            {m.colloquium2Date && <span>Tarix: <strong>{formatDateAZ(m.colloquium2Date)}</strong></span>}
+                            {m.colloquium2Time && <span>Saat: <strong>{m.colloquium2Time}</strong></span>}
+                            {m.colloquium2Room && <span>{formatRoomLabel(m.colloquium2Room)}</span>}
                           </div>
                         )}
                       </div>
@@ -1159,9 +1160,9 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                         </div>
                         {(m.examDate || m.examTime || m.examRoom) && (
                           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-slate-700 pl-4 leading-tight">
-                            {m.examDate && <span>T: <strong>{m.examDate}</strong></span>}
-                            {m.examTime && <span>S: <strong>{m.examTime}</strong></span>}
-                            {m.examRoom && <span>O: <strong>{m.examRoom}</strong></span>}
+                            {m.examDate && <span>Tarix: <strong>{formatDateAZ(m.examDate)}</strong></span>}
+                            {m.examTime && <span>Saat: <strong>{m.examTime}</strong></span>}
+                            {m.examRoom && <span>{formatRoomLabel(m.examRoom)}</span>}
                           </div>
                         )}
                       </div>
