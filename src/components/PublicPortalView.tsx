@@ -53,8 +53,20 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
     fetchModulesFromDb().then((dbMods) => {
       if (dbMods && dbMods.length > 0) {
         setAllModules(dbMods);
+        try {
+          localStorage.setItem('eldptm_modules', JSON.stringify(dbMods));
+        } catch {}
       }
     });
+
+    const handleModulesUpdated = () => {
+      const stored = getStoredModules();
+      if (stored && stored.length > 0) {
+        setAllModules(stored);
+      }
+    };
+    window.addEventListener('eldptm_modules_updated', handleModulesUpdated);
+    return () => window.removeEventListener('eldptm_modules_updated', handleModulesUpdated);
   }, []);
 
   // Filter modules for this student's specialty

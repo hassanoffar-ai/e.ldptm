@@ -202,7 +202,9 @@ export async function fetchCoursesFromDb(): Promise<GradeBookCourse[]> {
     console.error('Error fetching courses from Supabase:', error);
     return [];
   }
-  return (data || []).map(mapDbToCourse);
+  return (data || [])
+    .filter((row) => row.id !== '__app_specialty_modules_registry__' && !row.id.startsWith('__'))
+    .map(mapDbToCourse);
 }
 
 export async function upsertCourseToDb(course: GradeBookCourse): Promise<void> {
@@ -388,32 +390,63 @@ export const mapModuleToDb = (m: SpecialtyModule) => ({
 
 export async function fetchModulesFromDb(): Promise<SpecialtyModule[]> {
   try {
-    const { data, error } = await supabase
-      .from('modules')
-      .select('*')
-      .order('created_at', { ascending: false });
+    const { data: regData, error: regError } = await supabase
+      .from('gradebook_courses')
+      .select('grades')
+      .eq('id', '__app_specialty_modules_registry__')
+      .maybeSingle();
+
+    if (!regError && regData && Array.isArray(regData.grades)) {
+      return (regData.grades as SpecialtyModule[]).filter((m) => m && m.name);
+    }
+  } catch (err) {
+    console.error('Error fetching modules from Supabase:', err);
+  }
+  return [];
+}
+
+export async function saveAllModulesToDb(modules: SpecialtyModule[]): Promise<void> {
+  try {
+    const validMods = (modules || []).filter((m) => m && m.name);
+    const { error } = await supabase.from('gradebook_courses').upsert({
+      id: '__app_specialty_modules_registry__',
+      group_name: 'SYSTEM',
+      specialty: 'SYSTEM_REGISTRY',
+      subject: 'SPECIALTY_MODULES',
+      subject_code: 'MODULES',
+      semester: '',
+      max_score: 100,
+      last_saved: new Date().toISOString(),
+      is_published: false,
+      grades: validMods as any,
+    }, { onConflict: 'id' });
 
     if (error) {
-      return [];
+      console.error('Error saving modules registry to Supabase:', error);
     }
-    return (data || []).map(mapDbToModule);
-  } catch {
-    return [];
+  } catch (err) {
+    console.error('Error saving modules to Supabase:', err);
   }
 }
 
 export async function upsertModuleToDb(m: SpecialtyModule): Promise<void> {
   try {
-    const dbPayload = mapModuleToDb(m);
-    await supabase.from('modules').upsert(dbPayload, { onConflict: 'id' });
+    const current = await fetchModulesFromDb();
+    const exists = current.some((x) => x.id === m.id);
+    const updated = exists
+      ? current.map((x) => (x.id === m.id ? m : x))
+      : [m, ...current];
+    await saveAllModulesToDb(updated);
   } catch (err) {
-    console.error('Error saving module to Supabase:', err);
+    console.error('Error upserting module:', err);
   }
 }
 
 export async function deleteModuleFromDb(id: string): Promise<void> {
   try {
-    await supabase.from('modules').delete().eq('id', id);
+    const current = await fetchModulesFromDb();
+    const updated = current.filter((x) => x.id !== id);
+    await saveAllModulesToDb(updated);
   } catch (err) {
     console.error('Error deleting module from Supabase:', err);
   }

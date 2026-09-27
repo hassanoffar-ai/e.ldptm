@@ -48,7 +48,10 @@ import {
   fetchSpecialtiesFromDb,
   upsertSpecialtyToDb,
   deleteSpecialtyFromDb,
+  fetchModulesFromDb,
+  saveAllModulesToDb,
 } from './lib/supabase';
+import { getStoredModules } from './data/mockData';
 
 const loadFromStorage = <T,>(key: string, fallback: T): T => {
   try {
@@ -283,11 +286,12 @@ export default function App() {
 
     async function loadDataFromSupabase() {
       try {
-        const [dbStudents, dbSessions, dbCourses, dbSpecialties] = await Promise.all([
+        const [dbStudents, dbSessions, dbCourses, dbSpecialties, dbModules] = await Promise.all([
           fetchStudentsFromDb(),
           fetchSessionsFromDb(),
           fetchCoursesFromDb(),
           fetchSpecialtiesFromDb(),
+          fetchModulesFromDb(),
         ]);
 
         if (!isMounted) return;
@@ -344,6 +348,19 @@ export default function App() {
         } else if (specialties.length > 0) {
           specialties.forEach((s) => upsertSpecialtyToDb(s));
         }
+
+        // Synchronize Modules (Fənlər) across devices
+        if (dbModules && dbModules.length > 0) {
+          try {
+            localStorage.setItem('eldptm_modules', JSON.stringify(dbModules));
+            window.dispatchEvent(new Event('eldptm_modules_updated'));
+          } catch {}
+        } else {
+          const localMods = getStoredModules();
+          if (localMods && localMods.length > 0) {
+            saveAllModulesToDb(localMods);
+          }
+        }
       } catch (err) {
         console.error('Failed to load data from Supabase:', err);
       }
@@ -377,7 +394,16 @@ export default function App() {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'gradebook_courses' },
-        async () => {
+        async (payload: any) => {
+          if (payload?.new?.id === '__app_specialty_modules_registry__') {
+            const regGrades = payload.new.grades;
+            if (Array.isArray(regGrades)) {
+              try {
+                localStorage.setItem('eldptm_modules', JSON.stringify(regGrades));
+                window.dispatchEvent(new Event('eldptm_modules_updated'));
+              } catch {}
+            }
+          }
           const fresh = await fetchCoursesFromDb();
           if (isMounted && fresh.length > 0) setCourses(fresh);
         }

@@ -43,6 +43,7 @@ import {
   fetchModulesFromDb,
   upsertModuleToDb,
   deleteModuleFromDb,
+  saveAllModulesToDb,
   uploadSyllabusFile,
   deleteSyllabusFile,
   upsertCourseToDb,
@@ -108,7 +109,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
   const [subjectGradesMap, setSubjectGradesMap] = useState<Record<string, StudentGrade>>({});
   const [subjectGradesSuccessMsg, setSubjectGradesSuccessMsg] = useState<string | null>(null);
 
-  // Sync modules from Supabase on mount
+  // Sync modules from Supabase on mount and listen to updates
   React.useEffect(() => {
     fetchModulesFromDb().then((dbMods) => {
       if (dbMods && dbMods.length > 0) {
@@ -116,8 +117,19 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
         try {
           localStorage.setItem('eldptm_modules', JSON.stringify(dbMods));
         } catch {}
+      } else {
+        const local = getStoredModules();
+        if (local && local.length > 0) {
+          saveAllModulesToDb(local);
+        }
       }
     });
+
+    const handleModulesUpdated = () => {
+      setModulesList(getStoredModules());
+    };
+    window.addEventListener('eldptm_modules_updated', handleModulesUpdated);
+    return () => window.removeEventListener('eldptm_modules_updated', handleModulesUpdated);
   }, []);
 
   const sortedSpecialties = React.useMemo(() => {
@@ -157,6 +169,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
     } catch (e) {
       console.error(e);
     }
+    saveAllModulesToDb(updated);
   };
 
   const openAddModuleModal = () => {
