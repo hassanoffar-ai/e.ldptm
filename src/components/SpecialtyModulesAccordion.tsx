@@ -3,13 +3,7 @@ import {
   BookOpen,
   FileText,
   ExternalLink,
-  Download,
-  GraduationCap,
-  Sparkles,
-  Layers,
   Calendar,
-  Clock,
-  MapPin,
 } from 'lucide-react';
 import { SpecialtyModule, StudentUser } from '../types';
 import { SEMESTERS_LIST } from '../data/mockData';
