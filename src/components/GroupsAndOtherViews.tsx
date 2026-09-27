@@ -1530,7 +1530,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                           <span>{isUploadingSyllabus ? 'Yüklənir...' : 'Yeni Sillabus Seç / Dəyişdir'}</span>
                           <input
                             type="file"
-                            accept=".pdf,.doc,.docx,.ppt,.pptx,.txt"
+                            accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                             onChange={handleFileUpload}
                             disabled={isUploadingSyllabus}
                             className="hidden"
@@ -1542,7 +1542,7 @@ export const GroupsAndOtherViews: React.FC<GroupsAndOtherViewsProps> = ({
                     <div className="relative border-2 border-dashed border-[#ccc3d7] hover:border-[#5300b7] rounded-xl p-4 text-center transition-all bg-[#f8f9ff] hover:bg-purple-50/20 group">
                       <input
                         type="file"
-                        accept=".pdf,.doc,.docx,.ppt,.pptx,.txt"
+                        accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                         onChange={handleFileUpload}
                         disabled={isUploadingSyllabus}
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-10"
