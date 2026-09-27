@@ -224,6 +224,13 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
     };
   };
 
+  const getDisplaySemester = (sem?: string) => {
+    if (!sem) return '1-ci semestr';
+    const match = sem.match(/(\d+-(?:ci|cü|cu|cı)\s+semestr|\d+\s*semestr)/i);
+    if (match) return match[1];
+    return sem;
+  };
+
   return (
     <div className="min-h-screen bg-[#f8f9ff] text-[#121c2a] flex flex-col antialiased">
       {/* 1. Header */}
@@ -288,13 +295,9 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                   Tələbə ID: <strong className="font-mono text-white">{student.studentId || student.finCode}</strong>
                 </span>
                 <span>•</span>
-                <span>
-                  Kurs: <strong className="text-white">{student.group}</strong>
-                </span>
+                <span className="text-white font-semibold">{student.group}</span>
                 <span>•</span>
-                <span>
-                  Semestr: <strong className="text-white">{student.semester || `${student.group || '1-ci kurs'} 1-ci semestr`}</strong>
-                </span>
+                <span className="text-white font-semibold">{getDisplaySemester(student.semester)}</span>
               </div>
 
               <p className="text-xs text-purple-200 pt-0.5">
@@ -363,7 +366,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                   {student.group}
                 </span>
                 <span className="px-2.5 py-0.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold">
-                  {student.semester || `${student.group || '1-ci kurs'} 1-ci semestr`}
+                  {getDisplaySemester(student.semester)}
                 </span>
               </div>
               <p className="text-xs text-slate-500">
