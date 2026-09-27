@@ -51,14 +51,20 @@ export const findSpecialtyDurationYears = (specialtyName?: string): number => {
   let specList: any[] = [];
   try {
     const saved = localStorage.getItem('eldptm_specialties');
-    if (saved) specList = JSON.parse(saved);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) specList = parsed;
+    }
   } catch {}
 
   const target = specialtyName.toLowerCase().trim();
-  const matched = specList.find((s) => {
-    const sName = (s.name || '').toLowerCase().trim();
-    return sName === target || sName.includes(target) || target.includes(sName);
-  });
+  const matched = Array.isArray(specList)
+    ? specList.find((s) => {
+        if (!s) return false;
+        const sName = (s.name || '').toLowerCase().trim();
+        return sName === target || sName.includes(target) || target.includes(sName);
+      })
+    : null;
 
   const durStr = (matched?.duration || '').toLowerCase();
   if (durStr.includes('4')) return 4;
@@ -98,7 +104,7 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
   studentCourseYear,
 }) => {
   // Determine current active course year for this student
-  const activeCourseYear = studentCourseYear ?? extractStudentCourseYear(student.group);
+  const activeCourseYear = studentCourseYear ?? extractStudentCourseYear(student?.group);
 
   // Determine total valid course years for student's specialty (1, 2, 3, or 4)
   const totalSpecialtyYears = useMemo(() => {
@@ -110,9 +116,10 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
 
   // Filter modules for this student's specialty
   const specialtyModules = useMemo(() => {
-    if (!student?.specialty) return modules;
-    const specLower = student.specialty.toLowerCase().trim();
-    return modules.filter((m) => {
+    if (!student?.specialty) return modules || [];
+    const specLower = (student.specialty || '').toLowerCase().trim();
+    return (modules || []).filter((m) => {
+      if (!m) return false;
       const mSpec = (m.specialtyName || '').toLowerCase().trim();
       return mSpec === specLower || specLower.includes(mSpec) || mSpec.includes(specLower);
     });
@@ -120,16 +127,16 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
 
   // Only take semesters up to the specialty's exact duration (e.g. 3 years = 6 semesters, no 4th year!)
   const semesterBlocks = useMemo(() => {
-    const validSemestersCount = totalSpecialtyYears * 2;
-    const relevantSemesters = SEMESTERS_LIST.slice(0, validSemestersCount);
+    const validSemestersCount = (totalSpecialtyYears || 3) * 2;
+    const relevantSemesters = (SEMESTERS_LIST || []).slice(0, validSemestersCount);
 
     return relevantSemesters.map((semName, index) => {
       const courseYear = Math.floor(index / 2) + 1;
       const semesterNumInYear = (index % 2) + 1;
       const isCurrentCourse = courseYear === activeCourseYear;
 
-      const semModules = specialtyModules.filter((m) => {
-        if (!m.semester) return false;
+      const semModules = (specialtyModules || []).filter((m) => {
+        if (!m || !m.semester) return false;
         const mSem = m.semester.toLowerCase();
         const sSem = semName.toLowerCase();
         return mSem === sSem || mSem.includes(sSem) || sSem.includes(mSem);
@@ -161,11 +168,11 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                   Bütün semestrlər üzrə Tədris Planı, Fənlər və İmtahan Cədvəli
                 </h2>
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-[#5300b7] border border-purple-200">
-                  {student.specialty} ({totalSpecialtyYears} illik)
+                  {student?.specialty || 'İxtisas'} ({totalSpecialtyYears} illik)
                 </span>
               </div>
               <p className="text-xs text-slate-500 flex flex-wrap items-center gap-x-2 gap-y-1">
-                <span>Cari statusunuz: <strong className="text-purple-700 font-bold">{activeCourseYear}-ci kurs tələbəsi</strong> ({student.group})</span>
+                <span>Cari statusunuz: <strong className="text-purple-700 font-bold">{activeCourseYear}-ci kurs tələbəsi</strong> ({student?.group || 'Qrup'})</span>
                 <span>•</span>
                 <span>YTP {totalSpecialtyYears} İllik Tədris Proqramı</span>
               </p>
@@ -346,24 +353,32 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
 
                                     {/* Student Grade in this Subject (if exists in Gradebook) */}
                                     {(() => {
+                                      if (!student) return null;
                                       let allCourses: any[] = [];
                                       try {
                                         const saved = localStorage.getItem('eldptm_courses');
-                                        if (saved) allCourses = JSON.parse(saved);
+                                        if (saved) {
+                                          const parsed = JSON.parse(saved);
+                                          if (Array.isArray(parsed)) allCourses = parsed;
+                                        }
                                       } catch (e) {}
+
+                                      if (!Array.isArray(allCourses)) return null;
 
                                       // Match course by subject name
                                       const matchedCourse = allCourses.find((c: any) => {
+                                        if (!c) return false;
                                         const cSub = (c.subject || '').toLowerCase().trim();
-                                        const mSub = (m.name || '').toLowerCase().trim();
+                                        const mSub = (m?.name || '').toLowerCase().trim();
                                         return cSub && mSub && (cSub === mSub || cSub.includes(mSub) || mSub.includes(cSub));
                                       });
 
-                                      if (!matchedCourse || !matchedCourse.students) return null;
+                                      if (!matchedCourse || !Array.isArray(matchedCourse.students)) return null;
 
-                                      const myStudentId = (student.studentId || student.id || student.finCode || '').toLowerCase();
-                                      const myStudentName = (student.name || '').toLowerCase();
+                                      const myStudentId = (student?.studentId || student?.id || student?.finCode || '').toLowerCase();
+                                      const myStudentName = (student?.name || '').toLowerCase();
                                       const myGrade = matchedCourse.students.find((gs: any) => {
+                                        if (!gs) return false;
                                         const gsId = (gs.studentId || gs.idNumber || '').toLowerCase();
                                         const gsName = (gs.studentName || '').toLowerCase();
                                         return (myStudentId && gsId === myStudentId) || (myStudentName && gsName.includes(myStudentName));
