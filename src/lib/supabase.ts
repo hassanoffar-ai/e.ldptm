@@ -26,36 +26,69 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ==================== STUDENTS ====================
 
-export const mapDbToStudent = (row: any): Student => ({
-  id: row.id,
-  studentId: row.student_id,
-  finCode: row.fin_code,
-  name: row.name,
-  group: row.group_name,
-  specialty: row.specialty,
-  semester: row.semester || (row.group_name ? `${row.group_name} 1-ci semestr` : '1-ci kurs 1-ci semestr'),
-  avatar: row.avatar || undefined,
-  email: row.email || undefined,
-  phone: row.phone || undefined,
-  passwordHash: row.password_hash || undefined,
-  status: row.status || 'active',
-  isRegistered: row.is_registered || false,
-});
+export const mapDbToStudent = (row: any): Student => {
+  let semesterVal: string | undefined = undefined;
+  let avatarVal: string | undefined = undefined;
 
-export const mapStudentToDb = (s: Student) => ({
-  id: s.id,
-  student_id: s.studentId,
-  fin_code: s.finCode || s.studentId || '',
-  name: s.name,
-  group_name: s.group,
-  specialty: s.specialty,
-  avatar: s.avatar || null,
-  email: s.email || null,
-  phone: s.phone || null,
-  password_hash: s.passwordHash || '123456',
-  status: s.status || 'active',
-  is_registered: s.isRegistered ?? false,
-});
+  if (row.avatar) {
+    if (typeof row.avatar === 'string' && row.avatar.startsWith('{') && row.avatar.endsWith('}')) {
+      try {
+        const parsed = JSON.parse(row.avatar);
+        semesterVal = parsed.semester;
+        avatarVal = parsed.avatar;
+      } catch {}
+    } else if (typeof row.avatar === 'string' && row.avatar.includes('semestr')) {
+      semesterVal = row.avatar;
+    } else {
+      avatarVal = row.avatar;
+    }
+  }
+
+  const defaultSem = row.group_name ? `${row.group_name} 1-ci semestr` : '1-ci kurs 1-ci semestr';
+  const resolvedSemester = row.semester || semesterVal || defaultSem;
+
+  return {
+    id: row.id,
+    studentId: row.student_id,
+    finCode: row.fin_code,
+    name: row.name,
+    group: row.group_name,
+    specialty: row.specialty,
+    semester: resolvedSemester,
+    avatar: avatarVal,
+    email: row.email || undefined,
+    phone: row.phone || undefined,
+    passwordHash: row.password_hash || undefined,
+    status: row.status || 'active',
+    isRegistered: row.is_registered || false,
+  };
+};
+
+export const mapStudentToDb = (s: Student) => {
+  let avatarPayload: string | null = null;
+  if (s.avatar || s.semester) {
+    if (s.avatar) {
+      avatarPayload = JSON.stringify({ avatar: s.avatar, semester: s.semester });
+    } else if (s.semester) {
+      avatarPayload = s.semester;
+    }
+  }
+
+  return {
+    id: s.id,
+    student_id: s.studentId,
+    fin_code: s.finCode || s.studentId || '',
+    name: s.name,
+    group_name: s.group,
+    specialty: s.specialty,
+    avatar: avatarPayload,
+    email: s.email || null,
+    phone: s.phone || null,
+    password_hash: s.passwordHash || '123456',
+    status: s.status || 'active',
+    is_registered: s.isRegistered ?? false,
+  };
+};
 
 export async function fetchStudentsFromDb(): Promise<Student[]> {
   const { data, error } = await supabase
