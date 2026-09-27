@@ -289,7 +289,11 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                 </span>
                 <span>•</span>
                 <span>
-                  Qrup: <strong className="text-white">{student.group}</strong>
+                  Kurs: <strong className="text-white">{student.group}</strong>
+                </span>
+                <span>•</span>
+                <span>
+                  Semestr: <strong className="text-white">{student.semester || `${student.group || '1-ci kurs'} 1-ci semestr`}</strong>
                 </span>
               </div>
 
@@ -357,6 +361,9 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                 </h2>
                 <span className="px-2.5 py-0.5 rounded-full bg-purple-100 text-[#5300b7] text-xs font-bold">
                   {student.group}
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold">
+                  {student.semester || `${student.group || '1-ci kurs'} 1-ci semestr`}
                 </span>
               </div>
               <p className="text-xs text-slate-500">
