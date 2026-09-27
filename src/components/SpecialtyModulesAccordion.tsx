@@ -134,6 +134,19 @@ export const getGradeEvaluation = (finalScore: number | null, examScore: number 
   return { letter: 'E', label: 'Qənaətbəxş', badgeClass: 'bg-teal-100 text-teal-900 border-teal-300' };
 };
 
+/**
+ * Formats room label so that it always clearly says "Otaq: 206"
+ */
+export const formatRoomLabel = (room?: string): string => {
+  if (!room) return '';
+  const clean = room.trim();
+  if (!clean) return '';
+  if (/^otaq/i.test(clean)) {
+    return clean.replace(/^otaq\s*:?\s*/i, 'Otaq: ');
+  }
+  return `Otaq: ${clean}`;
+};
+
 export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps> = ({
   student,
   modules = [],
@@ -487,21 +500,21 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                                 <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-900 px-1.5 sm:px-2 py-0.5 rounded border border-amber-200 text-[9.5px] sm:text-[10.5px] font-medium leading-tight">
                                   <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-600 shrink-0" />
                                   <span>K1:</span>
-                                  <strong className="font-semibold text-amber-950">{m.colloquium1Date} {m.colloquium1Time || ''} {m.colloquium1Room ? `(${m.colloquium1Room})` : ''}</strong>
+                                  <strong className="font-semibold text-amber-950">{m.colloquium1Date} {m.colloquium1Time || ''} {m.colloquium1Room ? `(${formatRoomLabel(m.colloquium1Room)})` : ''}</strong>
                                 </span>
                               )}
                               {m.colloquium2Date && (
                                 <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-900 px-1.5 sm:px-2 py-0.5 rounded border border-amber-200 text-[9.5px] sm:text-[10.5px] font-medium leading-tight">
                                   <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-600 shrink-0" />
                                   <span>K2:</span>
-                                  <strong className="font-semibold text-amber-950">{m.colloquium2Date} {m.colloquium2Time || ''} {m.colloquium2Room ? `(${m.colloquium2Room})` : ''}</strong>
+                                  <strong className="font-semibold text-amber-950">{m.colloquium2Date} {m.colloquium2Time || ''} {m.colloquium2Room ? `(${formatRoomLabel(m.colloquium2Room)})` : ''}</strong>
                                 </span>
                               )}
                               {m.examDate && (
                                 <span className="inline-flex items-center gap-1 bg-purple-50 text-purple-900 px-1.5 sm:px-2 py-0.5 rounded border border-purple-200 text-[9.5px] sm:text-[10.5px] font-medium leading-tight">
                                   <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#5300b7] shrink-0" />
                                   <span>İmtahan:</span>
-                                  <strong className="font-semibold text-purple-950">{m.examDate} {m.examTime || ''} {m.examRoom ? `(${m.examRoom})` : ''}</strong>
+                                  <strong className="font-semibold text-purple-950">{m.examDate} {m.examTime || ''} {m.examRoom ? `(${formatRoomLabel(m.examRoom)})` : ''}</strong>
                                 </span>
                               )}
                             </div>
