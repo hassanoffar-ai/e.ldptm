@@ -237,10 +237,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
   };
 
   const getDisplaySemester = (sem?: string) => {
-    if (!sem) return '1-ci semestr';
-    const match = sem.match(/(\d+-(?:ci|cü|cu|cı)\s+semestr|\d+\s*semestr)/i);
-    if (match) return match[1];
-    return sem;
+    return sem || '1-ci kurs 1-ci semestr';
   };
 
   return (

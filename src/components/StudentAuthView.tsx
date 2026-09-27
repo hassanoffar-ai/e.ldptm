@@ -123,6 +123,7 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
       name: matched.name || 'Tələbə',
       group: matched.group || '',
       specialty: matched.specialty || '',
+      semester: matched.semester || '',
       email: matched.email || '',
       phone: matched.phone || '',
     };
