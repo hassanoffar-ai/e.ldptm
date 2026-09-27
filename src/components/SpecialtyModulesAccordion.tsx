@@ -197,354 +197,340 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
     });
   }, [specialtyModules, activeSemesterIndex, totalSpecialtyYears]);
 
+  // Load courses from localStorage for matching grades
+  const allCourses = useMemo(() => {
+    try {
+      const saved = localStorage.getItem('eldptm_courses');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch {}
+    return [];
+  }, []);
+
+  const getModuleGradeInfo = (m: SpecialtyModule) => {
+    if (!student) return null;
+    const cSub = (m.name || '').toLowerCase().trim();
+    const matchedCourse = allCourses.find((c: any) => {
+      if (!c) return false;
+      const sub = (c.subject || '').toLowerCase().trim();
+      return sub && cSub && (sub === cSub || sub.includes(cSub) || cSub.includes(sub));
+    });
+
+    if (!matchedCourse || !Array.isArray(matchedCourse.grades || matchedCourse.students)) return null;
+    const gradesList = matchedCourse.grades || matchedCourse.students || [];
+
+    const myStudentId = (student.studentId || student.id || student.finCode || '').toLowerCase().trim();
+    const myStudentName = (student.name || '').toLowerCase().trim();
+
+    const myGrade = gradesList.find((g: any) => {
+      if (!g) return false;
+      const gId = (g.studentId || g.idNumber || '').toLowerCase().trim();
+      const gName = (g.studentName || '').toLowerCase().trim();
+      return (myStudentId && gId === myStudentId) || (myStudentName && gName.includes(myStudentName));
+    });
+
+    if (!myGrade) return null;
+
+    const isEntryComplete =
+      myGrade.attendance !== null && myGrade.attendance !== undefined &&
+      myGrade.seminar !== null && myGrade.seminar !== undefined &&
+      myGrade.colloquium1 !== null && myGrade.colloquium1 !== undefined &&
+      myGrade.colloquium2 !== null && myGrade.colloquium2 !== undefined;
+
+    const entryTotal = isEntryComplete
+      ? Number(myGrade.attendance) + Number(myGrade.seminar) + Number(myGrade.colloquium1) + Number(myGrade.colloquium2)
+      : null;
+
+    const hasExam = myGrade.examScore !== null && myGrade.examScore !== undefined;
+    const finalScore = isEntryComplete && hasExam ? (entryTotal! + Number(myGrade.examScore)) : null;
+    const gradeEval = getGradeEvaluation(finalScore, myGrade.examScore);
+
+    return {
+      myGrade,
+      entryTotal,
+      finalScore,
+      gradeEval,
+    };
+  };
+
+  // Flatten active modules to display in table
+  const tableRows = useMemo(() => {
+    const selectedBlocks = semesterBlocks.filter((block) => {
+      if (selectedSemesterFilter === 'all') return true;
+      return block.semesterName === selectedSemesterFilter;
+    });
+
+    const rows: Array<{
+      index: number;
+      module: SpecialtyModule;
+      academicYear: string;
+      semesterNum: number;
+      semesterName: string;
+      isCurrentSemester: boolean;
+      gradeInfo: ReturnType<typeof getModuleGradeInfo>;
+    }> = [];
+
+    let count = 1;
+    selectedBlocks.forEach((block) => {
+      const currentYear = 2026;
+      const courseStartYear = currentYear - (activeCourseYear - block.courseYear);
+      const academicYear = `${courseStartYear}/${courseStartYear + 1}`;
+
+      block.modules.forEach((m) => {
+        rows.push({
+          index: count++,
+          module: m,
+          academicYear,
+          semesterNum: block.semesterNumInYear,
+          semesterName: block.semesterName,
+          isCurrentSemester: block.isCurrentSemester,
+          gradeInfo: getModuleGradeInfo(m),
+        });
+      });
+    });
+
+    return rows;
+  }, [semesterBlocks, selectedSemesterFilter, allCourses, student]);
+
+  const lastUpdatedTime = useMemo(() => {
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  }, []);
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* 1. Header Banner */}
-      <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs overflow-hidden transition-all">
-        <div className="p-5 sm:p-6 bg-gradient-to-r from-purple-50/80 via-indigo-50/50 to-white flex flex-col md:flex-row md:items-center justify-between gap-4 select-none">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden transition-all">
+        <div className="p-4 sm:p-5 bg-gradient-to-r from-purple-50/80 via-indigo-50/50 to-white flex flex-col md:flex-row md:items-center justify-between gap-4 select-none">
           <div className="flex items-start sm:items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-[#5300b7] text-white flex items-center justify-center shrink-0 shadow-md shadow-purple-900/15">
-              <BookOpen className="w-6 h-6" />
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-[#5300b7] text-white flex items-center justify-center shrink-0 shadow-md shadow-purple-900/15">
+              <BookOpen className="w-5 h-5" />
             </div>
 
             <div>
-              <div className="flex flex-wrap items-center gap-2 mb-1">
-                <h2 className="text-lg sm:text-xl font-black text-slate-900">
-                  Tədris Planı, Fənlər və İmtahan Cədvəli
+              <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                <h2 className="text-base sm:text-lg font-black text-slate-900">
+                  Tədris Planı, Fənlər və Qiymətləndirmə Cədvəli
                 </h2>
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-[#5300b7] border border-purple-200">
                   {student?.specialty || 'İxtisas'} ({totalSpecialtyYears} illik)
                 </span>
               </div>
-              <p className="text-xs text-slate-500 flex flex-wrap items-center gap-x-2 gap-y-1">
+              <p className="text-xs text-slate-500 flex flex-wrap items-center gap-x-2 gap-y-0.5">
                 <span>Cari statusunuz: <strong className="text-purple-700 font-bold">{student?.semester || activeSemesterName}</strong> ({student?.group || 'Qrup'})</span>
                 <span>•</span>
                 <span>YTP {totalSpecialtyYears} İllik Tədris Proqramı</span>
               </p>
             </div>
           </div>
+
+          {/* Filter dropdown */}
+          <div className="flex items-center gap-2">
+            <select
+              value={selectedSemesterFilter}
+              onChange={(e) => setSelectedSemesterFilter(e.target.value)}
+              className="bg-[#f8f9ff] border border-[#5300b7] rounded-xl px-3 py-2 text-xs font-bold text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer shadow-xs"
+            >
+              <option value="all">
+                {semesterBlocks.length === 1
+                  ? `${semesterBlocks[0]?.semesterName} (Cari Semestr)`
+                  : `Bütün semestrlər (1 - ${semesterBlocks.length}-ci semestr)`}
+              </option>
+              {semesterBlocks.length > 1 &&
+                semesterBlocks.map((block) => (
+                  <option key={block.semesterName} value={block.semesterName}>
+                    {block.semesterName} {block.isCurrentSemester ? '★ (Cari)' : '✓ (Keçmiş)'}
+                  </option>
+                ))}
+            </select>
+          </div>
         </div>
 
-        {/* 2. Main Content */}
-        <div className="p-4 sm:p-6 border-t border-slate-200 space-y-6">
-          {/* Semestr Seçim Formu (Yalnız tələbənin cari və keçmiş semestrləri görünür) */}
-          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#ccc3d7] shadow-xs space-y-2">
-            <label className="block text-xs font-bold text-slate-700">
-              Semestr Seçin *
-            </label>
-            <div className="relative">
-              <select
-                value={selectedSemesterFilter}
-                onChange={(e) => setSelectedSemesterFilter(e.target.value)}
-                className="w-full bg-[#f8f9ff] border-2 border-[#5300b7] rounded-xl px-4 py-3 text-sm font-semibold text-[#121c2a] outline-none focus:ring-2 focus:ring-[#5300b7] cursor-pointer shadow-xs"
-              >
-                <option value="all">
-                  {semesterBlocks.length === 1
-                    ? `${semesterBlocks[0]?.semesterName} (Cari Semestr)`
-                    : `Bütün aktiv semestrlər üzrə (1 - ${semesterBlocks.length}-ci semestr)`}
-                </option>
-                {semesterBlocks.length > 1 &&
-                  semesterBlocks.map((block) => (
-                    <option key={block.semesterName} value={block.semesterName}>
-                      {block.semesterName} {block.isCurrentSemester ? '★ (Cari Semestr)' : '✓ (Keçmiş Semestr)'}
-                    </option>
-                  ))}
-              </select>
+        {/* 2. Unified Academic Portal Table */}
+        <div className="p-3 sm:p-5 border-t border-slate-200 space-y-3">
+          {tableRows.length === 0 ? (
+            <div className="p-8 text-center rounded-xl bg-slate-50 border border-dashed border-slate-200 text-slate-400 space-y-1.5">
+              <BookOpen className="w-8 h-8 mx-auto opacity-40 text-purple-600" />
+              <p className="text-xs font-bold text-slate-600">
+                Bu semestr üzrə hələ fənn daxil edilməyib
+              </p>
+              <p className="text-[11px] text-slate-400">
+                Admin tərəfindən fənlər və imtahan cədvəli əlavə edildikdə burada əks olunacaq.
+              </p>
             </div>
-          </div>
+          ) : (
+            <div className="overflow-x-auto rounded-lg border border-[#c4d1e2] bg-white shadow-xs">
+              {/* Notice Bar */}
+              <div className="bg-[#eef4fb] text-[#1e3a5f] text-xs font-semibold py-2 px-3 text-center border-b border-[#c4d1e2] flex items-center justify-center gap-1.5">
+                <span>Davamiyyət və qiymətləndirmə barədə məlumatların son yenilənmə vaxtı:</span>
+                <strong className="text-slate-900 font-mono">{lastUpdatedTime}</strong>
+              </div>
 
-          {/* Semester Blocks for Permitted Duration */}
-          <div className="space-y-5">
-            {semesterBlocks
-              .filter((block) => {
-                if (selectedSemesterFilter === 'all') return true;
-                return block.semesterName === selectedSemesterFilter;
-              })
-              .map((block) => {
-                return (
-                  <div
-                    key={block.semesterName}
-                    className="rounded-2xl border border-purple-200 bg-white shadow-xs transition-all overflow-hidden"
-                  >
-                    {/* Block Header */}
-                    <div className="px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b bg-purple-50/80 border-purple-100 text-slate-900">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-lg bg-purple-100 text-[#5300b7] flex items-center justify-center">
-                          <Layers className="w-4 h-4" />
-                        </div>
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="bg-[#b9c9dc] text-[#15293e] border-b border-[#a8bcce] font-bold text-[11px] sm:text-xs">
+                    <th rowSpan={2} className="py-2.5 px-2 text-center border-r border-[#a8bcce] w-10">
+                      №
+                    </th>
+                    <th rowSpan={2} className="py-2.5 px-2 text-center border-r border-[#a8bcce] whitespace-nowrap">
+                      <div>Tədris ili</div>
+                      <div>Semestr</div>
+                    </th>
+                    <th rowSpan={2} className="py-2.5 px-2 text-center border-r border-[#a8bcce] whitespace-nowrap min-w-[120px]">
+                      Tarix
+                    </th>
+                    <th rowSpan={2} className="py-2.5 px-3 border-r border-[#a8bcce] min-w-[240px]">
+                      Fənn
+                    </th>
+                    <th colSpan={7} className="py-1 px-2 text-center border-b border-[#a8bcce]">
+                      Qiymətləndirmə
+                    </th>
+                  </tr>
+                  <tr className="bg-[#b9c9dc] text-[#15293e] font-bold text-[11px] sm:text-xs text-center">
+                    <th className="py-1.5 px-2 border-r border-[#a8bcce] w-16" title="Davamiyyət">D</th>
+                    <th className="py-1.5 px-2 border-r border-[#a8bcce] w-10" title="Seminar">S</th>
+                    <th className="py-1.5 px-2 border-r border-[#a8bcce] w-10" title="1-ci Kollokvium / Laboratoriya">L</th>
+                    <th className="py-1.5 px-2 border-r border-[#a8bcce] w-10" title="2-ci Kollokvium / Sərbəst İş">K</th>
+                    <th className="py-1.5 px-2 border-r border-[#a8bcce] w-10" title="Giriş Balı (Cəmi)">SÜ</th>
+                    <th className="py-1.5 px-2 border-r border-[#a8bcce] w-10" title="İmtahan Balı">İB</th>
+                    <th className="py-1.5 px-3 min-w-[140px]" title="Yekun Qiymət">Yekun</th>
+                  </tr>
+                </thead>
 
-                        <h3 className="font-bold text-sm sm:text-base">
-                          {block.semesterName}
-                        </h3>
+                <tbody className="divide-y divide-[#d6e0ec]">
+                  {tableRows.map((row) => {
+                    const m = row.module;
+                    const g = row.gradeInfo?.myGrade;
+                    const gradeEval = row.gradeInfo?.gradeEval;
+                    const entryTotal = row.gradeInfo?.entryTotal;
+                    const finalScore = row.gradeInfo?.finalScore;
 
-                        {block.isCurrentSemester && (
-                          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#5300b7] text-white shadow-xs">
-                            Cari Semestr
-                          </span>
-                        )}
-                      </div>
+                    // Display exam or colloquium date in Tarix column
+                    const displayDate = m.examDate
+                      ? `${m.examDate} ${m.examTime || ''}`
+                      : m.colloquium1Date
+                      ? `${m.colloquium1Date} ${m.colloquium1Time || ''}`
+                      : m.colloquium2Date
+                      ? `${m.colloquium2Date} ${m.colloquium2Time || ''}`
+                      : '';
 
-                      {/* Status Badges */}
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-purple-800 bg-purple-100/80 px-2.5 py-1 rounded-md border border-purple-200">
-                          {block.modules.length} fənn
-                        </span>
-                      </div>
-                    </div>
+                    return (
+                      <tr
+                        key={m.id}
+                        className={`transition-colors hover:bg-[#ebf2fa] ${
+                          row.index % 2 === 0 ? 'bg-[#f7f9fc]' : 'bg-white'
+                        }`}
+                      >
+                        {/* 1. № */}
+                        <td className="py-2.5 px-2 text-center border-r border-[#d6e0ec] text-slate-700 font-medium">
+                          {row.index}
+                        </td>
 
-                    {/* Block Body: Fənlər List */}
-                    <div className="p-4 sm:p-6">
-                      {block.modules.length === 0 ? (
-                        /* Empty State Display */
-                        <div className="p-6 text-center rounded-2xl bg-slate-50 border border-dashed border-slate-200 text-slate-400 space-y-1.5">
-                          <BookOpen className="w-8 h-8 mx-auto opacity-40 text-purple-600" />
-                          <p className="text-xs font-bold text-slate-600">
-                            Bu semestr üzrə hələ fənn daxil edilməyib
-                          </p>
-                          <p className="text-[11px] text-slate-400">
-                            Admin tərəfindən fənlər və imtahan cədvəli əlavə edildikdə burada əks olunacaq.
-                          </p>
-                        </div>
-                      ) : (
-                        /* Modules Grid for Semester */
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-3.5">
-                            {block.modules.map((m) => {
-                              return (
-                                <div
-                                  key={m.id}
-                                  className="bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200 hover:border-[#5300b7] transition-all shadow-xs space-y-2.5 flex flex-col justify-between"
-                                >
-                                  <div className="space-y-2">
-                                    <div className="flex items-center justify-between gap-2">
-                                      <span className="text-[10px] font-mono font-bold text-[#5300b7] bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
-                                        {m.code || 'YTP-FƏNN'}
-                                      </span>
-                                      <span className="text-[11px] font-semibold text-slate-500">
-                                        {m.credits ? `${m.credits} kredit` : 'YTP Fənni'}
-                                      </span>
-                                    </div>
+                        {/* 2. Tədris ili / Semestr */}
+                        <td className="py-2.5 px-2 text-center border-r border-[#d6e0ec] whitespace-nowrap text-slate-800">
+                          <span className="font-mono text-xs">{row.academicYear}</span>
+                          <span className="ml-2 font-bold text-slate-900">{row.semesterNum}</span>
+                        </td>
 
-                                    <h4 className="font-bold text-sm text-slate-900 leading-tight">
-                                      {m.name}
-                                    </h4>
+                        {/* 3. Tarix */}
+                        <td className="py-2.5 px-2 text-center border-r border-[#d6e0ec] text-slate-700 whitespace-nowrap font-mono text-[11px]">
+                          {displayDate || '-'}
+                        </td>
 
-                                    {m.description && (
-                                      <p className="text-[11px] text-slate-600 line-clamp-2">
-                                        {m.description}
-                                      </p>
-                                    )}
-
-                                    {/* Colloquiums and Exam Schedule Card Inside Fənn */}
-                                    <div className="p-2.5 rounded-lg bg-slate-50/80 border border-slate-200/80 space-y-1.5">
-                                      <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#5300b7]">
-                                          <Calendar className="w-3 h-3" />
-                                          <span>İmtahan və Kollokvium Cədvəli</span>
-                                        </div>
-                                      </div>
-
-                                      <div className="grid grid-cols-3 gap-1.5 pt-1 border-t border-slate-200/60 text-[11px]">
-                                        {/* 1-ci Kollokvium */}
-                                        <div className="p-1.5 bg-white rounded border border-slate-200/70">
-                                          <div className="text-[9px] font-bold text-purple-700 uppercase tracking-tight">
-                                            1-ci Kollokvium
-                                          </div>
-                                          {m.colloquium1Date || m.colloquium1Time || m.colloquium1Room ? (
-                                            <div className="text-[10px] text-slate-800 space-y-0.5 mt-0.5 leading-tight">
-                                              {m.colloquium1Date && <div><strong>T:</strong> {m.colloquium1Date}</div>}
-                                              {m.colloquium1Time && <div><strong>S:</strong> {m.colloquium1Time}</div>}
-                                              {m.colloquium1Room && <div><strong>O:</strong> {m.colloquium1Room}</div>}
-                                            </div>
-                                          ) : (
-                                            <div className="text-[9px] text-slate-400 italic mt-0.5">Təyin edilməyib</div>
-                                          )}
-                                        </div>
-
-                                        {/* 2-ci Kollokvium */}
-                                        <div className="p-1.5 bg-white rounded border border-slate-200/70">
-                                          <div className="text-[9px] font-bold text-purple-700 uppercase tracking-tight">
-                                            2-ci Kollokvium
-                                          </div>
-                                          {m.colloquium2Date || m.colloquium2Time || m.colloquium2Room ? (
-                                            <div className="text-[10px] text-slate-800 space-y-0.5 mt-0.5 leading-tight">
-                                              {m.colloquium2Date && <div><strong>T:</strong> {m.colloquium2Date}</div>}
-                                              {m.colloquium2Time && <div><strong>S:</strong> {m.colloquium2Time}</div>}
-                                              {m.colloquium2Room && <div><strong>O:</strong> {m.colloquium2Room}</div>}
-                                            </div>
-                                          ) : (
-                                            <div className="text-[9px] text-slate-400 italic mt-0.5">Təyin edilməyib</div>
-                                          )}
-                                        </div>
-
-                                        {/* Yekun İmtahan */}
-                                        <div className="p-1.5 bg-purple-50/70 rounded border border-purple-200/70">
-                                          <div className="text-[9px] font-bold text-[#5300b7] uppercase tracking-tight">
-                                            Yekun İmtahan
-                                          </div>
-                                          {m.examDate || m.examTime || m.examRoom ? (
-                                            <div className="text-[10px] text-slate-900 space-y-0.5 mt-0.5 font-medium leading-tight">
-                                              {m.examDate && <div><strong>T:</strong> {m.examDate}</div>}
-                                              {m.examTime && <div><strong>S:</strong> {m.examTime}</div>}
-                                              {m.examRoom && <div><strong>O:</strong> {m.examRoom}</div>}
-                                            </div>
-                                          ) : (
-                                            <div className="text-[9px] text-slate-400 italic mt-0.5">Təyin edilməyib</div>
-                                          )}
-                                        </div>
-                                      </div>
-                                    </div>
-
-                                    {/* Student Grade in this Subject (if exists in Gradebook) */}
-                                    {(() => {
-                                      if (!student) return null;
-                                      let allCourses: any[] = [];
-                                      try {
-                                        const saved = localStorage.getItem('eldptm_courses');
-                                        if (saved) {
-                                          const parsed = JSON.parse(saved);
-                                          if (Array.isArray(parsed)) allCourses = parsed;
-                                        }
-                                      } catch (e) {}
-
-                                      if (!Array.isArray(allCourses)) return null;
-
-                                      // Match course by subject name
-                                      const matchedCourse = allCourses.find((c: any) => {
-                                        if (!c) return false;
-                                        const cSub = (c.subject || '').toLowerCase().trim();
-                                        const mSub = (m?.name || '').toLowerCase().trim();
-                                        return cSub && mSub && (cSub === mSub || cSub.includes(mSub) || mSub.includes(cSub));
-                                      });
-
-                                      if (!matchedCourse || !Array.isArray(matchedCourse.students)) return null;
-
-                                      const myStudentId = (student?.studentId || student?.id || student?.finCode || '').toLowerCase();
-                                      const myStudentName = (student?.name || '').toLowerCase();
-                                      const myGrade = matchedCourse.students.find((gs: any) => {
-                                        if (!gs) return false;
-                                        const gsId = (gs.studentId || gs.idNumber || '').toLowerCase();
-                                        const gsName = (gs.studentName || '').toLowerCase();
-                                        return (myStudentId && gsId === myStudentId) || (myStudentName && gsName.includes(myStudentName));
-                                      });
-
-                                      if (!myGrade) return null;
-
-                                      const isEntryComplete =
-                                        myGrade.attendance !== null && myGrade.attendance !== undefined &&
-                                        myGrade.seminar !== null && myGrade.seminar !== undefined &&
-                                        myGrade.colloquium1 !== null && myGrade.colloquium1 !== undefined &&
-                                        myGrade.colloquium2 !== null && myGrade.colloquium2 !== undefined;
-
-                                      const entryTotal = isEntryComplete
-                                        ? Number(myGrade.attendance) + Number(myGrade.seminar) + Number(myGrade.colloquium1) + Number(myGrade.colloquium2)
-                                        : null;
-
-                                      const hasAnyGrade =
-                                        myGrade.attendance !== null ||
-                                        myGrade.seminar !== null ||
-                                        myGrade.colloquium1 !== null ||
-                                        myGrade.colloquium2 !== null ||
-                                        myGrade.examScore !== null;
-
-                                      if (!hasAnyGrade) return null;
-
-                                      const hasExam = myGrade.examScore !== null && myGrade.examScore !== undefined;
-                                      const finalScore = isEntryComplete && hasExam ? (entryTotal! + Number(myGrade.examScore)) : null;
-
-                                      const gradeEval = getGradeEvaluation(finalScore, myGrade.examScore);
-
-                                      return (
-                                        <div className="p-2 bg-slate-50 border border-slate-200 rounded-lg space-y-1.5">
-                                          <div className="flex items-center justify-between">
-                                            <span className="text-[10px] font-bold text-slate-700">
-                                              📊 Cari Qiymətlər:
-                                            </span>
-                                            {gradeEval ? (
-                                              <span className={`px-2 py-0.2 rounded-full text-[9px] font-bold border ${gradeEval.badgeClass}`}>
-                                                {gradeEval.letter} — {gradeEval.label} ({finalScore} bal)
-                                              </span>
-                                            ) : entryTotal !== null ? (
-                                              <span className="text-[9px] text-purple-700 font-bold bg-purple-100 px-1.5 py-0.2 rounded">
-                                                Giriş: {entryTotal}/50
-                                              </span>
-                                            ) : (
-                                              <span className="text-[9px] text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded">
-                                                Giriş gözlənilir
-                                              </span>
-                                            )}
-                                          </div>
-
-                                          <div className="grid grid-cols-4 sm:grid-cols-7 gap-1 text-center text-[9px]">
-                                            <div className="bg-white p-0.5 rounded border border-slate-200">
-                                              <span className="text-slate-400 block text-[8px]">Dav</span>
-                                              <strong className="text-slate-800">{myGrade.attendance ?? '-'}</strong>
-                                            </div>
-                                            <div className="bg-white p-0.5 rounded border border-slate-200">
-                                              <span className="text-slate-400 block text-[8px]">Sem</span>
-                                              <strong className="text-slate-800">{myGrade.seminar ?? '-'}</strong>
-                                            </div>
-                                            <div className="bg-white p-0.5 rounded border border-slate-200">
-                                              <span className="text-slate-400 block text-[8px]">Kol 1</span>
-                                              <strong className="text-slate-800">{myGrade.colloquium1 ?? '-'}</strong>
-                                            </div>
-                                            <div className="bg-white p-0.5 rounded border border-slate-200">
-                                              <span className="text-slate-400 block text-[8px]">Kol 2</span>
-                                              <strong className="text-slate-800">{myGrade.colloquium2 ?? '-'}</strong>
-                                            </div>
-                                            <div className="bg-purple-50 p-0.5 rounded border border-purple-200 font-bold text-[#5300b7]">
-                                              <span className="text-purple-600 block text-[8px]">Giriş</span>
-                                              <strong>{entryTotal !== null ? entryTotal : '-'}</strong>
-                                            </div>
-                                            <div className="bg-amber-50 p-0.5 rounded border border-amber-200 font-bold text-amber-900">
-                                              <span className="text-amber-700 block text-[8px]">İmtahan</span>
-                                              <strong>{myGrade.examScore ?? '-'}</strong>
-                                            </div>
-                                            <div className="bg-purple-100/70 p-0.5 rounded border border-purple-300 font-bold text-purple-950">
-                                              <span className="text-purple-800 block text-[8px]">Yekun</span>
-                                              <strong>{finalScore !== null ? finalScore : (entryTotal !== null ? entryTotal : '-')}</strong>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      );
-                                    })()}
-                                  </div>
-
-                                  {/* Syllabus Action Button */}
-                                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
-                                    <span className="text-[11px] text-slate-500 font-medium">
-                                      Fənn Sillabusu:
-                                    </span>
-                                    {m.syllabusUrl ? (
-                                      <a
-                                        href={m.syllabusUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#5300b7] hover:bg-[#430093] text-white rounded-lg text-[11px] font-semibold transition-all shadow-2xs group cursor-pointer"
-                                        title="Sillabus faylını aç və ya yüklə"
-                                      >
-                                        <FileText className="w-3 h-3 group-hover:scale-110 transition-transform" />
-                                        <span className="truncate max-w-[140px]">
-                                          {m.syllabusFileName || 'Sillabusu Aç'}
-                                        </span>
-                                        <ExternalLink className="w-2.5 h-2.5 opacity-80" />
-                                      </a>
-                                    ) : (
-                                      <span className="text-[11px] text-slate-400 italic">
-                                        Sillabus yüklənməyib
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            })}
+                        {/* 4. Fənn (Title + Code + Sub-schedule + Syllabus link) */}
+                        <td className="py-2.5 px-3 border-r border-[#d6e0ec] text-left">
+                          <div className="font-semibold text-slate-900 text-xs">
+                            {m.name} {m.code ? `(${m.code})` : ''}
                           </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+
+                          {/* Sub-text: Colloquium / Exam schedule */}
+                          {(m.colloquium1Date || m.colloquium2Date || m.examDate) && (
+                            <div className="text-[11px] text-slate-500 italic mt-0.5 space-y-0.5">
+                              {m.colloquium1Date && (
+                                <div>Kollokvium ({m.colloquium1Date} {m.colloquium1Time || ''} {m.colloquium1Room ? `Otaq: ${m.colloquium1Room}` : ''})</div>
+                              )}
+                              {m.examDate && (
+                                <div>İmtahan ({m.examDate} {m.examTime || ''} {m.examRoom ? `Otaq: ${m.examRoom}` : ''})</div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Syllabus Link */}
+                          {m.syllabusUrl ? (
+                            <div className="mt-1">
+                              <a
+                                href={m.syllabusUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[11px] text-blue-600 hover:text-blue-800 hover:underline font-semibold inline-flex items-center gap-1 cursor-pointer"
+                                title="Sillabus faylını aç və ya yüklə"
+                              >
+                                <FileText className="w-3 h-3 text-blue-600" />
+                                <span>Sillabus</span>
+                              </a>
+                            </div>
+                          ) : null}
+                        </td>
+
+                        {/* 5. D (Davamiyyət) */}
+                        <td className="py-2.5 px-2 text-center border-r border-[#d6e0ec] text-slate-800 font-mono text-xs">
+                          {g?.attendance !== null && g?.attendance !== undefined
+                            ? g.attendance >= 10
+                              ? '100.00%'
+                              : `${Number(g.attendance) * 10}.00%`
+                            : ''}
+                        </td>
+
+                        {/* 6. S (Seminar) */}
+                        <td className="py-2.5 px-2 text-center border-r border-[#d6e0ec] text-slate-800 font-mono text-xs">
+                          {g?.seminar !== null && g?.seminar !== undefined ? g.seminar : ''}
+                        </td>
+
+                        {/* 7. L (1-ci Kollokvium) */}
+                        <td className="py-2.5 px-2 text-center border-r border-[#d6e0ec] text-slate-800 font-mono text-xs">
+                          {g?.colloquium1 !== null && g?.colloquium1 !== undefined ? g.colloquium1 : ''}
+                        </td>
+
+                        {/* 8. K (2-ci Kollokvium) */}
+                        <td className="py-2.5 px-2 text-center border-r border-[#d6e0ec] text-slate-800 font-mono text-xs">
+                          {g?.colloquium2 !== null && g?.colloquium2 !== undefined ? g.colloquium2 : ''}
+                        </td>
+
+                        {/* 9. SÜ (Giriş Balı Cəmi) */}
+                        <td className="py-2.5 px-2 text-center border-r border-[#d6e0ec] font-bold text-[#5300b7] font-mono text-xs">
+                          {entryTotal !== null && entryTotal !== undefined ? entryTotal : ''}
+                        </td>
+
+                        {/* 10. İB (İmtahan Balı) */}
+                        <td className="py-2.5 px-2 text-center border-r border-[#d6e0ec] font-bold text-amber-900 font-mono text-xs">
+                          {g?.examScore !== null && g?.examScore !== undefined ? g.examScore : ''}
+                        </td>
+
+                        {/* 11. Yekun */}
+                        <td className="py-2.5 px-3 text-center font-bold text-xs whitespace-nowrap">
+                          {gradeEval && finalScore !== null ? (
+                            <span className="text-slate-900">
+                              {finalScore} {gradeEval.letter} ({gradeEval.label.toLowerCase()})
+                            </span>
+                          ) : entryTotal !== null ? (
+                            <span className="text-purple-700 text-[11px] font-semibold">
+                              {entryTotal} (giriş)
+                            </span>
+                          ) : (
+                            ''
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-          </div>
+          )}
+        </div>
       </div>
     </div>
   );
