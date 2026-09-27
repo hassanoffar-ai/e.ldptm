@@ -372,361 +372,197 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
               </p>
             </div>
           ) : (
-            <>
-              {/* 1. MOBİL KART GÖRÜNÜŞÜ (Telefonlar üçün - bütün məlumatlar tam görünür, heç bir kəsilmə və ya daxili sıxılma olmur) */}
-              <div className="block sm:hidden space-y-3">
-                {tableRows.map((row) => {
-                  const m = row.module;
-                  const g = row.gradeInfo?.myGrade;
-                  const gradeEval = row.gradeInfo?.gradeEval;
-                  const entryTotal = row.gradeInfo?.entryTotal;
-                  const finalScore = row.gradeInfo?.finalScore;
-                  const hasExam = row.gradeInfo?.hasExam;
+            <div className="w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
+              <table className="w-full text-left border-collapse text-xs table-auto">
+                <thead>
+                  <tr className="bg-gradient-to-r from-[#5300b7] via-[#6415c4] to-[#7c3aed] text-white font-bold text-[10px] sm:text-xs">
+                    <th rowSpan={2} className="py-2 sm:py-3 px-1 sm:px-2.5 text-center border-r border-white/20 w-6 sm:w-10">
+                      №
+                    </th>
+                    <th rowSpan={2} className="py-2 sm:py-3 px-1.5 sm:px-3 text-center border-r border-white/20">
+                      <div>Tədris İli</div>
+                      <div className="text-[9px] sm:text-[10px] text-purple-200 font-normal">Semestr</div>
+                    </th>
+                    <th rowSpan={2} className="py-2 sm:py-3 px-2 sm:px-4 border-r border-white/20">
+                      Fənn və Sillabus
+                    </th>
+                    <th colSpan={7} className="py-1 px-1 sm:px-2 text-center border-b border-white/20 bg-white/10 uppercase tracking-wider text-[9px] sm:text-[10px]">
+                      Qiymətləndirmə Göstəriciləri
+                    </th>
+                  </tr>
+                  <tr className="bg-[#48009e] text-white font-bold text-[10px] sm:text-xs text-center border-t border-white/15">
+                    <th className="py-1.5 sm:py-2 px-1 sm:px-2 border-r border-white/15" title="Davamiyyət">Dav.</th>
+                    <th className="py-1.5 sm:py-2 px-1 sm:px-2 border-r border-white/15" title="Seminar">Sem.</th>
+                    <th className="py-1.5 sm:py-2 px-1 sm:px-2 border-r border-white/15 bg-white/10 text-amber-200" title="1-ci Kollokvium">K1</th>
+                    <th className="py-1.5 sm:py-2 px-1 sm:px-2 border-r border-white/15 bg-white/10 text-amber-200" title="2-ci Kollokvium">K2</th>
+                    <th className="py-1.5 sm:py-2 px-1 sm:px-2 border-r border-white/15 text-emerald-200" title="Giriş Balı (Cəmi 50 baldan)">Giriş</th>
+                    <th className="py-1.5 sm:py-2 px-1 sm:px-2 border-r border-white/15 text-sky-200" title="İmtahan Balı (50 baldan)">İmt.</th>
+                    <th className="py-1.5 sm:py-2 px-1 sm:px-3 text-white" title="Yekun Qiymət (100 baldan)">Yekun</th>
+                  </tr>
+                </thead>
 
-                  return (
-                    <div
-                      key={m.id}
-                      className="bg-white rounded-2xl border border-slate-200/90 p-3.5 shadow-2xs space-y-3 transition-all hover:border-purple-300"
-                    >
-                      {/* Başlıq: Sıra №, Fənnin Adı, Kodu, Semestr */}
-                      <div className="flex items-start justify-between gap-2 border-b border-slate-100 pb-2.5">
-                        <div className="flex items-start gap-2">
-                          <span className="w-6 h-6 rounded-lg bg-purple-100 text-[#5300b7] font-extrabold text-xs flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
-                            {row.index}
-                          </span>
-                          <div>
-                            <h4 className="font-bold text-slate-900 text-xs leading-snug break-words">
-                              {m.name}
-                            </h4>
-                            <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                              {m.code && (
-                                <span className="px-1.5 py-0.5 bg-slate-100 text-slate-600 border border-slate-200 rounded text-[9.5px] font-mono font-semibold">
-                                  {m.code}
-                                </span>
-                              )}
-                              <span className="text-[10px] font-mono text-slate-500 font-medium">
-                                {row.academicYear}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
+                <tbody className="divide-y divide-slate-200">
+                  {tableRows.map((row) => {
+                    const m = row.module;
+                    const g = row.gradeInfo?.myGrade;
+                    const gradeEval = row.gradeInfo?.gradeEval;
+                    const entryTotal = row.gradeInfo?.entryTotal;
+                    const finalScore = row.gradeInfo?.finalScore;
+                    const hasExam = row.gradeInfo?.hasExam;
 
-                        <span className="px-2 py-0.5 bg-purple-50 text-[#5300b7] border border-purple-200/80 rounded-lg text-[10px] font-bold shrink-0">
-                          {row.semesterNum}-ci sem.
-                        </span>
-                      </div>
+                    return (
+                      <tr
+                        key={m.id}
+                        className={`transition-colors hover:bg-purple-50/40 ${
+                          row.index % 2 === 0 ? 'bg-slate-50/60' : 'bg-white'
+                        }`}
+                      >
+                        {/* 1. № */}
+                        <td className="py-2 sm:py-3 px-1 sm:px-2 text-center border-r border-slate-200 text-slate-500 font-semibold text-[10px] sm:text-xs">
+                          {row.index}
+                        </td>
 
-                      {/* İmtahan və Kollokvium Tarixləri */}
-                      {(m.colloquium1Date || m.colloquium2Date || m.examDate) && (
-                        <div className="bg-slate-50/90 rounded-xl p-2.5 border border-slate-100 text-[11px] space-y-1">
-                          {m.colloquium1Date && (
-                            <div className="flex items-center justify-between gap-2 bg-amber-50/80 text-amber-950 px-2 py-1 rounded-md border border-amber-200/60 text-[10.5px]">
-                              <span className="flex items-center gap-1 text-amber-800 font-medium">
-                                <Calendar className="w-3 h-3 text-amber-600 shrink-0" />
-                                <span>1-ci Kol (K1):</span>
-                              </span>
-                              <strong className="font-semibold text-right">{m.colloquium1Date} {m.colloquium1Time || ''} {m.colloquium1Room ? `(${m.colloquium1Room})` : ''}</strong>
-                            </div>
-                          )}
-                          {m.colloquium2Date && (
-                            <div className="flex items-center justify-between gap-2 bg-amber-50/80 text-amber-950 px-2 py-1 rounded-md border border-amber-200/60 text-[10.5px]">
-                              <span className="flex items-center gap-1 text-amber-800 font-medium">
-                                <Calendar className="w-3 h-3 text-amber-600 shrink-0" />
-                                <span>2-ci Kol (K2):</span>
-                              </span>
-                              <strong className="font-semibold text-right">{m.colloquium2Date} {m.colloquium2Time || ''} {m.colloquium2Room ? `(${m.colloquium2Room})` : ''}</strong>
-                            </div>
-                          )}
-                          {m.examDate && (
-                            <div className="flex items-center justify-between gap-2 bg-purple-50/80 text-purple-950 px-2 py-1 rounded-md border border-purple-200/60 text-[10.5px]">
-                              <span className="flex items-center gap-1 text-[#5300b7] font-medium">
-                                <Calendar className="w-3 h-3 text-[#5300b7] shrink-0" />
-                                <span>Yekun İmtahan:</span>
-                              </span>
-                              <strong className="font-semibold text-right">{m.examDate} {m.examTime || ''} {m.examRoom ? `(${m.examRoom})` : ''}</strong>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Sillabus Linki (varsa) */}
-                      {m.syllabusUrl && (
-                        <div>
-                          <a
-                            href={m.syllabusUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-[#5300b7] hover:bg-[#430094] text-white rounded-xl text-[11px] font-bold transition-all shadow-2xs"
-                          >
-                            <FileText className="w-3.5 h-3.5" />
-                            <span>Sillabus ({m.syllabusFileName || 'PDF'})</span>
-                            <ExternalLink className="w-3 h-3 opacity-80" />
-                          </a>
-                        </div>
-                      )}
-
-                      {/* Qiymətləndirmə Paneli (7 sütun: Dav, Sem, K1, K2, Giriş, İmtahan, Yekun) */}
-                      <div>
-                        <div className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider mb-1 px-0.5">
-                          Qiymətləndirmə Göstəriciləri
-                        </div>
-                        <div className="grid grid-cols-7 gap-1 text-center bg-slate-50 p-1.5 rounded-xl border border-slate-200/80">
-                          {/* 1. Davamiyyət */}
-                          <div className="p-1">
-                            <div className="text-[8.5px] font-bold text-slate-500 uppercase">Dav.</div>
-                            <div className="text-[11px] font-bold text-slate-900 font-mono mt-0.5">
-                              {g?.attendance !== null && g?.attendance !== undefined ? g.attendance : '-'}
-                            </div>
-                          </div>
-
-                          {/* 2. Seminar */}
-                          <div className="p-1">
-                            <div className="text-[8.5px] font-bold text-slate-500 uppercase">Sem.</div>
-                            <div className="text-[11px] font-bold text-slate-900 font-mono mt-0.5">
-                              {g?.seminar !== null && g?.seminar !== undefined ? g.seminar : '-'}
-                            </div>
-                          </div>
-
-                          {/* 3. K1 */}
-                          <div className="p-1 bg-amber-100/60 rounded-lg border border-amber-200/60">
-                            <div className="text-[8.5px] font-bold text-amber-900 uppercase">K1</div>
-                            <div className="text-[11px] font-bold text-amber-950 font-mono mt-0.5">
-                              {g?.colloquium1 !== null && g?.colloquium1 !== undefined ? g.colloquium1 : '-'}
-                            </div>
-                          </div>
-
-                          {/* 4. K2 */}
-                          <div className="p-1 bg-amber-100/60 rounded-lg border border-amber-200/60">
-                            <div className="text-[8.5px] font-bold text-amber-900 uppercase">K2</div>
-                            <div className="text-[11px] font-bold text-amber-950 font-mono mt-0.5">
-                              {g?.colloquium2 !== null && g?.colloquium2 !== undefined ? g.colloquium2 : '-'}
-                            </div>
-                          </div>
-
-                          {/* 5. Giriş Balı */}
-                          <div className="p-1 bg-purple-100/60 rounded-lg border border-purple-200/60">
-                            <div className="text-[8.5px] font-bold text-[#5300b7] uppercase">Giriş</div>
-                            <div className="text-[11px] font-extrabold text-[#5300b7] font-mono mt-0.5">
-                              {entryTotal !== null && entryTotal !== undefined ? entryTotal : '-'}
-                            </div>
-                          </div>
-
-                          {/* 6. İmtahan */}
-                          <div className="p-1 bg-sky-100/60 rounded-lg border border-sky-200/60">
-                            <div className="text-[8.5px] font-bold text-sky-900 uppercase">İmt.</div>
-                            <div className="text-[11px] font-extrabold text-sky-950 font-mono mt-0.5">
-                              {g?.examScore !== null && g?.examScore !== undefined ? g.examScore : '-'}
-                            </div>
-                          </div>
-
-                          {/* 7. Yekun */}
-                          <div className="p-1 bg-indigo-50 rounded-lg border border-indigo-200/60 flex flex-col justify-between">
-                            <div className="text-[8.5px] font-bold text-indigo-900 uppercase">Yekun</div>
-                            <div className="mt-0.5">
-                              {hasExam && gradeEval && finalScore !== null ? (
-                                <span className={`inline-block px-1 py-0.2 rounded font-extrabold text-[9px] ${gradeEval.badgeClass}`}>
-                                  {finalScore} ({gradeEval.letter})
-                                </span>
-                              ) : (
-                                <span className="text-[8.5px] text-slate-400 italic">Gözl.</span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* 2. MASAÜSTÜ / LANDŞAFT CƏDVƏL GÖRÜNÜŞÜ (Planşet, Kompüter və ya Yan Çevrilmiş Telefonlar üçün) */}
-              <div className="hidden sm:block w-full overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-xs">
-                <table className="w-full text-left border-collapse text-xs table-auto">
-                  <thead>
-                    <tr className="bg-gradient-to-r from-[#5300b7] via-[#6415c4] to-[#7c3aed] text-white font-bold text-xs">
-                      <th rowSpan={2} className="py-3 px-2.5 text-center border-r border-white/20 w-10">
-                        №
-                      </th>
-                      <th rowSpan={2} className="py-3 px-3 text-center border-r border-white/20 whitespace-nowrap">
-                        <div>Tədris İli</div>
-                        <div className="text-[10px] text-purple-200 font-normal">Semestr</div>
-                      </th>
-                      <th rowSpan={2} className="py-3 px-4 border-r border-white/20 min-w-[280px]">
-                        Fənn və Sillabus
-                      </th>
-                      <th colSpan={7} className="py-1.5 px-2 text-center border-b border-white/20 bg-white/10 uppercase tracking-wider text-[10px]">
-                        Qiymətləndirmə Göstəriciləri
-                      </th>
-                    </tr>
-                    <tr className="bg-[#48009e] text-white font-bold text-xs text-center border-t border-white/15">
-                      <th className="py-2 px-2.5 border-r border-white/15 w-14" title="Davamiyyət">Dav.</th>
-                      <th className="py-2 px-2.5 border-r border-white/15 w-14" title="Seminar">Sem.</th>
-                      <th className="py-2 px-2.5 border-r border-white/15 w-14 bg-white/10 text-amber-200" title="1-ci Kollokvium">K1</th>
-                      <th className="py-2 px-2.5 border-r border-white/15 w-14 bg-white/10 text-amber-200" title="2-ci Kollokvium">K2</th>
-                      <th className="py-2 px-2.5 border-r border-white/15 w-14 text-emerald-200" title="Giriş Balı (Cəmi 50 baldan)">Giriş</th>
-                      <th className="py-2 px-2.5 border-r border-white/15 w-14 text-sky-200" title="İmtahan Balı (50 baldan)">İmt.</th>
-                      <th className="py-2 px-3.5 min-w-[130px] text-white" title="Yekun Qiymət (100 baldan)">Yekun</th>
-                    </tr>
-                  </thead>
-
-                  <tbody className="divide-y divide-slate-200">
-                    {tableRows.map((row) => {
-                      const m = row.module;
-                      const g = row.gradeInfo?.myGrade;
-                      const gradeEval = row.gradeInfo?.gradeEval;
-                      const entryTotal = row.gradeInfo?.entryTotal;
-                      const finalScore = row.gradeInfo?.finalScore;
-                      const hasExam = row.gradeInfo?.hasExam;
-
-                      return (
-                        <tr
-                          key={m.id}
-                          className={`transition-colors hover:bg-purple-50/40 ${
-                            row.index % 2 === 0 ? 'bg-slate-50/60' : 'bg-white'
-                          }`}
-                        >
-                          {/* 1. № */}
-                          <td className="py-3 px-2.5 text-center border-r border-slate-200 text-slate-500 font-semibold text-xs">
-                            {row.index}
-                          </td>
-
-                          {/* 2. Tədris ili / Semestr */}
-                          <td className="py-3 px-3 text-center border-r border-slate-200 whitespace-nowrap">
-                            <span className="font-mono text-xs text-slate-700 font-medium">{row.academicYear}</span>
-                            <span className="ml-2 px-2 py-0.5 bg-purple-100 text-[#5300b7] rounded-md font-bold text-xs">
+                        {/* 2. Tədris ili / Semestr (Stacked for mobile, horizontal on larger screens) */}
+                        <td className="py-2 sm:py-3 px-1.5 sm:px-3 text-center border-r border-slate-200">
+                          <div className="flex flex-col items-center justify-center gap-0.5">
+                            <span className="font-mono text-[10px] sm:text-xs text-slate-700 font-medium leading-tight">
+                              {row.academicYear}
+                            </span>
+                            <span className="px-1 sm:px-1.5 py-0.5 bg-purple-100 text-[#5300b7] rounded font-bold text-[9px] sm:text-xs whitespace-nowrap leading-none">
                               {row.semesterNum}-ci sem.
                             </span>
-                          </td>
+                          </div>
+                        </td>
 
-                          {/* 3. Fənn (Title + Code + Dates underneath + Syllabus link) */}
-                          <td className="py-3 px-4 border-r border-slate-200 text-left">
-                            <div className="flex flex-wrap items-center gap-1.5">
-                              <span className="font-bold text-slate-900 text-xs sm:text-sm">
-                                {m.name}
+                        {/* 3. Fənn (Title + Code + Dates underneath + Syllabus link) */}
+                        <td className="py-2 sm:py-3 px-2 sm:px-4 border-r border-slate-200 text-left min-w-0">
+                          <div className="flex flex-wrap items-center gap-1">
+                            <span className="font-bold text-slate-900 text-[11px] sm:text-sm break-words leading-tight">
+                              {m.name}
+                            </span>
+                            {m.code && (
+                              <span className="px-1 py-0.5 bg-slate-100 text-slate-600 border border-slate-200 rounded text-[9px] sm:text-[10px] font-mono font-semibold">
+                                {m.code}
                               </span>
-                              {m.code && (
-                                <span className="px-1.5 py-0.5 bg-slate-100 text-slate-600 border border-slate-200 rounded text-[10px] font-mono font-semibold">
-                                  {m.code}
+                            )}
+                          </div>
+
+                          {/* Sub-text: Colloquium & Exam Schedule */}
+                          {(m.colloquium1Date || m.colloquium2Date || m.examDate) && (
+                            <div className="text-[10px] sm:text-[11px] text-slate-600 mt-1.5 flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-1">
+                              {m.colloquium1Date && (
+                                <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-900 px-1.5 sm:px-2 py-0.5 rounded border border-amber-200 text-[9.5px] sm:text-[10.5px] font-medium leading-tight">
+                                  <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-600 shrink-0" />
+                                  <span>K1:</span>
+                                  <strong className="font-semibold text-amber-950">{m.colloquium1Date} {m.colloquium1Time || ''} {m.colloquium1Room ? `(${m.colloquium1Room})` : ''}</strong>
+                                </span>
+                              )}
+                              {m.colloquium2Date && (
+                                <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-900 px-1.5 sm:px-2 py-0.5 rounded border border-amber-200 text-[9.5px] sm:text-[10.5px] font-medium leading-tight">
+                                  <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-600 shrink-0" />
+                                  <span>K2:</span>
+                                  <strong className="font-semibold text-amber-950">{m.colloquium2Date} {m.colloquium2Time || ''} {m.colloquium2Room ? `(${m.colloquium2Room})` : ''}</strong>
+                                </span>
+                              )}
+                              {m.examDate && (
+                                <span className="inline-flex items-center gap-1 bg-purple-50 text-purple-900 px-1.5 sm:px-2 py-0.5 rounded border border-purple-200 text-[9.5px] sm:text-[10.5px] font-medium leading-tight">
+                                  <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#5300b7] shrink-0" />
+                                  <span>İmtahan:</span>
+                                  <strong className="font-semibold text-purple-950">{m.examDate} {m.examTime || ''} {m.examRoom ? `(${m.examRoom})` : ''}</strong>
                                 </span>
                               )}
                             </div>
+                          )}
 
-                            {/* Sub-text: Colloquium & Exam Schedule */}
-                            {(m.colloquium1Date || m.colloquium2Date || m.examDate) && (
-                              <div className="text-[11px] text-slate-600 mt-1.5 flex flex-wrap items-center gap-1.5">
-                                {m.colloquium1Date && (
-                                  <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-900 px-2 py-0.5 rounded border border-amber-200 text-[10.5px] font-medium">
-                                    <Calendar className="w-3 h-3 text-amber-600 shrink-0" />
-                                    <span>K1:</span>
-                                    <strong className="font-semibold text-amber-950">{m.colloquium1Date} {m.colloquium1Time || ''} {m.colloquium1Room ? `(${m.colloquium1Room})` : ''}</strong>
-                                  </span>
-                                )}
-                                {m.colloquium2Date && (
-                                  <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-900 px-2 py-0.5 rounded border border-amber-200 text-[10.5px] font-medium">
-                                    <Calendar className="w-3 h-3 text-amber-600 shrink-0" />
-                                    <span>K2:</span>
-                                    <strong className="font-semibold text-amber-950">{m.colloquium2Date} {m.colloquium2Time || ''} {m.colloquium2Room ? `(${m.colloquium2Room})` : ''}</strong>
-                                  </span>
-                                )}
-                                {m.examDate && (
-                                  <span className="inline-flex items-center gap-1 bg-purple-50 text-purple-900 px-2 py-0.5 rounded border border-purple-200 text-[10.5px] font-medium">
-                                    <Calendar className="w-3 h-3 text-[#5300b7] shrink-0" />
-                                    <span>İmtahan:</span>
-                                    <strong className="font-semibold text-purple-950">{m.examDate} {m.examTime || ''} {m.examRoom ? `(${m.examRoom})` : ''}</strong>
-                                  </span>
-                                )}
-                              </div>
-                            )}
+                          {/* Syllabus Link */}
+                          {m.syllabusUrl ? (
+                            <div className="mt-1.5">
+                              <a
+                                href={m.syllabusUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 bg-[#5300b7] hover:bg-[#430094] text-white rounded-md sm:rounded-lg text-[10px] sm:text-[11px] font-bold transition-all shadow-2xs group cursor-pointer"
+                                title="Fənn sillabusunu aç və ya yüklə"
+                              >
+                                <FileText className="w-2.5 h-2.5 sm:w-3 sm:h-3 group-hover:scale-110 transition-transform" />
+                                <span>Sillabus ({m.syllabusFileName || 'PDF'})</span>
+                                <ExternalLink className="w-2.5 h-2.5 opacity-80" />
+                              </a>
+                            </div>
+                          ) : null}
+                        </td>
 
-                            {/* Syllabus Link */}
-                            {m.syllabusUrl ? (
-                              <div className="mt-1.5">
-                                <a
-                                 href={m.syllabusUrl}
-                                 target="_blank"
-                                 rel="noopener noreferrer"
-                                 className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#5300b7] hover:bg-[#430094] text-white rounded-lg text-[11px] font-bold transition-all shadow-2xs group cursor-pointer"
-                                 title="Fənn sillabusunu aç və ya yüklə"
-                                >
-                                  <FileText className="w-3 h-3 group-hover:scale-110 transition-transform" />
-                                  <span>Sillabus ({m.syllabusFileName || 'PDF'})</span>
-                                  <ExternalLink className="w-2.5 h-2.5 opacity-80" />
-                                </a>
-                              </div>
-                            ) : null}
-                          </td>
+                        {/* 4. Davamiyyət */}
+                        <td className="py-2 sm:py-3 px-0.5 sm:px-2 text-center border-r border-slate-200 text-slate-800 font-mono text-[10px] sm:text-xs">
+                          {g?.attendance !== null && g?.attendance !== undefined ? (
+                            <span className="font-semibold text-slate-900">{g.attendance}</span>
+                          ) : (
+                            <span className="text-slate-300">-</span>
+                          )}
+                        </td>
 
-                          {/* 4. Davamiyyət */}
-                          <td className="py-3 px-2.5 text-center border-r border-slate-200 text-slate-800 font-mono text-xs">
-                            {g?.attendance !== null && g?.attendance !== undefined ? (
-                              <span className="font-semibold text-slate-900">{g.attendance}</span>
-                            ) : (
-                              <span className="text-slate-300">-</span>
-                            )}
-                          </td>
+                        {/* 5. Seminar */}
+                        <td className="py-2 sm:py-3 px-0.5 sm:px-2 text-center border-r border-slate-200 text-slate-800 font-mono text-[10px] sm:text-xs">
+                          {g?.seminar !== null && g?.seminar !== undefined ? (
+                            <span className="font-semibold text-slate-900">{g.seminar}</span>
+                          ) : (
+                            <span className="text-slate-300">-</span>
+                          )}
+                        </td>
 
-                          {/* 5. Seminar */}
-                          <td className="py-3 px-2.5 text-center border-r border-slate-200 text-slate-800 font-mono text-xs">
-                            {g?.seminar !== null && g?.seminar !== undefined ? (
-                              <span className="font-semibold text-slate-900">{g.seminar}</span>
-                            ) : (
-                              <span className="text-slate-300">-</span>
-                            )}
-                          </td>
+                        {/* 6. K1 (1-ci Kollokvium) */}
+                        <td className="py-2 sm:py-3 px-0.5 sm:px-2 text-center border-r border-slate-200 font-mono text-[10px] sm:text-xs bg-amber-50/30">
+                          {g?.colloquium1 !== null && g?.colloquium1 !== undefined ? (
+                            <span className="font-bold text-amber-900">{g.colloquium1}</span>
+                          ) : (
+                            <span className="text-slate-300">-</span>
+                          )}
+                        </td>
 
-                          {/* 6. K1 (1-ci Kollokvium) */}
-                          <td className="py-3 px-2.5 text-center border-r border-slate-200 font-mono text-xs bg-amber-50/30">
-                            {g?.colloquium1 !== null && g?.colloquium1 !== undefined ? (
-                              <span className="font-bold text-amber-900">{g.colloquium1}</span>
-                            ) : (
-                              <span className="text-slate-300">-</span>
-                            )}
-                          </td>
+                        {/* 7. K2 (2-ci Kollokvium) */}
+                        <td className="py-2 sm:py-3 px-0.5 sm:px-2 text-center border-r border-slate-200 font-mono text-[10px] sm:text-xs bg-amber-50/30">
+                          {g?.colloquium2 !== null && g?.colloquium2 !== undefined ? (
+                            <span className="font-bold text-amber-900">{g.colloquium2}</span>
+                          ) : (
+                            <span className="text-slate-300">-</span>
+                          )}
+                        </td>
 
-                          {/* 7. K2 (2-ci Kollokvium) */}
-                          <td className="py-3 px-2.5 text-center border-r border-slate-200 font-mono text-xs bg-amber-50/30">
-                            {g?.colloquium2 !== null && g?.colloquium2 !== undefined ? (
-                              <span className="font-bold text-amber-900">{g.colloquium2}</span>
-                            ) : (
-                              <span className="text-slate-300">-</span>
-                            )}
-                          </td>
+                        {/* 8. Giriş Balı (Cəmi 50 baldan) */}
+                        <td className="py-2 sm:py-3 px-0.5 sm:px-2 text-center border-r border-slate-200 font-mono text-[10px] sm:text-xs bg-purple-50/40">
+                          {entryTotal !== null && entryTotal !== undefined ? (
+                            <span className="font-extrabold text-[#5300b7]">{entryTotal}</span>
+                          ) : (
+                            <span className="text-slate-300">-</span>
+                          )}
+                        </td>
 
-                          {/* 8. Giriş Balı (Cəmi 50 baldan) */}
-                          <td className="py-3 px-2.5 text-center border-r border-slate-200 font-mono text-xs bg-purple-50/40">
-                            {entryTotal !== null && entryTotal !== undefined ? (
-                              <span className="font-extrabold text-[#5300b7]">{entryTotal}</span>
-                            ) : (
-                              <span className="text-slate-300">-</span>
-                            )}
-                          </td>
+                        {/* 9. İmtahan Balı (50 baldan) */}
+                        <td className="py-2 sm:py-3 px-0.5 sm:px-2 text-center border-r border-slate-200 font-mono text-[10px] sm:text-xs bg-sky-50/40">
+                          {g?.examScore !== null && g?.examScore !== undefined ? (
+                            <span className="font-extrabold text-sky-950">{g.examScore}</span>
+                          ) : (
+                            <span className="text-slate-300">-</span>
+                          )}
+                        </td>
 
-                          {/* 9. İmtahan Balı (50 baldan) */}
-                          <td className="py-3 px-2.5 text-center border-r border-slate-200 font-mono text-xs bg-sky-50/40">
-                            {g?.examScore !== null && g?.examScore !== undefined ? (
-                              <span className="font-extrabold text-sky-950">{g.examScore}</span>
-                            ) : (
-                              <span className="text-slate-300">-</span>
-                            )}
-                          </td>
-
-                          {/* 10. Yekun Nəticə */}
-                          <td className="py-3 px-3.5 text-center text-xs whitespace-nowrap">
-                            {hasExam && gradeEval && finalScore !== null ? (
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-bold border text-[11px] ${gradeEval.badgeClass}`}>
-                                {finalScore} bal ({gradeEval.letter} — {gradeEval.label})
-                              </span>
-                            ) : (
-                              <span className="text-slate-400 text-[11px] italic">Gözlənilir</span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </>
+                        {/* 10. Yekun Nəticə (Yalnız imtahan balı yazıldıqdan sonra yekun göstərilir, giriş balı yekun yerinə yazılmır) */}
+                        <td className="py-2 sm:py-3 px-1 sm:px-2.5 text-center text-[9px] sm:text-xs">
+                          {hasExam && gradeEval && finalScore !== null ? (
+                            <span className={`inline-flex flex-col sm:flex-row items-center justify-center px-1 sm:px-2 py-0.5 rounded font-bold border text-[9px] sm:text-[11px] leading-tight ${gradeEval.badgeClass}`}>
+                              <span>{finalScore} bal</span>
+                              <span className="text-[8px] sm:text-[10px] sm:ml-1 opacity-80">({gradeEval.letter})</span>
+                            </span>
+                          ) : (
+                            <span className="text-slate-400 text-[9px] sm:text-[11px] italic">Gözlənilir</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </div>
