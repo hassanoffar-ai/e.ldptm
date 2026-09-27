@@ -288,8 +288,9 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
           {/* Identity info */}
           <div className="flex items-start gap-3.5 sm:gap-4">
             <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white font-extrabold text-xl sm:text-3xl shadow-inner shrink-0">
-              {student.name
+              {(student?.name || 'TL')
                 .split(' ')
+                .filter(Boolean)
                 .map((n) => n[0])
                 .slice(0, 2)
                 .join('')}
@@ -298,22 +299,22 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
             <div className="space-y-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-xl sm:text-3xl font-black tracking-tight break-words leading-tight">
-                  {student.name}
+                  {student?.name || 'Tələbə'}
                 </h1>
               </div>
 
               <div className="flex flex-wrap items-center gap-x-3 sm:gap-x-4 gap-y-1 text-xs text-purple-100/90 font-medium">
                 <span>
-                  Tələbə ID: <strong className="font-mono text-white">{student.studentId || student.finCode}</strong>
+                  Tələbə ID: <strong className="font-mono text-white">{student?.studentId || student?.finCode || ''}</strong>
                 </span>
                 <span>•</span>
-                <span className="text-white font-semibold">{student.group}</span>
+                <span className="text-white font-semibold">{student?.group || 'Qrup'}</span>
                 <span>•</span>
-                <span className="text-white font-semibold">{getDisplaySemester(student.semester)}</span>
+                <span className="text-white font-semibold">{getDisplaySemester(student?.semester)}</span>
               </div>
 
               <p className="text-xs text-purple-200 pt-0.5">
-                İxtisas: <strong className="text-white">{student.specialty}</strong> • YTP (Yüksək Texniki Peşə)
+                İxtisas: <strong className="text-white">{student?.specialty || 'İxtisas'}</strong> • YTP (Yüksək Texniki Peşə)
               </p>
             </div>
           </div>
@@ -372,22 +373,22 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
             <div className="space-y-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="text-base sm:text-lg font-bold text-slate-900">
-                  {student.specialty}
+                  {student?.specialty || 'İxtisas'}
                 </h2>
                 <span className="px-2.5 py-0.5 rounded-full bg-purple-100 text-[#5300b7] text-xs font-bold">
-                  {student.group}
+                  {student?.group || 'Qrup'}
                 </span>
                 <span className="px-2.5 py-0.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold">
-                  {getDisplaySemester(student.semester)}
+                  {getDisplaySemester(student?.semester)}
                 </span>
               </div>
               <p className="text-xs text-slate-500">
                 Lənkəran Dövlət Peşə Təhsil Mərkəzi • YTP (Yüksək Texniki Peşə)
               </p>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600 pt-0.5">
-                <span>Tələbə ID: <strong className="font-mono text-[#5300b7]">{student.studentId || student.finCode}</strong></span>
-                {student.email && !student.email.includes('@eldptm.edu.az') && <span>E-poçt: <strong className="text-slate-800">{student.email}</strong></span>}
-                {student.phone && <span>Əlaqə: <strong className="text-slate-800">{student.phone}</strong></span>}
+                <span>Tələbə ID: <strong className="font-mono text-[#5300b7]">{student?.studentId || student?.finCode}</strong></span>
+                {student?.email && !student.email.includes('@eldptm.edu.az') && <span>E-poçt: <strong className="text-slate-800">{student.email}</strong></span>}
+                {student?.phone && <span>Əlaqə: <strong className="text-slate-800">{student.phone}</strong></span>}
               </div>
             </div>
           </div>
