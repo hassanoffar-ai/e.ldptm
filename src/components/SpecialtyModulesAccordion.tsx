@@ -7,6 +7,10 @@ import {
   X,
   Eye,
   Loader2,
+  Globe,
+  CheckCircle2,
+  Sparkles,
+  FileSpreadsheet,
 } from 'lucide-react';
 import { SpecialtyModule, StudentUser } from '../types';
 import { SEMESTERS_LIST } from '../data/mockData';
@@ -161,7 +165,15 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
     subjectName: string;
     fileName?: string;
   } | null>(null);
+  const [syllabusViewTab, setSyllabusViewTab] = useState<'info' | 'online'>('info');
   const [isDownloading, setIsDownloading] = useState(false);
+
+  const openSyllabusModal = (syllabus: { url: string; subjectName: string; fileName?: string }) => {
+    const fn = (syllabus.fileName || syllabus.url).toLowerCase();
+    const isPdf = fn.endsWith('.pdf') || syllabus.url.toLowerCase().includes('.pdf');
+    setSyllabusViewTab(isPdf ? 'online' : 'info');
+    setViewingSyllabus(syllabus);
+  };
 
   // Clean in-memory Blob download (masks Supabase URL completely)
   const handleDownloadBlob = async (url: string, subjectName: string, customFileName?: string) => {
@@ -172,7 +184,8 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
       const objectUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = objectUrl;
-      link.download = customFileName || `${subjectName} - Sillabus.pdf`;
+      const rawExt = url.split('?')[0].split('.').pop() || 'docx';
+      link.download = customFileName || `${subjectName} - Sillabus.${rawExt}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -506,7 +519,7 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
                               <button
                                 type="button"
                                 onClick={() =>
-                                  setViewingSyllabus({
+                                  openSyllabusModal({
                                     url: m.syllabusUrl!,
                                     subjectName: m.name,
                                     fileName: m.syllabusFileName,
@@ -599,81 +612,252 @@ export const SpecialtyModulesAccordion: React.FC<SpecialtyModulesAccordionProps>
       </div>
 
       {/* IN-APP SYLLABUS VIEWER & DOWNLOAD MODAL (Masks Supabase URL completely) */}
-      {viewingSyllabus && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/70 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl w-full max-w-4xl h-[90vh] max-h-[850px] flex flex-col overflow-hidden">
-            {/* Modal Header */}
-            <div className="p-4 sm:p-5 bg-gradient-to-r from-purple-50/90 via-indigo-50/50 to-white border-b border-slate-200 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#5300b7] to-[#7c3aed] text-white flex items-center justify-center shrink-0 shadow-md">
-                  <FileText className="w-5 h-5" />
+      {viewingSyllabus && (() => {
+        const rawFileName = viewingSyllabus.fileName || viewingSyllabus.url.split('?')[0].split('/').pop() || 'sillabus.docx';
+        const lowerName = rawFileName.toLowerCase();
+        const isPdf = lowerName.endsWith('.pdf') || viewingSyllabus.url.toLowerCase().includes('.pdf');
+        const isDocx = /\.(docx|doc)$/i.test(lowerName) || /\.(docx|doc)/i.test(viewingSyllabus.url);
+        const isExcel = /\.(xlsx|xls|csv)$/i.test(lowerName);
+        const isPpt = /\.(pptx|ppt)$/i.test(lowerName);
+        const isImage = /\.(png|jpe?g|webp|gif|svg)$/i.test(lowerName);
+
+        const fileTypeLabel = isPdf
+          ? 'PDF Sənədi'
+          : isDocx
+          ? 'Microsoft Word Sənədi (.docx)'
+          : isExcel
+          ? 'Microsoft Excel Cədvəli'
+          : isPpt
+          ? 'PowerPoint Təqdimatı'
+          : isImage
+          ? 'Təsvir Faylı'
+          : 'Tədris Faylı';
+
+        const fileTypeColor = isPdf
+          ? 'from-rose-500 to-red-600'
+          : isDocx
+          ? 'from-blue-600 to-indigo-600'
+          : isExcel
+          ? 'from-emerald-600 to-teal-700'
+          : isPpt
+          ? 'from-amber-500 to-orange-600'
+          : 'from-[#5300b7] to-[#7c3aed]';
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/75 backdrop-blur-md animate-fadeIn">
+            <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden">
+              {/* Modal Header */}
+              <div className="p-4 sm:p-5 bg-gradient-to-r from-purple-50/90 via-indigo-50/50 to-white border-b border-slate-200 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${fileTypeColor} text-white flex items-center justify-center shrink-0 shadow-md`}>
+                    {isExcel ? <FileSpreadsheet className="w-5 h-5" /> : <FileText className="w-5 h-5" />}
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="text-sm sm:text-base font-bold text-slate-900 truncate">
+                      {viewingSyllabus.subjectName} — Tədris Sillabusu
+                    </h3>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-[#5300b7]">
+                        {fileTypeLabel}
+                      </span>
+                      <span className="text-[11px] text-slate-500 truncate hidden sm:inline">
+                        • {rawFileName}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <h3 className="text-sm sm:text-base font-bold text-slate-900 truncate">
-                    {viewingSyllabus.subjectName} — Tədris Sillabusu
-                  </h3>
-                  <p className="text-[11px] text-slate-500 truncate">
-                    {viewingSyllabus.fileName || 'Rəsmi Tədris Sillabusu'} • Lənkəran Dövlət Peşə Təhsil Mərkəzi
-                  </p>
+
+                {/* Actions */}
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleDownloadBlob(
+                        viewingSyllabus.url,
+                        viewingSyllabus.subjectName,
+                        viewingSyllabus.fileName
+                      )
+                    }
+                    disabled={isDownloading}
+                    className="flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-[#5300b7] hover:bg-[#430094] text-white rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer disabled:opacity-50 active:scale-95"
+                    title="Faylı birbaşa cihazınıza endirin"
+                  >
+                    {isDownloading ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Download className="w-3.5 h-3.5" />
+                    )}
+                    <span className="hidden sm:inline">Sillabusu Yüklə</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setViewingSyllabus(null)}
+                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 flex items-center justify-center transition-colors cursor-pointer"
+                    title="Bağla"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
 
-              {/* Actions */}
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleDownloadBlob(
-                      viewingSyllabus.url,
-                      viewingSyllabus.subjectName,
-                      viewingSyllabus.fileName
-                    )
-                  }
-                  disabled={isDownloading}
-                  className="flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-[#5300b7] hover:bg-[#430094] text-white rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer disabled:opacity-50"
-                  title="Faylı birbaşa cihazınıza endirin"
-                >
-                  {isDownloading ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <Download className="w-3.5 h-3.5" />
-                  )}
-                  <span className="hidden sm:inline">Sillabusu Yüklə</span>
-                </button>
+              {/* Sub-bar / Mode Tabs for Non-PDF Office Documents */}
+              {(!isPdf || isDocx || isExcel || isPpt) && (
+                <div className="px-4 py-2 bg-slate-50 border-b border-slate-200 flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-1.5 bg-slate-200/80 p-1 rounded-xl">
+                    <button
+                      type="button"
+                      onClick={() => setSyllabusViewTab('info')}
+                      className={`px-3 py-1 rounded-lg font-bold text-xs transition-all cursor-pointer ${
+                        syllabusViewTab === 'info'
+                          ? 'bg-white text-slate-900 shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      📄 Sənəd Məlumatı & Yükləmə
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSyllabusViewTab('online')}
+                      className={`px-3 py-1 rounded-lg font-bold text-xs transition-all cursor-pointer flex items-center gap-1 ${
+                        syllabusViewTab === 'online'
+                          ? 'bg-white text-[#5300b7] shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      <Globe className="w-3 h-3" />
+                      <span>Onlayn Baxış (Google Docs)</span>
+                    </button>
+                  </div>
+                  <span className="text-[11px] text-slate-500 hidden md:inline">
+                    Lənkəran Dövlət Peşə Təhsil Mərkəzi
+                  </span>
+                </div>
+              )}
 
+              {/* Modal Body */}
+              <div className="flex-1 min-h-[360px] max-h-[68vh] bg-slate-50 relative overflow-y-auto flex flex-col justify-center">
+                {/* 1. PDF View */}
+                {isPdf && syllabusViewTab === 'online' && (
+                  <iframe
+                    src={`${viewingSyllabus.url}#toolbar=0&navpanes=0`}
+                    className="w-full h-full min-h-[480px] border-none"
+                    title={`${viewingSyllabus.subjectName} Sillabus`}
+                  />
+                )}
+
+                {/* 2. Image View */}
+                {!isPdf && isImage && (
+                  <div className="w-full h-full flex items-center justify-center p-4 bg-slate-900/10">
+                    <img
+                      src={viewingSyllabus.url}
+                      alt={viewingSyllabus.subjectName}
+                      className="max-h-[60vh] max-w-full rounded-lg object-contain shadow-lg"
+                    />
+                  </div>
+                )}
+
+                {/* 3. Non-PDF / Office Document (Word DOCX, Excel, PPTX): Google Docs Viewer Mode */}
+                {(!isPdf || isDocx || isExcel || isPpt) && syllabusViewTab === 'online' && !isImage && (
+                  <div className="w-full h-full min-h-[480px] relative bg-white">
+                    <iframe
+                      src={`https://docs.google.com/viewer?url=${encodeURIComponent(viewingSyllabus.url)}&embedded=true`}
+                      className="w-full h-full min-h-[480px] border-none"
+                      title={`${viewingSyllabus.subjectName} Sillabus Viewer`}
+                    />
+                  </div>
+                )}
+
+                {/* 4. Non-PDF / Office Document (Word DOCX, Excel, PPTX): Rich Document Card Mode */}
+                {syllabusViewTab === 'info' && (
+                  <div className="p-6 sm:p-10 flex flex-col items-center justify-center text-center my-auto">
+                    {/* Glowing Icon Banner */}
+                    <div className="relative mb-5">
+                      <div className={`w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-br ${fileTypeColor} text-white flex items-center justify-center shadow-xl shadow-indigo-500/20 ring-8 ring-white transform hover:scale-105 transition-transform`}>
+                        {isExcel ? <FileSpreadsheet className="w-10 h-10 sm:w-12 sm:h-12" /> : <FileText className="w-10 h-10 sm:w-12 sm:h-12" />}
+                      </div>
+                      <div className="absolute -bottom-2 -right-2 px-2.5 py-0.5 bg-slate-900 text-white text-[10px] font-bold rounded-full border-2 border-white uppercase shadow">
+                        {rawFileName.split('.').pop() || 'DOCX'}
+                      </div>
+                    </div>
+
+                    {/* Titles */}
+                    <h4 className="text-base sm:text-xl font-bold text-slate-900 max-w-lg">
+                      {viewingSyllabus.subjectName}
+                    </h4>
+                    <p className="text-xs sm:text-sm font-mono text-slate-500 mt-1 max-w-md break-all">
+                      {rawFileName}
+                    </p>
+
+                    {/* Badges */}
+                    <div className="flex flex-wrap items-center justify-center gap-2 mt-4 max-w-lg">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 text-xs font-semibold">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
+                        Təsdiq Olunmuş Sillabus
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-50 text-purple-700 border border-purple-200 text-xs font-semibold">
+                        <Sparkles className="w-3.5 h-3.5 text-purple-600" />
+                        Lənkəran Dövlət Peşə Təhsil Mərkəzi
+                      </span>
+                    </div>
+
+                    {/* Informative text */}
+                    <p className="text-xs sm:text-sm text-slate-600 max-w-md mt-4 leading-relaxed bg-white/90 border border-slate-200 p-3.5 rounded-2xl shadow-xs">
+                      Bu fənn üçün rəsmi tədris sillabusu <strong>{fileTypeLabel}</strong> formatında yerləşdirilmişdir. Faylı telefonunuza və ya kompüterinizə endirərək Microsoft Word / WPS Office proqramında aça və ya Google Docs vasitəsilə onlayn oxuya bilərsiniz.
+                    </p>
+
+                    {/* Action buttons */}
+                    <div className="flex flex-col sm:flex-row items-center gap-3 mt-6 w-full max-w-md">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleDownloadBlob(
+                            viewingSyllabus.url,
+                            viewingSyllabus.subjectName,
+                            viewingSyllabus.fileName
+                          )
+                        }
+                        disabled={isDownloading}
+                        className="w-full flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-[#5300b7] to-[#7c3aed] hover:from-[#430094] hover:to-[#6d28d9] text-white rounded-2xl font-bold text-sm shadow-lg shadow-purple-500/25 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer disabled:opacity-50"
+                      >
+                        {isDownloading ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Download className="w-4 h-4" />
+                        )}
+                        <span>Sillabusu Cihazına Yüklə</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setSyllabusViewTab('online')}
+                        className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-3 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-2xl font-bold text-xs sm:text-sm transition-all cursor-pointer shadow-xs"
+                      >
+                        <Globe className="w-4 h-4 text-[#5300b7]" />
+                        <span>Google Docs ilə Oxu</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-3.5 bg-white border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+                <span className="text-[11px] text-slate-500 truncate hidden sm:inline">
+                  Tələbə Şəxsi Kabineti • Tədris Sillabusu Sistemi
+                </span>
                 <button
                   type="button"
                   onClick={() => setViewingSyllabus(null)}
-                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 flex items-center justify-center transition-colors cursor-pointer"
-                  title="Bağla"
+                  className="ml-auto text-slate-600 hover:text-slate-900 font-bold px-4 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
                 >
-                  <X className="w-4 h-4" />
+                  Pəncərəni Bağla
                 </button>
               </div>
             </div>
-
-            {/* Modal Body - PDF Document Frame */}
-            <div className="flex-1 bg-slate-100 relative overflow-hidden">
-              <iframe
-                src={`${viewingSyllabus.url}#toolbar=0&navpanes=0`}
-                className="w-full h-full border-none"
-                title={`${viewingSyllabus.subjectName} Sillabus`}
-              />
-            </div>
-
-            {/* Modal Footer */}
-            <div className="p-3 bg-white border-t border-slate-200 flex items-center justify-end text-xs text-slate-500">
-              <button
-                type="button"
-                onClick={() => setViewingSyllabus(null)}
-                className="text-slate-600 hover:text-slate-900 font-bold px-4 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
-              >
-                Pəncərəni Bağla
-              </button>
-            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 };
