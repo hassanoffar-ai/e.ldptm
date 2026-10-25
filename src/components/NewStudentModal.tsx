@@ -30,14 +30,39 @@ export const NewStudentModal: React.FC<NewStudentModalProps> = ({
   defaultSpecialty,
 }) => {
   const effectiveSpecialties: Array<{ id: string; name: string; code: string }> =
-    (specialties.length > 0
-      ? specialties
-      : SPECIALTIES_LIST.map((name, idx) => ({
-          id: `spec-default-${idx}`,
-          name,
-          code: `YTP-${idx + 1}`,
-        }))
-    ).slice().sort((a, b) => a.name.localeCompare(b.name, 'az'));
+    React.useMemo(() => {
+      const map = new Map<string, { id: string; name: string; code: string }>();
+      (specialties.length > 0
+        ? specialties
+        : SPECIALTIES_LIST.map((name, idx) => ({
+            id: `spec-default-${idx}`,
+            name,
+            code: `YTP-${idx + 1}`,
+          }))
+      ).forEach((s) => {
+        if (s.name) {
+          map.set(s.name.trim().toLowerCase(), { id: s.id, name: s.name.trim(), code: s.code || '' });
+        }
+      });
+
+      existingStudents.forEach((st) => {
+        const specName = (st.specialty || '').trim();
+        if (specName && !map.has(specName.toLowerCase())) {
+          map.set(specName.toLowerCase(), {
+            id: `spec-st-${specName}`,
+            name: specName,
+            code:
+              specName
+                .split(' ')
+                .map((w) => w[0]?.toUpperCase())
+                .filter(Boolean)
+                .join('') || 'YTP',
+          });
+        }
+      });
+
+      return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name, 'az'));
+    }, [specialties, existingStudents]);
 
   const [name, setName] = useState('');
   const [studentId, setStudentId] = useState('');

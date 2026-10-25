@@ -290,7 +290,6 @@ export const mapSpecialtyToDb = (s: SpecialtyItem) => {
     id: s.id,
     name: s.name,
     code: s.code || '',
-    direction: dir,
     duration: s.duration || '3 illik',
     department: dir,
     status: 'active',

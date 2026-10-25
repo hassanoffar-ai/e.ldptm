@@ -17,6 +17,8 @@ import {
   FileText,
   ExternalLink,
   Download,
+  Ticket,
+  Printer,
 } from 'lucide-react';
 import { ExamSession, GradeBookCourse, SpecialtyModule, StudentGrade, StudentUser } from '../types';
 import { getStoredModules, SEMESTERS_LIST } from '../data/mockData';
@@ -28,6 +30,7 @@ interface PublicPortalViewProps {
   courses: GradeBookCourse[];
   sessions: ExamSession[];
   onLogout: () => void;
+  onNavigateToTicket?: (studentId?: string) => void;
 }
 
 export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
@@ -35,6 +38,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
   courses = [],
   sessions = [],
   onLogout,
+  onNavigateToTicket,
 }) => {
   const [activeTab, setActiveTab] = useState<'subjects' | 'rules'>('subjects');
   const [selectedSemesterForModules, setSelectedSemesterForModules] = useState<string>('all');
@@ -265,8 +269,20 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
             </div>
           </div>
 
-          {/* Logout Button */}
-          <div className="flex items-center">
+          {/* Top Actions: Ticket & Logout */}
+          <div className="flex items-center gap-2">
+            {onNavigateToTicket && (
+              <button
+                onClick={() => onNavigateToTicket(student.studentId || student.finCode)}
+                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-[#5300b7] border border-purple-200 text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                title="İmtahana Buraxılış Biletini Aç və Çap Et"
+              >
+                <Ticket className="w-4 h-4 text-[#5300b7]" />
+                <span className="hidden sm:inline">İmtahan Bileti</span>
+                <span className="sm:hidden">Bilet</span>
+              </button>
+            )}
+
             <button
               onClick={onLogout}
               className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 text-xs font-bold transition-all cursor-pointer shadow-2xs"
@@ -316,8 +332,18 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
             </div>
           </div>
 
-          {/* Education level badge */}
-          <div className="flex items-center">
+          {/* Actions on hero */}
+          <div className="flex flex-wrap items-center gap-3">
+            {onNavigateToTicket && (
+              <button
+                onClick={() => onNavigateToTicket(student.studentId || student.finCode)}
+                className="flex items-center gap-2 px-4 py-2.5 bg-white text-[#5300b7] hover:bg-purple-50 rounded-2xl font-bold text-xs shadow-md transition-all active:scale-95 cursor-pointer"
+              >
+                <Printer className="w-4 h-4 text-[#5300b7]" />
+                <span>İmtahan Biletini Çap Et</span>
+              </button>
+            )}
+
             <div className="p-2.5 sm:p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 text-left">
               <span className="text-[10px] sm:text-[11px] text-purple-200 uppercase font-semibold block">
                 Təhsil Pilləsi

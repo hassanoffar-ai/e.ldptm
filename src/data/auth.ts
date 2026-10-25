@@ -33,6 +33,12 @@ const DEFAULT_ACCOUNTS: AccountCredentials[] = [
     fullName: 'Köməkçi Admin',
     role: 'admin',
   },
+  {
+    username: 'bilet',
+    passwordHash: 'bilet123',
+    fullName: 'İmtahan Bilet Sistemi',
+    role: 'admin',
+  },
 ];
 
 export const getStoredAccounts = (): AccountCredentials[] => {
@@ -41,19 +47,33 @@ export const getStoredAccounts = (): AccountCredentials[] => {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        let hasOld = false;
+        let hasChanges = false;
         const migrated = parsed.map((acc: AccountCredentials) => {
           if (acc.username === 'superadmin' && acc.passwordHash === 'super123') {
-            hasOld = true;
+            hasChanges = true;
             return { ...acc, passwordHash: 'Subhanallah313', fullName: 'Baş Administrator (Super Admin)' };
           }
           if (acc.username === 'admin' && acc.passwordHash === 'admin123') {
-            hasOld = true;
+            hasChanges = true;
             return { ...acc, passwordHash: 'LDPTM2026', fullName: 'Köməkçi Admin' };
           }
           return acc;
         });
-        if (hasOld) {
+
+        const hasBiletAccount = migrated.some(
+          (a: AccountCredentials) => a.username.toLowerCase() === 'bilet'
+        );
+        if (!hasBiletAccount) {
+          migrated.push({
+            username: 'bilet',
+            passwordHash: 'bilet123',
+            fullName: 'İmtahan Bilet Sistemi',
+            role: 'admin',
+          });
+          hasChanges = true;
+        }
+
+        if (hasChanges) {
           saveStoredAccounts(migrated);
         }
         return migrated;

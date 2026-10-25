@@ -53,6 +53,18 @@ import {
 } from './lib/supabase';
 import { getStoredModules } from './data/mockData';
 
+// Clean reset requested by user
+const RESET_STORAGE_KEY = 'eldptm_reset_empty_all_v2';
+if (typeof window !== 'undefined' && !localStorage.getItem(RESET_STORAGE_KEY)) {
+  try {
+    localStorage.removeItem('eldptm_students');
+    localStorage.removeItem('eldptm_specialties');
+    localStorage.removeItem('eldptm_deleted_students');
+    localStorage.removeItem('eldptm_deleted_specialties');
+    localStorage.setItem(RESET_STORAGE_KEY, 'true');
+  } catch {}
+}
+
 const loadFromStorage = <T,>(key: string, fallback: T): T => {
   try {
     const item = localStorage.getItem(key);
@@ -64,57 +76,95 @@ const loadFromStorage = <T,>(key: string, fallback: T): T => {
 
 const loadSpecialtiesFromStorage = (): SpecialtyItem[] => {
   try {
+    let result: SpecialtyItem[] = [];
     const item = localStorage.getItem('eldptm_specialties');
     if (item) {
       const parsed = JSON.parse(item);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        const cleaned = parsed.map((s: SpecialtyItem) => ({
+        result = parsed.map((s: SpecialtyItem) => ({
           ...s,
           direction:
             !s.direction || s.direction === 'Texniki' || s.direction === 'Qeyri-texniki'
               ? 'YTP (Yüksək Texniki Peşə)'
               : s.direction,
         }));
-        const hasLegacy = cleaned.some((s: SpecialtyItem) =>
-          [
-            'Veb tərtibatı və dizaynı',
-            'Kompüter sistemlərində proqram təminatı',
-            'Kompüter şəbəkələrinin inzibatçılığı',
-            'Kibertəhlükəsizlik sistemləri',
-          ].includes(s.name)
-        );
-        if (hasLegacy) {
-          const customOnes = cleaned.filter(
-            (s: SpecialtyItem) =>
-              ![
-                'Veb tərtibatı və dizaynı',
-                'Kompüter sistemlərində proqram təminatı',
-                'Kompüter şəbəkələrinin inzibatçılığı',
-                'Kibertəhlükəsizlik sistemləri',
-                'Kompüter sistemlərində proqramlaşdırma',
-              ].includes(s.name)
-          );
-          const migrated = [...INITIAL_SPECIALTIES, ...customOnes].sort((a, b) =>
-            (a.name || '').localeCompare(b.name || '', 'az')
-          );
-          localStorage.setItem('eldptm_specialties', JSON.stringify(migrated));
-          return migrated;
-        }
-        const sorted = [...cleaned].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'az'));
-        localStorage.setItem('eldptm_specialties', JSON.stringify(sorted));
-        return sorted;
       }
     }
+
+    if (result.length === 0) {
+      result = [...INITIAL_SPECIALTIES];
+    } else {
+      INITIAL_SPECIALTIES.forEach((initS) => {
+        if (!result.some((r) => r.name.toLowerCase() === initS.name.toLowerCase())) {
+          result.push(initS);
+        }
+      });
+    }
+
+    const deletedList: string[] = JSON.parse(
+      localStorage.getItem('eldptm_deleted_specialties') || '[]'
+    );
+
+    // Auto-recover any specialties from students stored locally
+    const studentsRaw = localStorage.getItem('eldptm_students');
+    if (studentsRaw) {
+      try {
+        const parsedStudents = JSON.parse(studentsRaw);
+        if (Array.isArray(parsedStudents)) {
+          parsedStudents.forEach((st: any) => {
+            const specName = (st.specialty || '').trim();
+            if (
+              specName &&
+              !deletedList.includes(specName.toLowerCase()) &&
+              !result.some((s) => s.name.trim().toLowerCase() === specName.toLowerCase())
+            ) {
+              const code =
+                specName
+                  .split(' ')
+                  .map((w: string) => w[0]?.toUpperCase())
+                  .filter(Boolean)
+                  .join('') || 'YTP';
+              result.push({
+                id: `spec-recovered-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                name: specName,
+                code,
+                direction: 'YTP (Yüksək Texniki Peşə)',
+                duration: '3 illik',
+                educationType: 'Əyani',
+                description: 'YTP (Yüksək Texniki Peşə) təhsil pilləsi',
+              });
+            }
+          });
+        }
+      } catch {}
+    }
+
+    const filtered = result.filter((s) => !deletedList.includes((s.name || '').toLowerCase()));
+    const sorted = filtered.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'az'));
+    localStorage.setItem('eldptm_specialties', JSON.stringify(sorted));
+    return sorted;
   } catch (e) {
     console.error(e);
   }
   return [...INITIAL_SPECIALTIES].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'az'));
 };
 
-const getInitialRoute = (): 'public' | 'admin' => {
+const getInitialRoute = (): 'public' | 'admin' | 'ticket' => {
   if (typeof window === 'undefined') return 'public';
   const path = window.location.pathname.toLowerCase();
   const hash = window.location.hash.toLowerCase();
+  if (
+    path.startsWith('/bilet') ||
+    path.includes('bilet') ||
+    hash.includes('bilet') ||
+    path.startsWith('/ticket') ||
+    path.includes('ticket') ||
+    hash.includes('ticket') ||
+    path.startsWith('/kiosk') ||
+    hash.includes('kiosk')
+  ) {
+    return 'ticket';
+  }
   if (path.startsWith('/admin') || path.includes('admin') || hash.includes('admin')) {
     return 'admin';
   }
@@ -122,8 +172,8 @@ const getInitialRoute = (): 'public' | 'admin' => {
 };
 
 export default function App() {
-  // Top-level route: 'public' (Production site at /) vs 'admin' (Admin Panel at /admin)
-  const [currentRoute, setCurrentRoute] = useState<'public' | 'admin'>(getInitialRoute);
+  // Top-level route: 'public' (Production site at /), 'admin' (/admin), 'ticket' (/bilet)
+  const [currentRoute, setCurrentRoute] = useState<'public' | 'admin' | 'ticket'>(getInitialRoute);
 
   // Authentication & permissions
   const [currentUser, setCurrentUser] = useState<AdminUser | null>(getStoredSession);
@@ -201,7 +251,18 @@ export default function App() {
     const handleLocationChange = () => {
       const path = window.location.pathname.toLowerCase();
       const hash = window.location.hash.toLowerCase();
-      if (path.startsWith('/admin') || path.includes('admin') || hash.includes('admin')) {
+      if (
+        path.startsWith('/bilet') ||
+        path.includes('bilet') ||
+        hash.includes('bilet') ||
+        path.startsWith('/ticket') ||
+        path.includes('ticket') ||
+        hash.includes('ticket') ||
+        path.startsWith('/kiosk') ||
+        hash.includes('kiosk')
+      ) {
+        setCurrentRoute('ticket');
+      } else if (path.startsWith('/admin') || path.includes('admin') || hash.includes('admin')) {
         setCurrentRoute('admin');
       } else {
         setCurrentRoute('public');
@@ -227,10 +288,12 @@ export default function App() {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  const navigateTo = (route: 'public' | 'admin') => {
+  const navigateTo = (route: 'public' | 'admin' | 'ticket') => {
     setCurrentRoute(route);
     if (route === 'admin') {
       window.history.pushState(null, '', '/admin');
+    } else if (route === 'ticket') {
+      window.history.pushState(null, '', '/bilet');
     } else {
       window.history.pushState(null, '', '/');
     }
@@ -302,9 +365,11 @@ export default function App() {
             (s) => !deletedList.includes(s.id) && !deletedList.includes(s.studentId)
           );
           setStudents(validStudents);
-        } else if (students.length > 0) {
-          // Sync any existing local students to Supabase
-          students.forEach((s) => upsertStudentToDb(s));
+        } else {
+          setStudents([]);
+          try {
+            localStorage.setItem('eldptm_students', '[]');
+          } catch {}
         }
 
         if (dbSessions.length > 0) {
@@ -328,26 +393,91 @@ export default function App() {
           courses.filter((c) => !isLegacyFakeCourse(c)).forEach((c) => upsertCourseToDb(c));
         }
 
+        const legacyNames = [
+          'Veb tərtibatı və dizaynı',
+          'Kompüter sistemlərində proqram təminatı',
+          'Kompüter şəbəkələrinin inzibatçılığı',
+          'Kibertəhlükəsizlik sistemləri',
+        ];
+
+        // Clean out legacy test rows from DB if any
         if (dbSpecialties.length > 0) {
-          const hasDbLegacy = dbSpecialties.some((s) =>
-            [
-              'Veb tərtibatı və dizaynı',
-              'Kompüter sistemlərində proqram təminatı',
-              'Kompüter şəbəkələrinin inzibatçılığı',
-              'Kibertəhlükəsizlik sistemləri',
-            ].includes(s.name)
-          );
-          if (hasDbLegacy) {
-            setSpecialties(INITIAL_SPECIALTIES);
-            INITIAL_SPECIALTIES.forEach((s) => upsertSpecialtyToDb(s));
-          } else {
-            setSpecialties(
-              [...dbSpecialties].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'az'))
-            );
-          }
-        } else if (specialties.length > 0) {
-          specialties.forEach((s) => upsertSpecialtyToDb(s));
+          dbSpecialties.forEach((s) => {
+            if (legacyNames.includes(s.name)) {
+              deleteSpecialtyFromDb(s.id);
+            }
+          });
         }
+
+        const deletedSpecialties: string[] = JSON.parse(
+          localStorage.getItem('eldptm_deleted_specialties') || '[]'
+        );
+
+        const validDbSpecialties = dbSpecialties.filter(
+          (s) => !legacyNames.includes(s.name) && !deletedSpecialties.includes((s.name || '').toLowerCase())
+        );
+
+        // Combine DB specialties with base, local state, and student specialties
+        const specMap = new Map<string, SpecialtyItem>();
+
+        // 1. Initial base specialties
+        INITIAL_SPECIALTIES.forEach((s) => {
+          if (!deletedSpecialties.includes((s.name || '').toLowerCase())) {
+            specMap.set(s.name.trim().toLowerCase(), s);
+          }
+        });
+
+        // 2. DB specialties (authoritative)
+        validDbSpecialties.forEach((s) => {
+          specMap.set(s.name.trim().toLowerCase(), s);
+        });
+
+        // 3. Any specialties belonging to students (auto-recover and guarantee no missing specialty)
+        const allStudentsToInspect = dbStudents.length > 0 ? dbStudents : [];
+        allStudentsToInspect.forEach((st) => {
+          const specName = (st.specialty || '').trim();
+          if (
+            specName &&
+            !deletedSpecialties.includes(specName.toLowerCase()) &&
+            !specMap.has(specName.toLowerCase())
+          ) {
+            const code =
+              specName
+                .split(' ')
+                .map((w) => w[0]?.toUpperCase())
+                .filter(Boolean)
+                .join('') || 'YTP';
+            const autoSpec: SpecialtyItem = {
+              id: `spec-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+              name: specName,
+              code,
+              direction: 'YTP (Yüksək Texniki Peşə)',
+              duration: '3 illik',
+              educationType: 'Əyani',
+              description: 'YTP (Yüksək Texniki Peşə) təhsil pilləsi',
+            };
+            specMap.set(specName.toLowerCase(), autoSpec);
+          }
+        });
+
+        const mergedSpecialties = Array.from(specMap.values()).sort((a, b) =>
+          (a.name || '').localeCompare(b.name || '', 'az')
+        );
+
+        setSpecialties(mergedSpecialties);
+        try {
+          localStorage.setItem('eldptm_specialties', JSON.stringify(mergedSpecialties));
+        } catch {}
+
+        // Upsert any missing specialties to Supabase DB so they are persistently saved
+        mergedSpecialties.forEach((s) => {
+          const existsInDb = validDbSpecialties.some(
+            (dbS) => dbS.id === s.id || dbS.name.trim().toLowerCase() === s.name.trim().toLowerCase()
+          );
+          if (!existsInDb) {
+            upsertSpecialtyToDb(s);
+          }
+        });
 
         // Synchronize Modules (Fənlər) across devices
         if (dbModules && dbModules.length > 0) {
@@ -429,8 +559,19 @@ export default function App() {
   }, []);
 
   const handleAddSpecialty = (newSpecialty: SpecialtyItem) => {
+    try {
+      const deletedList: string[] = JSON.parse(
+        localStorage.getItem('eldptm_deleted_specialties') || '[]'
+      );
+      const filtered = deletedList.filter(
+        (n) => n !== (newSpecialty.name || '').trim().toLowerCase()
+      );
+      localStorage.setItem('eldptm_deleted_specialties', JSON.stringify(filtered));
+    } catch {}
     setSpecialties((prev) =>
-      [...prev, newSpecialty].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'az'))
+      [...prev.filter((s) => s.id !== newSpecialty.id), newSpecialty].sort((a, b) =>
+        (a.name || '').localeCompare(b.name || '', 'az')
+      )
     );
     upsertSpecialtyToDb(newSpecialty);
   };
@@ -445,6 +586,19 @@ export default function App() {
   };
 
   const handleDeleteSpecialty = (id: string) => {
+    const target = specialties.find((s) => s.id === id);
+    if (target) {
+      try {
+        const deletedList: string[] = JSON.parse(
+          localStorage.getItem('eldptm_deleted_specialties') || '[]'
+        );
+        const nameLower = (target.name || '').trim().toLowerCase();
+        if (!deletedList.includes(nameLower)) {
+          deletedList.push(nameLower);
+          localStorage.setItem('eldptm_deleted_specialties', JSON.stringify(deletedList));
+        }
+      } catch {}
+    }
     setSpecialties((prev) => prev.filter((s) => s.id !== id));
     deleteSpecialtyFromDb(id);
   };
@@ -654,7 +808,21 @@ export default function App() {
     return true;
   };
 
-  // 1. PUBLIC SITE ROUTE (/) - YTP TƏLƏBƏ PORTALI VƏ ŞƏXSİ KABİNET
+  // 1. DEDICATED TICKET KIOSK ROUTE (/bilet, /ticket, /kiosk)
+  if (currentRoute === 'ticket') {
+    return (
+      <ExamTicketKioskView
+        students={students}
+        sessions={sessions}
+        initialStudentId={kioskStudentId}
+        onClearInitialStudentId={() => setKioskStudentId(undefined)}
+        onNavigateHome={() => navigateTo('public')}
+        onNavigateToAdmin={() => navigateTo('admin')}
+      />
+    );
+  }
+
+  // 2. PUBLIC SITE ROUTE (/) - YTP TƏLƏBƏ PORTALI VƏ ŞƏXSİ KABİNET
   if (currentRoute === 'public') {
     if (!currentStudentUser) {
       return (
@@ -662,6 +830,8 @@ export default function App() {
           students={students}
           onRegisterStudent={handleAddStudent}
           onLoginSuccess={handleStudentLoginSuccess}
+          onNavigateToTicket={() => navigateTo('ticket')}
+          onNavigateToAdmin={() => navigateTo('admin')}
         />
       );
     }
@@ -693,16 +863,21 @@ export default function App() {
         courses={courses}
         sessions={sessions}
         onLogout={handleStudentLogout}
+        onNavigateToTicket={(id) => {
+          if (id) setKioskStudentId(id);
+          navigateTo('ticket');
+        }}
       />
     );
   }
 
-  // 2. ADMIN ROUTE (/admin) - NOT LOGGED IN
+  // 3. ADMIN ROUTE (/admin) - NOT LOGGED IN
   if (!currentUser) {
     return (
       <AdminLoginView
         onLoginSuccess={handleLoginSuccess}
         onNavigateHome={() => navigateTo('public')}
+        onNavigateToTicket={() => navigateTo('ticket')}
       />
     );
   }
@@ -796,6 +971,18 @@ export default function App() {
                   onOpenTicketKioskForStudent={handleOpenTicketKioskForStudent}
                   students={students}
                 />
+              )}
+
+              {/* SCREEN: İMTAHAN BİLETLƏRİ KİOSKU */}
+              {activeTab === 'tickets' && (
+                <div className="flex-1 w-full">
+                  <ExamTicketKioskView
+                    students={students}
+                    sessions={sessions}
+                    initialStudentId={kioskStudentId}
+                    onClearInitialStudentId={() => setKioskStudentId(undefined)}
+                  />
+                </div>
               )}
 
 

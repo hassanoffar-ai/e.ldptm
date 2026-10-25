@@ -314,6 +314,13 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         <button
+                          onClick={() => onOpenTicketKioskForStudent(student.studentId || student.id)}
+                          className="p-1.5 text-slate-400 hover:text-purple-600 rounded-lg hover:bg-purple-50 transition-colors cursor-pointer"
+                          title="İmtahan Biletini Aç və Çap Et"
+                        >
+                          <Ticket className="w-4 h-4" />
+                        </button>
+                        <button
                           onClick={() => setEditingStudent(student)}
                           className="p-1.5 text-slate-400 hover:text-[#5300b7] rounded-lg hover:bg-purple-50 transition-colors cursor-pointer"
                           title="Redaktə et"

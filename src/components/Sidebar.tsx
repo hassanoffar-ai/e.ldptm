@@ -51,6 +51,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'specialties', label: 'İxtisaslar', icon: GraduationCap, requiredPerm: 'canManageSpecialties' as const },
     { id: 'subjects', label: 'Fənlər və Qiymətlər', icon: BookOpen, requiredPerm: 'canManageSubjects' as const },
     { id: 'exams', label: 'İmtahanlar', icon: FileText, requiredPerm: 'canManageExams' as const },
+    { id: 'tickets', label: 'İmtahan Biletləri', icon: Ticket, requiredPerm: 'canAccessTickets' as const },
     { id: 'reports', label: 'Hesabatlar', icon: BarChart3, requiredPerm: 'canViewReports' as const },
     { id: 'users', label: 'Səlahiyyətlər', icon: UserCheck, superAdminOnly: true },
     { id: 'settings', label: 'Ayarlar', icon: Settings, superAdminOnly: true },

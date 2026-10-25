@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import {
-  FileCheck,
+  FileText,
   BadgeAlert,
   ArrowLeft,
   Printer,
   Calendar,
   Clock,
-  DoorOpen,
-  Monitor,
   User,
-  CheckCircle,
+  GraduationCap,
+  Home,
+  Lock,
+  RotateCcw,
+  BookOpen,
+  CheckCircle2,
   Sparkles,
-  QrCode,
-  Search,
-  Maximize2,
-  Minimize2
+  LogOut
 } from 'lucide-react';
 import { Student, ExamSession } from '../types';
 
@@ -23,141 +23,375 @@ interface ExamTicketKioskViewProps {
   sessions: ExamSession[];
   initialStudentId?: string;
   onClearInitialStudentId?: () => void;
+  onNavigateHome?: () => void;
+  onNavigateToAdmin?: () => void;
+}
+
+interface TicketRecord {
+  studentName: string;
+  studentId: string;
+  finCode: string;
+  specialty: string;
+  courseLevel: string; // e.g. "1-ci kurs", "2-ci kurs"
+  group: string;
+  subject: string;
+  date: string;
+  time: string;
+  ticketNumber: number;
+  questions: string[];
+  academicYear: string;
+  semester: string;
+  isToday: boolean;
+}
+
+// Comprehensive Academic Question Bank tailored to E-LDPTM specialties and subjects
+const QUESTION_BANK: Record<string, string[]> = {
+  programming: [
+    'Dəyişənlər, sabitlər və əsas verilənlər tiplərinin (int, float, string, boolean) xüsusiyyətlərini izah edin.',
+    'Şərt operatorları (if, else if, switch/case) və onların proqramlaşdırmada tətbiq sahələrini müqayisə edin.',
+    'Dövr operatorları (for, while, do-while) arasındakı fərqləri qeyd edin və sonsuz dövr anlayışını izah edin.',
+    'Funksiyalar (metodlar), parametr və arqument anlayışları, qiymət qaytarma (return) mexanizmini şərh edin.',
+    'Birölçülü və ikiölçülü massivlər (array) nədir? Massiv elementlərinin indekslənməsi və müraciət qaydalarını yazın.',
+    'Obyekt Yönümlü Proqramlaşdırmanın (OOP) əsas prinsipləri: İnkapsulyasiya və Varislik (Inheritance) anlayışlarını izah edin.',
+    'Polimorfizm və Abstraksiya anlayışlarının mahiyyətini və kod nümunələrindəki əhəmiyyətini göstərin.',
+    'Xətaların idarə olunması: Try-Catch bloklarının iş prinsipi və xüsusi istisna (exception) halları.',
+    'Alqoritmin əsas xassələri (müəyyənlik, kütləvilik, nəticəvilik, diskretlik) haqqında məlumat verin.',
+    'Veb tərtibatında HTML struktur teqləri və CSS seçicilərinin (selectors) növləri və istifadəsi.',
+    'DOM (Document Object Model) nədir və JavaScript ilə veb elementlərin dinamik idarə olunması prinsipləri.',
+    'Verilənlər bazası (SQL) sorğuları: SELECT, INSERT, UPDATE, DELETE əmrlərinin sintaksisi və rolu.',
+    'Əsas çeşidləmə (sorting) və axtarış (search) alqoritmlərinin iş prinsipləri.',
+    'Git versiya nəzarət sistemi: commit, branch, merge və push əmrlərinin mahiyyəti.',
+    'Müştəri-server (Client-Server) arxitekturası və HTTP/HTTPS sorğularının iş prinsipi.',
+  ],
+  cybersecurity: [
+    'İnformasiya təhlükəsizliyinin CIA üçbucağı (Məxfilik, Bütövlük, Əlçatanlıq) prinsiplərini izah edin.',
+    'OSI modelinin 7 səviyyəsi və hər bir səviyyənin yerinə yetirdiyi əsas funksiyalar.',
+    'TCP və UDP nəqliyyat protokolları arasındakı əsas fərqlər və onların tətbiq sahələri.',
+    'IP ünvanlaşdırma (IPv4 vs IPv6), şəbəkə maskası (subnet mask) və şlüz (gateway) anlayışları.',
+    'Marşrutlaşdırma (Routing) və kommutasiya (Switching) arasındakı fərqləri izah edin.',
+    'Zərərli proqram təminatının növləri: Virus, Qurd (Worm), Troyan və Fidyə (Ransomware) proqramları.',
+    'Fişinq (Phishing), Brute-Force və Sosial Mühəndislik hücumlarının qarşısının alınması yolları.',
+    'Simmetrik və Asimmetrik şifrələmə alqoritmləri (RSA, AES) arasındakı fərqləri izah edin.',
+    'Şəbəkə təhlükəsizlik divarı (Firewall) və İntruziyanın Qarşısının Alınması Sistemi (IPS/IDS) haqqında məlumat verin.',
+    'VPN (Virtual Private Network) texnologiyası və onun təhlükəsiz məlumat mübadiləsindəki rolu.',
+    'DNS (Domain Name System) və DHCP xidmətlərinin şəbəkədəki iş prinsipləri.',
+    'Kriptoqrafik açarlar, rəqəmsal imza və SSL/TLS sertifikatlarının iş mexanizmi.',
+    'Şəbəkə topologiyaları (Ulduz, Şin, Həlqə, Ağvarı) və onların üstünlük/çatışmazlıqları.',
+    'Linux əməliyyat sistemində icazələrin (chmod, chown) və proseslərin idarə olunması.',
+    'Ehtiyat nüsxələmə (Backup) strategiyaları və insidentlərə reaksiya planı (Incident Response).',
+  ],
+  accounting: [
+    'Mühasibat balansının mahiyyəti, aktiv və passiv maddələrin qarşılıqlı əlaqəsi.',
+    'İkili yazılış üsulu və mühasibat hesablarında debet/kredit anlayışları.',
+    'İlkin uçot sənədləri və onların qeydiyyatı, arxivləşdirilməsi qaydaları.',
+    'Əsas vəsaitlər nədir və onların köhnəlməsi (amortizasiyası) hansı üsullarla hesablanır?',
+    'Əmək haqqının hesablanması, gəlir vergisi və məcburi dövlət sosial sığorta ayırmaları.',
+    'Gəlir və xərclərin tanınması prinsipləri və maliyyə nəticələrinin (mənfəət/zərər) formalaşması.',
+    'Əlavə Dəyər Vergisi (ƏDV) anlayışı, dərəcələri və hesablanma qaydası.',
+    'Kassa əməliyyatları, kassa mədaxil/məxaric orderlərinin tərtibatı və bank hesablaşmaları.',
+    'Məhsulun maya dəyərinin hesablanması (kalkulyasiyası) və onun tərkib hissələri.',
+    'Maliyyə hesabatlarının beynəlxalq standartları (MHBS) haqqında ümumi məlumat.',
+    'Dövriyyə vəsaitləri və onların müəssisə fəaliyyətində dövranı.',
+    'İnventarizasiya prosesinin mahiyyəti və aparılma mərhələləri.',
+  ],
+  hotel: [
+    'Mehmanxana təsərrüfatında qonaqların qəbulu və yerləşdirilməsi (Front Office) xidmətinin təşkili.',
+    'Rezervasiya (bronlaşdırma) sistemləri və otaq kateqoriyalarının təsnifatı.',
+    'Mehmanxanada Təsərrüfat (Housekeeping) xidmətinin vəzifələri və gigiyena standartları.',
+    'Restoran xidmətində menyu tərtibatının əsas prinsipləri və masa tərtibatı qaydaları.',
+    'Qonaq məmnuniyyətinin təmin edilməsi, şikayətlərin idarə olunması və xidmət etikası.',
+    'Mehmanxana və restoranlarda təhlükəsizlik və yanğından mühafizə qaydaları.',
+    'Turizm məhsulu və onun təşviqi, turizm marşrutlarının planlaşdırılması.',
+    'Qida təhlükəsizliyi və sanitar-gigiyenik normaların tətbiqi qaydaları.',
+    'Mehmanxanada otaq qiymətlərinin müəyyənləşdirilməsi və mövsümi tarif siyasəti.',
+    'Xarici qonaqlarla ünsiyyət etikası və beynəlxalq qonaqpərvərlik normaları.',
+  ],
+  general: [
+    'Fənnin əsas anlayışları, predmeti və tədqiqat metodları haqqında ətraflı məlumat verin.',
+    'Tədris olunmuş nəzəri mövzuların praktiki tətbiq sahələrini izah edin.',
+    'Sahə üzrə meydana çıxan əsas problemləri və onların aradan qaldırılması yollarını şərh edin.',
+    'Fənn çərçivəsində öyrənilmiş standartlar, qaydalar və normativ tələblər haqqında danışın.',
+    'Mövzu üzrə konkret nümunə və ya praktiki tapşırığın həlli ardıcıllığını təsvir edin.',
+    'Müasir texnologiyaların bu sahədəki rolu və inkişaf perspektivlərini qiymətləndirin.',
+    'Fənn üzrə əsas terminologiyanı və onların mənasını şərh edin.',
+  ],
+};
+
+function get5ExamQuestions(subjectName: string, specialtyName: string, ticketNum: number): string[] {
+  const text = `${subjectName} ${specialtyName}`.toLowerCase();
+  let pool = QUESTION_BANK.general;
+
+  if (
+    text.includes('kiber') ||
+    text.includes('şəbəkə') ||
+    text.includes('sebeke') ||
+    text.includes('inzibat') ||
+    text.includes('təhlükəsizlik')
+  ) {
+    pool = QUESTION_BANK.cybersecurity;
+  } else if (
+    text.includes('proqram') ||
+    text.includes('veb') ||
+    text.includes('dizayn') ||
+    text.includes('alqoritm') ||
+    text.includes('kod') ||
+    text.includes('kompüter')
+  ) {
+    pool = QUESTION_BANK.programming;
+  } else if (
+    text.includes('mühasibat') ||
+    text.includes('muhasibat') ||
+    text.includes('uçot') ||
+    text.includes('iqtisad') ||
+    text.includes('maliyyə')
+  ) {
+    pool = QUESTION_BANK.accounting;
+  } else if (
+    text.includes('mehmanxana') ||
+    text.includes('restoran') ||
+    text.includes('turizm') ||
+    text.includes('otel') ||
+    text.includes('servis')
+  ) {
+    pool = QUESTION_BANK.hotel;
+  }
+
+  // Deterministically draw 5 questions based on ticket number so it is stable
+  const questions: string[] = [];
+  const poolLen = pool.length;
+  const startIdx = ((ticketNum - 1) * 3) % poolLen;
+
+  for (let i = 0; i < 5; i++) {
+    const qIndex = (startIdx + i * 2) % poolLen;
+    const candidate = pool[qIndex] || pool[i % poolLen];
+    if (!questions.includes(candidate)) {
+      questions.push(candidate);
+    } else {
+      // Find an unused question
+      const unused = pool.find((q) => !questions.includes(q)) || candidate;
+      questions.push(unused);
+    }
+  }
+
+  return questions.slice(0, 5);
+}
+
+function extractCourseLevel(student: Student | undefined): string {
+  if (!student) return '1-ci kurs';
+  const grp = (student.group || '').trim();
+  const sem = (student.semester || '').trim();
+
+  if (grp.toLowerCase().includes('kurs')) {
+    return grp;
+  }
+  if (sem.toLowerCase().includes('kurs')) {
+    const parts = sem.split(' ');
+    const kursPart = parts.slice(0, 2).join(' ');
+    if (kursPart.toLowerCase().includes('kurs')) {
+      return kursPart;
+    }
+  }
+  return grp || '1-ci kurs';
 }
 
 export const ExamTicketKioskView: React.FC<ExamTicketKioskViewProps> = ({
-  students,
-  sessions,
+  students = [],
+  sessions = [],
   initialStudentId,
   onClearInitialStudentId,
+  onNavigateHome,
+  onNavigateToAdmin,
 }) => {
   const [studentIdInput, setStudentIdInput] = useState(initialStudentId || '');
   const [phase, setPhase] = useState<'input' | 'ticket'>(
     initialStudentId ? 'ticket' : 'input'
   );
-  const [ticketData, setTicketData] = useState<{
-    studentName: string;
-    studentId: string;
-    specialty: string;
-    group: string;
-    subject: string;
-    date: string;
-    time: string;
-    room: string;
-    computerNo: string;
-    ticketNo: string;
-    academicYear: string;
-    semester: string;
-    docNumber: string;
-  } | null>(null);
 
+  const [availableTickets, setAvailableTickets] = useState<TicketRecord[]>([]);
+  const [selectedTicketIndex, setSelectedTicketIndex] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isPrinting, setIsPrinting] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Sync if initial student ID changes from outside
   useEffect(() => {
     if (initialStudentId) {
       setStudentIdInput(initialStudentId);
-      generateTicket(initialStudentId);
+      generateTicketsForId(initialStudentId);
     }
   }, [initialStudentId]);
 
-  const generateTicket = (idToSearch: string) => {
-    const trimmedId = idToSearch.trim();
-    if (!trimmedId) {
-      setErrorMessage('Zəhmət olmasa tələbə ID-sini daxil edin.');
+  const generateTicketsForId = (idToSearch: string) => {
+    const rawTerm = (idToSearch || '').trim();
+    if (!rawTerm) {
+      setErrorMessage('Zəhmət olmasa tələbə ID-sini və ya FİN kodunu daxil edin.');
       return;
     }
 
-    // Search across sessions or student registry
-    let foundItem: any = null;
-    let foundSession: any = null;
+    const cleanTerm = rawTerm.toLowerCase().replace(/\s+/g, '');
 
-    const targetLower = trimmedId.toLowerCase();
-
-    for (const session of (sessions || [])) {
-      if (!session) continue;
-      const match = (session.items || []).find(
-        (i) => (i?.studentId || '').toLowerCase() === targetLower
+    // 1. Find matching student in student registry
+    const matchedStudent = (students || []).find((s) => {
+      if (!s) return false;
+      const sId = (s.studentId || '').toLowerCase().replace(/\s+/g, '');
+      const sFin = (s.finCode || '').toLowerCase().replace(/\s+/g, '');
+      const sDbId = (s.id || '').toLowerCase().replace(/\s+/g, '');
+      const sName = (s.name || '').toLowerCase();
+      return (
+        sId === cleanTerm ||
+        sFin === cleanTerm ||
+        sDbId === cleanTerm ||
+        sName === rawTerm.toLowerCase() ||
+        sName.includes(rawTerm.toLowerCase())
       );
-      if (match) {
-        foundItem = match;
-        foundSession = session;
-        break;
+    });
+
+    // 2. Find sessions matching student or student's group/specialty
+    const matchedSessions: Array<{ session: ExamSession; isToday: boolean }> = [];
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    for (const sess of (sessions || [])) {
+      if (!sess) continue;
+      const sessDate = sess.date || '';
+      const isToday = sessDate === todayStr;
+
+      // Direct student participation in session items
+      const hasItem = (sess.items || []).some((item) => {
+        const itemStudentId = (item?.studentId || '').toLowerCase().replace(/\s+/g, '');
+        const itemStudentName = (item?.studentName || '').toLowerCase();
+        return (
+          itemStudentId === cleanTerm ||
+          (matchedStudent &&
+            (itemStudentId === (matchedStudent.studentId || '').toLowerCase().replace(/\s+/g, '') ||
+              itemStudentName === (matchedStudent.name || '').toLowerCase()))
+        );
+      });
+
+      // Group or specialty match
+      const groupMatch =
+        matchedStudent?.group &&
+        sess.group &&
+        sess.group.trim().toLowerCase() === matchedStudent.group.trim().toLowerCase();
+
+      const specMatch =
+        matchedStudent?.specialty &&
+        sess.specialty &&
+        sess.specialty.trim().toLowerCase() === matchedStudent.specialty.trim().toLowerCase();
+
+      if (hasItem || groupMatch || specMatch) {
+        matchedSessions.push({ session: sess, isToday });
       }
     }
 
-    const foundStudent = (students || []).find((s) => {
-      if (!s) return false;
-      const sId = (s.studentId || '').toLowerCase();
-      const sFin = (s.finCode || '').toLowerCase();
-      return sId === targetLower || sFin === targetLower;
+    // Sort matching sessions: put today's exam first!
+    matchedSessions.sort((a, b) => {
+      if (a.isToday && !b.isToday) return -1;
+      if (!a.isToday && b.isToday) return 1;
+      return 0;
     });
 
-    if (!foundItem && !foundStudent) {
+    if (!matchedStudent && matchedSessions.length === 0) {
       setErrorMessage(
-        `"${trimmedId}" üzrə sistemdə tələbə və ya aktiv imtahan tapılmadı. Zəhmət olmasa Tələbə ID-nizi dəqiqləşdirin və ya administratora müraciət edin.`
+        `"${rawTerm}" üzrə sistemdə tələbə və ya imtahan qeydiyyatı tapılmadı. Zəhmət olmasa Tələbə ID-nizi (məs: TL-001) və ya FİN kodunuzu dəqiqləşdirin.`
       );
       return;
     }
 
-    const studentName =
-      foundItem?.studentName || foundStudent?.name || 'Tələbə';
-    const group = foundItem?.group || foundStudent?.group || '-';
-    const specialty =
-      foundStudent?.specialty ||
-      foundSession?.specialty ||
-      '-';
-    const subject =
-      foundSession?.subject || 'Təyin olunmuş imtahan';
-    const date = foundSession?.date || new Date().toISOString().split('T')[0];
-    const time = foundSession?.time || foundItem?.time || '10:00';
-    const room = foundItem?.room || foundSession?.room || 'Təyin olunmayıb';
-    const computerNo = foundItem?.computerNo || 'PC-01';
-    const ticketNo = foundItem?.ticketNo
-      ? (foundItem.ticketNo.startsWith('#') ? foundItem.ticketNo : `#EX-${foundItem.ticketNo}`)
-      : `#EX-${Math.floor(Math.random() * 89999 + 10000)}`;
+    // Stable ticket number based on student ID
+    const studentIdentifier = matchedStudent?.studentId || rawTerm.toUpperCase();
+    const hashVal = studentIdentifier
+      .split('')
+      .reduce((acc, c) => acc + c.charCodeAt(0), 0);
+    const baseTicketNum = (Math.abs(hashVal) % 25) + 1;
 
-    setTicketData({
-      studentName,
-      studentId: trimmedId,
-      specialty,
-      group,
-      subject,
-      date,
-      time,
-      room,
-      computerNo,
-      ticketNo,
-      academicYear: foundSession?.academicYear || '2024/2025 Tədris İli',
-      semester: foundSession?.semester || 'Semestr İmtahanı',
-      docNumber: `EX-${Math.floor(Math.random() * 89999 + 10000)}`,
-    });
-    setErrorMessage(null);
-    setPhase('ticket');
+    const ticketsList: TicketRecord[] = [];
 
+    if (matchedSessions.length > 0) {
+      matchedSessions.forEach(({ session, isToday }, idx) => {
+        const ticketNum = ((baseTicketNum + idx - 1) % 25) + 1;
+        const subject = session.subject || 'İxtisas İmtahanı';
+        const specialty = session.specialty || matchedStudent?.specialty || 'Yüksək Texniki Peşə';
+        const courseLevel = extractCourseLevel(matchedStudent);
+        const questions = get5ExamQuestions(subject, specialty, ticketNum);
+
+        ticketsList.push({
+          studentName: matchedStudent?.name || 'Tələbə',
+          studentId: studentIdentifier,
+          finCode: matchedStudent?.finCode || '-',
+          specialty,
+          courseLevel,
+          group: session.group || matchedStudent?.group || courseLevel,
+          subject,
+          date: session.date || todayStr,
+          time: session.time || '10:00',
+          ticketNumber: ticketNum,
+          questions,
+          academicYear: session.academicYear || '2024/2025 Tədris İli',
+          semester: session.semester || 'Yaz Semestri',
+          isToday,
+        });
+      });
+    } else if (matchedStudent) {
+      // Fallback if no explicit session exists yet in DB
+      const courseLevel = extractCourseLevel(matchedStudent);
+      const subject = 'İxtisas Fənni üzrə Yekun İmtahan';
+      const specialty = matchedStudent.specialty || 'Yüksək Texniki Peşə';
+      const questions = get5ExamQuestions(subject, specialty, baseTicketNum);
+
+      ticketsList.push({
+        studentName: matchedStudent.name,
+        studentId: studentIdentifier,
+        finCode: matchedStudent.finCode || '-',
+        specialty,
+        courseLevel,
+        group: matchedStudent.group || courseLevel,
+        subject,
+        date: todayStr,
+        time: '10:00',
+        ticketNumber: baseTicketNum,
+        questions,
+        academicYear: '2024/2025 Tədris İli',
+        semester: matchedStudent.semester || 'Yaz Semestri',
+        isToday: true,
+      });
+    }
+
+    setAvailableTickets(ticketsList);
+    setSelectedTicketIndex(0);
     setErrorMessage(null);
     setPhase('ticket');
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    generateTicket(studentIdInput);
-  };
-
-  const handleQuickSelect = (id: string) => {
-    setStudentIdInput(id);
-    generateTicket(id);
+    generateTicketsForId(studentIdInput);
   };
 
   const handleBackToSearch = () => {
     setPhase('input');
     setStudentIdInput('');
     setErrorMessage(null);
+    setAvailableTickets([]);
     if (onClearInitialStudentId) {
       onClearInitialStudentId();
     }
+  };
+
+  const handleDrawAnotherTicket = () => {
+    if (!currentTicket) return;
+    const newTicketNum = Math.floor(Math.random() * 25) + 1;
+    const newQuestions = get5ExamQuestions(
+      currentTicket.subject,
+      currentTicket.specialty,
+      newTicketNum
+    );
+
+    setAvailableTickets((prev) =>
+      prev.map((t, idx) =>
+        idx === selectedTicketIndex
+          ? { ...t, ticketNumber: newTicketNum, questions: newQuestions }
+          : t
+      )
+    );
   };
 
   const handlePrintTicket = () => {
@@ -165,316 +399,323 @@ export const ExamTicketKioskView: React.FC<ExamTicketKioskViewProps> = ({
     setTimeout(() => {
       window.print();
       setIsPrinting(false);
-    }, 400);
+    }, 250);
   };
 
-  const toggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen);
-  };
+  const currentTicket = availableTickets[selectedTicketIndex] || null;
 
   return (
-    <div
-      className={`min-h-[calc(100vh-4rem)] flex flex-col justify-center items-center relative overflow-hidden p-4 md:p-8 ${
-        isFullscreen ? 'fixed inset-0 z-50 bg-[#f8f9ff]' : ''
-      }`}
-    >
-      {/* Ambient Blurred Circles */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
-        <div className="absolute -top-[20%] -right-[10%] w-[50vw] h-[50vw] rounded-full bg-[#6d28d9]/10 blur-[100px]" />
-        <div className="absolute -bottom-[20%] -left-[10%] w-[60vw] h-[60vw] rounded-full bg-[#d9e3f6]/40 blur-[120px]" />
+    <div className="min-h-screen bg-[#0f172a] text-slate-100 flex flex-col justify-between relative overflow-hidden antialiased selection:bg-[#6d28d9] selection:text-white">
+      {/* Ambient background lighting */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-0 no-print">
+        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-[#6d28d9]/25 blur-[140px]" />
+        <div className="absolute -bottom-40 -left-40 w-[600px] h-[600px] rounded-full bg-[#1e1b4b]/60 blur-[150px]" />
       </div>
 
-      {/* Top right Fullscreen Mode Toggle */}
-      <div className="absolute top-4 right-4 no-print flex items-center gap-2">
-        <button
-          onClick={toggleFullscreen}
-          className="p-2 bg-white/80 backdrop-blur-xs border border-[#ccc3d7] rounded-full text-[#4a4455] hover:text-[#5300b7] transition-all shadow-xs"
-          title={isFullscreen ? 'Tam ekrandan çıx' : 'Kiosk tam ekran rejimi'}
-        >
-          {isFullscreen ? (
-            <Minimize2 className="w-4 h-4" />
-          ) : (
-            <Maximize2 className="w-4 h-4" />
-          )}
-        </button>
-      </div>
+      {/* Top Navigation Bar (Hidden during print) */}
+      <header className="w-full px-4 sm:px-6 py-3.5 sm:py-4 flex items-center justify-between relative z-10 max-w-6xl mx-auto border-b border-slate-800/80 no-print">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-[#6d28d9] to-[#9333ea] flex items-center justify-center text-white shadow-lg shadow-purple-900/40 shrink-0">
+            <BookOpen className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-extrabold text-base sm:text-lg tracking-tight text-white leading-tight">
+                E-LDPTM
+              </span>
+              <span className="px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-bold uppercase tracking-wider">
+                İmtahan Bileti
+              </span>
+            </div>
+            <span className="text-[10px] sm:text-[11px] text-purple-300 font-medium tracking-wide">
+              Fərdi İmtahan Sualları Bileti
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 sm:gap-3">
+          <button
+            onClick={onNavigateToAdmin || onNavigateHome}
+            className="flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-semibold backdrop-blur-md transition-all cursor-pointer"
+            title="Sessiyanı bitir və giriş səhifəsinə qayıt"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Çıxış</span>
+          </button>
+        </div>
+      </header>
 
       {/* ========================================================================= */}
-      {/* PHASE 1: ID INPUT SCREEN */}
+      {/* PHASE 1: ID INPUT / SEARCH SCREEN */}
       {/* ========================================================================= */}
       {phase === 'input' && (
-        <div className="flex flex-col items-center justify-center w-full max-w-lg mx-auto py-8 animate-in fade-in zoom-in-95 duration-200">
-          {/* Main Logo & Title */}
-          <div className="mb-6 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-[#6d28d9]/10 border border-[#6d28d9]/20 flex items-center justify-center mx-auto mb-3 text-[#5300b7] shadow-inner">
-              <FileCheck className="w-9 h-9" />
+        <main className="flex-1 flex items-center justify-center p-4 relative z-10 my-4 no-print">
+          <div className="w-full max-w-lg bg-slate-900/85 backdrop-blur-2xl border border-slate-700/60 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-purple-950/50">
+            {/* Header Icon & Title */}
+            <div className="text-center mb-6">
+              <div className="inline-flex p-3 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 mb-3 shadow-inner">
+                <FileText className="w-8 h-8" />
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                İmtahan Biletini Əldə Edin
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-400 mt-2 max-w-sm mx-auto">
+                Həmin gün keçirilən imtahan üçün biletinizi və 5 imtahan sualınızı ekrana çıxarmaq üçün Tələbə ID-nizi daxil edin.
+              </p>
             </div>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-[#121c2a] tracking-tight mb-2">
-              E-LDPTM
-            </h1>
-            <p className="text-lg md:text-xl font-semibold text-[#4a4455]">
-              İmtahan Zalı Paneli
-            </p>
-          </div>
 
-          {/* Form Card */}
-          <div className="bg-white p-6 md:p-8 rounded-2xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.06),0_8px_10px_-6px_rgba(0,0,0,0.04)] border border-[#ccc3d7] w-full">
-            <form onSubmit={handleSearchSubmit} className="flex flex-col gap-6">
-              <div className="flex flex-col gap-2 text-left">
+            {/* Form */}
+            <form onSubmit={handleSearchSubmit} className="space-y-4">
+              <div>
                 <label
                   htmlFor="studentIdInput"
-                  className="text-sm font-semibold text-[#4a4455]"
+                  className="block text-xs font-semibold text-slate-300 mb-1.5"
                 >
-                  Tələbə ID və ya FİN kodunuzu daxil edin
+                  Tələbə ID və ya FİN Kodu
                 </label>
                 <div className="relative">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#7b7486]">
-                    <User className="w-5 h-5" />
-                  </div>
+                  <User className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-400" />
                   <input
                     id="studentIdInput"
                     type="text"
                     autoFocus
-                    autoComplete="off"
+                    required
                     value={studentIdInput}
                     onChange={(e) => {
                       setStudentIdInput(e.target.value);
                       if (errorMessage) setErrorMessage(null);
                     }}
-                    placeholder=" "
-                    className="w-full pl-12 pr-4 py-3.5 bg-[#f8f9ff] border border-[#ccc3d7] rounded-xl focus:ring-2 focus:ring-[#5300b7] focus:border-[#5300b7] text-base md:text-lg font-medium text-[#121c2a] transition-all outline-none uppercase"
-                    required
+                    placeholder="Məsələn: TL-001 və ya 1290927"
+                    className="w-full pl-11 pr-4 py-3.5 bg-slate-800/70 border border-slate-700 rounded-xl text-base text-white placeholder-slate-500 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all font-mono uppercase"
                   />
                 </div>
               </div>
 
               {errorMessage && (
-                <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl flex items-center gap-2">
-                  <BadgeAlert className="w-4 h-4 shrink-0" />
-                  <span>{errorMessage}</span>
+                <div className="p-3.5 bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs rounded-xl flex items-start gap-2.5">
+                  <BadgeAlert className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
+                  <span className="leading-relaxed">{errorMessage}</span>
                 </div>
               )}
 
               <button
-                id="kiosk-print-ticket-btn"
                 type="submit"
-                className="w-full py-4 bg-[#6d28d9] hover:bg-[#581c87] text-white font-semibold text-base md:text-lg rounded-xl shadow-[0_4px_12px_rgba(109,40,217,0.25)] transition-all flex items-center justify-center gap-2.5 active:scale-[0.99]"
+                id="search-ticket-btn"
+                className="w-full py-4 bg-gradient-to-r from-[#6d28d9] to-[#8b5cf6] hover:from-[#5b21b6] hover:to-[#7c3aed] text-white font-bold text-sm sm:text-base rounded-xl shadow-lg shadow-purple-950 transition-all flex items-center justify-center gap-2.5 active:scale-[0.99] cursor-pointer"
               >
                 <Printer className="w-5 h-5" />
-                <span>İmtahan Biletini Çap Et</span>
+                <span>İmtahan Biletini Tap və Göstər</span>
               </button>
             </form>
+          </div>
+        </main>
+      )}
 
-            {/* Real registered students quick selection if any exist */}
-            {students.length > 0 && (
-              <div className="mt-6 pt-5 border-t border-slate-100 text-left">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block mb-2">
-                  Qeydiyyatdakı Tələbələr:
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  {students.slice(0, 6).map((s) => (
-                    <button
-                      key={s.id}
-                      type="button"
-                      onClick={() => handleQuickSelect(s.studentId)}
-                      className="px-2.5 py-1 text-xs bg-purple-50 hover:bg-purple-100 text-[#5300b7] rounded-lg border border-purple-200/60 font-mono transition-colors cursor-pointer"
-                    >
-                      {s.studentId} <span className="text-slate-500 font-sans">({s.name})</span>
-                    </button>
-                  ))}
+      {/* ========================================================================= */}
+      {/* PHASE 2: TICKET DISPLAY & PRINT SCREEN */}
+      {/* ========================================================================= */}
+      {phase === 'ticket' && currentTicket && (
+        <main className="flex-1 flex flex-col items-center justify-center p-3 sm:p-6 relative z-10 w-full max-w-3xl mx-auto my-2">
+          {/* Top Control Bar (Hidden on print) */}
+          <div className="w-full flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-4 no-print">
+            <button
+              onClick={handleBackToSearch}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 text-xs font-semibold backdrop-blur-md transition-all cursor-pointer self-start sm:self-auto"
+            >
+              <ArrowLeft className="w-4 h-4 text-purple-400" />
+              <span>Yeni Axtarış / Başqa ID</span>
+            </button>
+
+            <div className="flex items-center gap-2 self-end sm:self-auto">
+              {/* Optional draw another ticket number */}
+              <button
+                onClick={handleDrawAnotherTicket}
+                title="Təsadüfi başqa bilet çək"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs font-semibold transition-all cursor-pointer"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-purple-400" />
+                <span>Yeni Bilet Çək (№)</span>
+              </button>
+
+              {/* Main Print Action Button */}
+              <button
+                onClick={handlePrintTicket}
+                disabled={isPrinting}
+                id="print-action-btn"
+                className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm shadow-lg shadow-emerald-950 transition-all active:scale-95 cursor-pointer"
+              >
+                <Printer className="w-4 h-4" />
+                <span>{isPrinting ? 'Printerə Göndərilir...' : 'Çapa Ver (Printer)'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* If multiple exams found for this student, show tabs */}
+          {availableTickets.length > 1 && (
+            <div className="w-full flex items-center gap-2 overflow-x-auto pb-3 mb-2 no-print">
+              <span className="text-xs text-slate-400 font-semibold shrink-0">
+                Fənlər üzrə imtahanlar ({availableTickets.length}):
+              </span>
+              {availableTickets.map((t, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setSelectedTicketIndex(idx)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
+                    selectedTicketIndex === idx
+                      ? 'bg-purple-600 text-white shadow-sm'
+                      : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700'
+                  }`}
+                >
+                  <span>{t.subject}</span>
+                  {t.isToday && (
+                    <span className="px-1.5 py-0.2 bg-emerald-500/30 text-emerald-300 rounded text-[10px]">
+                      Bugün
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* THE OFFICIAL PRINTABLE EXAM QUESTION TICKET SHEET */}
+          {/* ========================================================================= */}
+          <div className="w-full bg-white text-slate-900 rounded-2xl shadow-2xl border-2 border-slate-300 p-6 sm:p-10 font-sans relative print-container">
+            {/* 1. Official Header */}
+            <div className="text-center border-b-2 border-slate-800 pb-4 mb-5">
+              <div className="text-xs sm:text-sm font-bold text-slate-700 uppercase tracking-wider leading-tight">
+                Azərbaycan Respublikası Elm və Təhsil Nazirliyi
+              </div>
+              <h1 className="text-base sm:text-xl font-extrabold text-slate-900 uppercase tracking-tight mt-0.5">
+                LƏNKƏRAN DÖVLƏT PEŞƏ TƏHSİL MƏRKƏZİ
+              </h1>
+              <div className="text-[11px] sm:text-xs font-bold text-[#5300b7] uppercase tracking-wide mt-0.5">
+                Yüksək Texniki Peşə (YTP) Təhsili
+              </div>
+
+              <div className="inline-block mt-3 px-4 py-1 border-2 border-slate-900 rounded-md font-mono text-sm sm:text-base font-black text-slate-900 tracking-wider">
+                İMTAHAN BİLETİ № {currentTicket.ticketNumber}
+              </div>
+            </div>
+
+            {/* 2. Student and Exam Core Details (Specialty, Course, Subject, Date) */}
+            <div className="bg-slate-50 border border-slate-300 rounded-xl p-4 text-xs sm:text-sm space-y-2 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
+                <div>
+                  <span className="text-slate-500 font-semibold">Tələbə (S.A.A.): </span>
+                  <strong className="text-slate-900 font-extrabold">{currentTicket.studentName}</strong>
+                </div>
+
+                <div>
+                  <span className="text-slate-500 font-semibold">Tələbə ID: </span>
+                  <span className="font-mono font-bold text-[#5300b7]">{currentTicket.studentId}</span>
+                </div>
+
+                <div>
+                  <span className="text-slate-500 font-semibold">İxtisas: </span>
+                  <strong className="text-slate-900 font-bold">{currentTicket.specialty}</strong>
+                </div>
+
+                <div>
+                  <span className="text-slate-500 font-semibold">Kurs / Qrup: </span>
+                  <strong className="text-slate-900 font-bold">{currentTicket.courseLevel}</strong>
+                  {currentTicket.group && currentTicket.group !== currentTicket.courseLevel && (
+                    <span className="text-slate-600 font-medium"> ({currentTicket.group})</span>
+                  )}
+                </div>
+
+                <div className="sm:col-span-2 pt-1 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                  <div>
+                    <span className="text-slate-500 font-semibold">İmtahan Fənni: </span>
+                    <strong className="text-[#5300b7] font-extrabold text-sm sm:text-base">{currentTicket.subject}</strong>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 font-semibold">Tarix: </span>
+                    <strong className="text-slate-900 font-bold">{currentTicket.date}</strong>
+                  </div>
                 </div>
               </div>
+            </div>
+
+            {/* 3. Centered Header: İMTAHAN SUALLARI */}
+            <div className="text-center my-6">
+              <div className="inline-block relative">
+                <h2 className="text-lg sm:text-2xl font-black text-slate-900 uppercase tracking-widest px-6 py-1.5 border-b-2 border-t-2 border-slate-900">
+                  İMTAHAN SUALLARI
+                </h2>
+              </div>
+            </div>
+
+            {/* 4. The 5 Exam Questions (1-dən 5-ə kimi) */}
+            <div className="space-y-4 my-6 text-slate-900 text-sm sm:text-base leading-relaxed pl-1 sm:pl-3">
+              {currentTicket.questions.map((questionText, qIdx) => (
+                <div key={qIdx} className="flex items-start gap-3">
+                  <span className="font-extrabold text-slate-900 shrink-0 w-6">
+                    {qIdx + 1}.
+                  </span>
+                  <p className="font-medium text-slate-900 flex-1">
+                    {questionText}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* 5. Bottom Signatures & Grading Block */}
+            <div className="mt-10 pt-6 border-t-2 border-slate-300 text-xs sm:text-sm text-slate-700">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 items-end">
+                <div>
+                  <span className="block text-[11px] text-slate-500 mb-6 font-semibold">
+                    Tələbənin İmzası:
+                  </span>
+                  <div className="border-b-2 border-slate-800" />
+                </div>
+
+                <div>
+                  <span className="block text-[11px] text-slate-500 mb-6 font-semibold">
+                    Fənn Müəlliminin İmzası:
+                  </span>
+                  <div className="border-b-2 border-slate-800" />
+                </div>
+
+                <div className="col-span-2 sm:col-span-1 text-left sm:text-right">
+                  <div className="p-2 border border-slate-300 rounded-lg inline-block text-center min-w-[120px]">
+                    <span className="block text-[10px] text-slate-500 font-bold uppercase">Yekun Bal</span>
+                    <span className="text-sm font-bold text-slate-400">____ / 50</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      )}
+
+      {/* Footer (Hidden on print) */}
+      <footer className="w-full py-4 text-center text-xs text-slate-500 relative z-10 no-print border-t border-slate-800/60">
+        <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <span>Lənkəran Dövlət Peşə Təhsil Mərkəzi — İmtahan İdarəetmə Sistemi © 2026</span>
+          <div className="flex items-center gap-4">
+            {onNavigateHome && (
+              <button
+                type="button"
+                onClick={onNavigateHome}
+                className="text-purple-400 hover:text-purple-300 font-semibold transition-colors cursor-pointer"
+              >
+                Əsas Portal
+              </button>
+            )}
+            {onNavigateToAdmin && (
+              <button
+                type="button"
+                onClick={onNavigateToAdmin}
+                className="inline-flex items-center gap-1.5 text-purple-400 hover:text-purple-300 font-semibold transition-colors cursor-pointer"
+              >
+                <Lock className="w-3.5 h-3.5" />
+                <span>Admin Girişi (/admin)</span>
+              </button>
             )}
           </div>
-
-          <p className="mt-6 text-sm text-[#7b7486] text-center">
-            Problem yaranarsa nəzarətçiyə müraciət edin.
-          </p>
         </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* PHASE 2: TICKET CARD SCREEN */}
-      {/* ========================================================================= */}
-      {phase === 'ticket' && ticketData && (
-        <div className="w-full max-w-4xl mx-auto flex flex-col items-center animate-in fade-in duration-300">
-          {/* Back Button */}
-          <button
-            id="ticket-back-btn"
-            onClick={handleBackToSearch}
-            className="self-start mb-4 flex items-center gap-1.5 text-sm font-semibold text-[#4a4455] hover:text-[#5300b7] transition-colors no-print px-2 py-1 rounded-lg hover:bg-purple-50"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Yeni Axtarış</span>
-          </button>
-
-          {/* Ticket Card Component */}
-          <div className="bg-white rounded-2xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.06),0_8px_10px_-6px_rgba(0,0,0,0.04)] border border-[#ccc3d7] w-full overflow-hidden flex flex-col md:flex-row relative print-container">
-            {/* Top decorative stripe for mobile, Left stripe for desktop */}
-            <div className="h-2 w-full md:w-2.5 md:h-auto bg-[#5300b7] md:absolute md:top-0 md:left-0" />
-
-            {/* Main Info Left Section */}
-            <div className="flex-1 p-6 md:p-8 md:pl-10 flex flex-col justify-between">
-              <div>
-                {/* Header */}
-                <div className="flex justify-between items-start border-b border-[#e2e8f0] pb-4 mb-6">
-                  <div>
-                    <h2 className="text-2xl md:text-3xl font-bold text-[#121c2a] leading-tight">
-                      İmtahan Bileti
-                    </h2>
-                    <p className="text-sm text-[#64748b] mt-0.5">
-                      {ticketData.academicYear} - {ticketData.semester}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <span className="inline-block px-3 py-1 bg-[#eff4ff] text-[#5300b7] font-semibold text-xs rounded-full mb-1 border border-[#d9e3f6]">
-                      Rəsmi Sənəd
-                    </span>
-                    <p className="text-xs text-[#7b7486] font-mono">
-                      Bilet No: {ticketData.ticketNo}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Bento Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                  {/* Student Highlight */}
-                  <div className="col-span-1 md:col-span-2 flex items-center gap-4 p-4 bg-[#f8f9ff] rounded-xl border border-[#d9e3f6]">
-                    <div className="w-14 h-14 rounded-full bg-[#eff4ff] border border-[#ccc3d7] flex items-center justify-center shrink-0 text-[#5300b7]">
-                      <User className="w-7 h-7" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-[#121c2a]">
-                        {ticketData.studentName}
-                      </h3>
-                      <p className="text-sm font-semibold text-[#5300b7] font-mono">
-                        ID: {ticketData.studentId}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Specialty */}
-                  <div className="flex flex-col gap-1 p-3.5 bg-white rounded-xl border border-[#e2e8f0]">
-                    <span className="text-[11px] font-semibold text-[#7b7486] uppercase tracking-wider">
-                      İxtisas
-                    </span>
-                    <span className="text-sm font-semibold text-[#121c2a]">
-                      {ticketData.specialty}
-                    </span>
-                  </div>
-
-                  {/* Group */}
-                  <div className="flex flex-col gap-1 p-3.5 bg-white rounded-xl border border-[#e2e8f0]">
-                    <span className="text-[11px] font-semibold text-[#7b7486] uppercase tracking-wider">
-                      Qrup
-                    </span>
-                    <span className="text-sm font-semibold text-[#121c2a]">
-                      {ticketData.group}
-                    </span>
-                  </div>
-
-                  {/* Subject */}
-                  <div className="flex flex-col gap-1 p-3.5 bg-white rounded-xl border border-[#e2e8f0] col-span-1 md:col-span-2">
-                    <span className="text-[11px] font-semibold text-[#7b7486] uppercase tracking-wider">
-                      Fənn / Modul
-                    </span>
-                    <span className="text-base font-bold text-[#121c2a]">
-                      {ticketData.subject}
-                    </span>
-                  </div>
-
-                  {/* 4 Logistics Boxes */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 col-span-1 md:col-span-2 gap-2.5 pt-1">
-                    <div className="flex flex-col gap-1 p-3 bg-[#f8f9ff] rounded-xl border border-[#d9e3f6]">
-                      <div className="flex items-center gap-1 text-[#7b7486]">
-                        <Calendar className="w-3.5 h-3.5" />
-                        <span className="text-[10px] font-semibold uppercase">
-                          Tarix
-                        </span>
-                      </div>
-                      <span className="text-xs md:text-sm font-semibold text-[#121c2a]">
-                        {ticketData.date}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-col gap-1 p-3 bg-[#f8f9ff] rounded-xl border border-[#d9e3f6]">
-                      <div className="flex items-center gap-1 text-[#7b7486]">
-                        <Clock className="w-3.5 h-3.5" />
-                        <span className="text-[10px] font-semibold uppercase">
-                          Saat
-                        </span>
-                      </div>
-                      <span className="text-xs md:text-sm font-semibold text-[#121c2a]">
-                        {ticketData.time}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-col gap-1 p-3 bg-purple-50/60 rounded-xl border border-purple-200">
-                      <div className="flex items-center gap-1 text-[#5300b7]">
-                        <DoorOpen className="w-3.5 h-3.5" />
-                        <span className="text-[10px] font-semibold uppercase">
-                          Otaq
-                        </span>
-                      </div>
-                      <span className="text-base md:text-lg font-extrabold text-[#5300b7]">
-                        {ticketData.room}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-col gap-1 p-3 bg-purple-50/60 rounded-xl border border-purple-200">
-                      <div className="flex items-center gap-1 text-[#5300b7]">
-                        <Monitor className="w-3.5 h-3.5" />
-                        <span className="text-[10px] font-semibold uppercase">
-                          Kompüter
-                        </span>
-                      </div>
-                      <span className="text-base md:text-lg font-extrabold text-[#5300b7]">
-                        {ticketData.computerNo}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Bottom security note */}
-              <div className="mt-4 pt-3 border-t border-dashed border-slate-200 flex justify-between items-center text-[11px] text-[#7b7486]">
-                <span>E-LDPTM İmtahan Mərkəzi Tərəfindən Təsdiqlənmişdir</span>
-                <span className="font-mono">Tarix: {new Date().toLocaleDateString('az-AZ')}</span>
-              </div>
-            </div>
-
-            {/* Right Column: QR & Print Action */}
-            <div className="w-full md:w-64 bg-[#f8f9ff] border-t md:border-t-0 md:border-l border-[#e2e8f0] p-6 flex flex-col items-center justify-between">
-              <div className="w-full flex flex-col items-center gap-3">
-                {/* QR Code Block */}
-                <div className="w-40 h-40 bg-white border-2 border-[#ccc3d7] rounded-xl p-2.5 flex flex-col items-center justify-center shadow-xs">
-                  <div className="w-full h-full bg-slate-900 rounded-lg p-2 flex items-center justify-center">
-                    <QrCode className="w-full h-full text-white" />
-                  </div>
-                </div>
-                <p className="text-xs text-center font-medium text-[#4a4455]">
-                  Nəzarətçi yoxlanışı üçün
-                </p>
-                <span className="text-[10px] font-mono text-[#7b7486]">
-                  {ticketData.docNumber}
-                </span>
-              </div>
-
-              <div className="w-full mt-6 no-print">
-                <button
-                  id="final-print-ticket-btn"
-                  onClick={handlePrintTicket}
-                  disabled={isPrinting}
-                  className="w-full py-3.5 bg-[#5300b7] hover:bg-[#430094] text-white font-semibold text-base rounded-xl shadow-[0_4px_10px_rgba(83,0,183,0.25)] transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
-                >
-                  <Printer className="w-5 h-5" />
-                  <span>{isPrinting ? 'Çap edilir...' : 'Çap Et'}</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      </footer>
     </div>
   );
 };

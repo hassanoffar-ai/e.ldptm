@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
-import { Shield, Lock, User, ArrowRight, Globe, AlertCircle, CheckCircle2, Eye, EyeOff, ShieldCheck, KeyRound } from 'lucide-react';
+import { Shield, Lock, User, ArrowRight, Globe, AlertCircle, CheckCircle2, Eye, EyeOff, ShieldCheck, KeyRound, Ticket } from 'lucide-react';
 import { AdminUser, UserRole } from '../types';
 import { getStoredAccounts, saveStoredSession } from '../data/auth';
 
 interface AdminLoginViewProps {
   onLoginSuccess: (user: AdminUser) => void;
   onNavigateHome: () => void;
+  onNavigateToTicket?: () => void;
 }
 
 export const AdminLoginView: React.FC<AdminLoginViewProps> = ({
   onLoginSuccess,
   onNavigateHome,
+  onNavigateToTicket,
 }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -21,12 +23,23 @@ export const AdminLoginView: React.FC<AdminLoginViewProps> = ({
     e.preventDefault();
     setErrorMessage(null);
 
+    const cleanUser = username.trim().toLowerCase();
+    const cleanPass = password.trim();
+
+    // Direct entry for bilet / bilet123
+    if (cleanUser === 'bilet' && cleanPass === 'bilet123') {
+      if (onNavigateToTicket) {
+        onNavigateToTicket();
+      }
+      return;
+    }
+
     const accounts = getStoredAccounts();
     const userMatch = accounts.find(
-      (a) => a.username.toLowerCase() === username.trim().toLowerCase()
+      (a) => a.username.toLowerCase() === cleanUser
     );
 
-    if (!userMatch || userMatch.passwordHash !== password.trim()) {
+    if (!userMatch || userMatch.passwordHash !== cleanPass) {
       setErrorMessage('Daxil edilmiş istifadəçi adı və ya şifrə yanlışdır.');
       return;
     }

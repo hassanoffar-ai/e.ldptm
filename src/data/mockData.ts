@@ -13,61 +13,9 @@ export const GROUPS_LIST = [
   '4-cü kurs',
 ];
 
-export const INITIAL_SPECIALTIES: SpecialtyItem[] = [
-  {
-    id: 'spec-1',
-    name: 'Kibertəhlükəsizlik',
-    code: 'KT',
-    direction: 'YTP (Yüksək Texniki Peşə)',
-    duration: '3 illik',
-    educationType: 'Əyani' as const,
-    description: 'YTP (Yüksək Texniki Peşə) təhsil pilləsi',
-  },
-  {
-    id: 'spec-2',
-    name: 'Kompüter sistemlərində proqramlaşdırma',
-    code: 'KSP',
-    direction: 'YTP (Yüksək Texniki Peşə)',
-    duration: '3 illik',
-    educationType: 'Əyani' as const,
-    description: 'YTP (Yüksək Texniki Peşə) təhsil pilləsi',
-  },
-  {
-    id: 'spec-3',
-    name: 'Kompüter şəbəkələri və şəbəkə inzibatçılığı',
-    code: 'KŞŞİ',
-    direction: 'YTP (Yüksək Texniki Peşə)',
-    duration: '3 illik',
-    educationType: 'Əyani' as const,
-    description: 'YTP (Yüksək Texniki Peşə) təhsil pilləsi',
-  },
-  {
-    id: 'spec-4',
-    name: 'Mehmanxana və restoran işinin təşkili və idarə edilməsi',
-    code: 'MRİTİE',
-    direction: 'YTP (Yüksək Texniki Peşə)',
-    duration: '3 illik',
-    educationType: 'Əyani' as const,
-    description: 'YTP (Yüksək Texniki Peşə) təhsil pilləsi',
-  },
-  {
-    id: 'spec-5',
-    name: 'Mühasibat uçotu',
-    code: 'MU',
-    direction: 'YTP (Yüksək Texniki Peşə)',
-    duration: '3 illik',
-    educationType: 'Əyani' as const,
-    description: 'YTP (Yüksək Texniki Peşə) təhsil pilləsi',
-  },
-].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'az'));
+export const INITIAL_SPECIALTIES: SpecialtyItem[] = [];
 
-export const SPECIALTIES_LIST: string[] = [
-  'Kibertəhlükəsizlik',
-  'Kompüter sistemlərində proqramlaşdırma',
-  'Kompüter şəbəkələri və şəbəkə inzibatçılığı',
-  'Mehmanxana və restoran işinin təşkili və idarə edilməsi',
-  'Mühasibat uçotu',
-].sort((a, b) => a.localeCompare(b, 'az'));
+export const SPECIALTIES_LIST: string[] = [];
 
 export const SEMESTERS_LIST = [
   '1-ci kurs 1-ci semestr',
