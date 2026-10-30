@@ -817,7 +817,6 @@ export default function App() {
         initialStudentId={kioskStudentId}
         onClearInitialStudentId={() => setKioskStudentId(undefined)}
         onNavigateHome={() => navigateTo('public')}
-        onNavigateToAdmin={() => navigateTo('admin')}
       />
     );
   }
@@ -831,7 +830,6 @@ export default function App() {
           onRegisterStudent={handleAddStudent}
           onLoginSuccess={handleStudentLoginSuccess}
           onNavigateToTicket={() => navigateTo('ticket')}
-          onNavigateToAdmin={() => navigateTo('admin')}
         />
       );
     }

@@ -24,7 +24,6 @@ interface StudentAuthViewProps {
   onRegisterStudent: (newStudent: Student) => void;
   onLoginSuccess: (studentUser: StudentUser) => void;
   onNavigateToTicket?: () => void;
-  onNavigateToAdmin?: () => void;
 }
 
 export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
@@ -32,7 +31,6 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
   onRegisterStudent,
   onLoginSuccess,
   onNavigateToTicket,
-  onNavigateToAdmin,
 }) => {
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
@@ -240,15 +238,7 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
           </div>
         </div>
 
-        {onNavigateToAdmin && (
-          <button
-            onClick={onNavigateToAdmin}
-            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 text-xs font-semibold backdrop-blur-md transition-all cursor-pointer"
-          >
-            <Lock className="w-3.5 h-3.5 text-purple-400" />
-            <span className="hidden sm:inline">Admin Girişi</span>
-          </button>
-        )}
+        {/* Header navigation if needed */}
       </header>
 
       {/* Main Center Container */}
@@ -570,18 +560,8 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
 
       {/* Footer */}
       <footer className="w-full py-4 text-center text-xs text-slate-500 relative z-10 px-4 border-t border-slate-800/60">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className="max-w-6xl mx-auto flex items-center justify-center">
           <span>Lənkəran Dövlət Peşə Təhsil Mərkəzi — Yüksək Texniki Peşə (YTP) © 2026</span>
-          {onNavigateToAdmin && (
-            <button
-              type="button"
-              onClick={onNavigateToAdmin}
-              className="inline-flex items-center gap-1.5 text-purple-400 hover:text-purple-300 font-semibold transition-colors cursor-pointer"
-            >
-              <Lock className="w-3.5 h-3.5" />
-              <span>Admin Panelinə Giriş (/admin)</span>
-            </button>
-          )}
         </div>
       </footer>
     </div>

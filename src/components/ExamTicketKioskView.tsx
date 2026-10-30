@@ -24,7 +24,6 @@ interface ExamTicketKioskViewProps {
   initialStudentId?: string;
   onClearInitialStudentId?: () => void;
   onNavigateHome?: () => void;
-  onNavigateToAdmin?: () => void;
 }
 
 interface TicketRecord {
@@ -200,7 +199,6 @@ export const ExamTicketKioskView: React.FC<ExamTicketKioskViewProps> = ({
   initialStudentId,
   onClearInitialStudentId,
   onNavigateHome,
-  onNavigateToAdmin,
 }) => {
   const [studentIdInput, setStudentIdInput] = useState(initialStudentId || '');
   const [phase, setPhase] = useState<'input' | 'ticket'>(
@@ -435,7 +433,7 @@ export const ExamTicketKioskView: React.FC<ExamTicketKioskViewProps> = ({
 
         <div className="flex items-center gap-2 sm:gap-3">
           <button
-            onClick={onNavigateToAdmin || onNavigateHome}
+            onClick={onNavigateHome}
             className="flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-semibold backdrop-blur-md transition-all cursor-pointer"
             title="Sessiyanı bitir və giriş səhifəsinə qayıt"
           >
@@ -701,16 +699,6 @@ export const ExamTicketKioskView: React.FC<ExamTicketKioskViewProps> = ({
                 className="text-purple-400 hover:text-purple-300 font-semibold transition-colors cursor-pointer"
               >
                 Əsas Portal
-              </button>
-            )}
-            {onNavigateToAdmin && (
-              <button
-                type="button"
-                onClick={onNavigateToAdmin}
-                className="inline-flex items-center gap-1.5 text-purple-400 hover:text-purple-300 font-semibold transition-colors cursor-pointer"
-              >
-                <Lock className="w-3.5 h-3.5" />
-                <span>Admin Girişi (/admin)</span>
               </button>
             )}
           </div>
