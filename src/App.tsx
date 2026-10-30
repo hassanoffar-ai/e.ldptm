@@ -814,6 +814,7 @@ export default function App() {
       <ExamTicketKioskView
         students={students}
         sessions={sessions}
+        courses={courses}
         initialStudentId={kioskStudentId}
         onClearInitialStudentId={() => setKioskStudentId(undefined)}
         onNavigateHome={() => navigateTo('public')}
@@ -829,7 +830,10 @@ export default function App() {
           students={students}
           onRegisterStudent={handleAddStudent}
           onLoginSuccess={handleStudentLoginSuccess}
-          onNavigateToTicket={() => navigateTo('ticket')}
+          onNavigateToTicket={(targetId?: string) => {
+            if (targetId) setKioskStudentId(targetId);
+            navigateTo('ticket');
+          }}
         />
       );
     }

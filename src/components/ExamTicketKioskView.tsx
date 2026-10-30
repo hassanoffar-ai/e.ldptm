@@ -14,13 +14,14 @@ import {
   BookOpen,
   CheckCircle2,
   Sparkles,
-  LogOut
+  LogOut,
 } from 'lucide-react';
-import { Student, ExamSession } from '../types';
+import { Student, ExamSession, GradeBookCourse } from '../types';
 
 interface ExamTicketKioskViewProps {
   students: Student[];
   sessions: ExamSession[];
+  courses?: GradeBookCourse[];
   initialStudentId?: string;
   onClearInitialStudentId?: () => void;
   onNavigateHome?: () => void;
@@ -196,6 +197,7 @@ function extractCourseLevel(student: Student | undefined): string {
 export const ExamTicketKioskView: React.FC<ExamTicketKioskViewProps> = ({
   students = [],
   sessions = [],
+  courses = [],
   initialStudentId,
   onClearInitialStudentId,
   onNavigateHome,
@@ -221,117 +223,255 @@ export const ExamTicketKioskView: React.FC<ExamTicketKioskViewProps> = ({
   const generateTicketsForId = (idToSearch: string) => {
     const rawTerm = (idToSearch || '').trim();
     if (!rawTerm) {
-      setErrorMessage('Zəhmət olmasa tələbə ID-sini və ya FİN kodunu daxil edin.');
+      setErrorMessage('Zəhmət olmasa tələbə ID-sini daxil edin.');
       return;
     }
 
-    const cleanTerm = rawTerm.toLowerCase().replace(/\s+/g, '');
+    const cleanTerm = rawTerm.toLowerCase().replace(/[\s\-_]+/g, '');
 
     // 1. Find matching student in student registry
-    const matchedStudent = (students || []).find((s) => {
+    let matchedStudent = (students || []).find((s) => {
       if (!s) return false;
-      const sId = (s.studentId || '').toLowerCase().replace(/\s+/g, '');
-      const sFin = (s.finCode || '').toLowerCase().replace(/\s+/g, '');
-      const sDbId = (s.id || '').toLowerCase().replace(/\s+/g, '');
-      const sName = (s.name || '').toLowerCase();
+      const sId = (s.studentId || '').toLowerCase().replace(/[\s\-_]+/g, '');
+      const sFin = (s.finCode || '').toLowerCase().replace(/[\s\-_]+/g, '');
+      const sDbId = (s.id || '').toLowerCase().replace(/[\s\-_]+/g, '');
+      const sName = (s.name || '').toLowerCase().trim();
+      const rawLower = rawTerm.toLowerCase().trim();
       return (
         sId === cleanTerm ||
         sFin === cleanTerm ||
         sDbId === cleanTerm ||
-        sName === rawTerm.toLowerCase() ||
-        sName.includes(rawTerm.toLowerCase())
+        sName === rawLower ||
+        (rawLower.length >= 3 && sName.includes(rawLower))
       );
     });
 
-    // 2. Find sessions matching student or student's group/specialty
-    const matchedSessions: Array<{ session: ExamSession; isToday: boolean }> = [];
-    const todayStr = new Date().toISOString().split('T')[0];
-
-    for (const sess of (sessions || [])) {
-      if (!sess) continue;
-      const sessDate = sess.date || '';
-      const isToday = sessDate === todayStr;
-
-      // Direct student participation in session items
-      const hasItem = (sess.items || []).some((item) => {
-        const itemStudentId = (item?.studentId || '').toLowerCase().replace(/\s+/g, '');
-        const itemStudentName = (item?.studentName || '').toLowerCase();
-        return (
-          itemStudentId === cleanTerm ||
-          (matchedStudent &&
-            (itemStudentId === (matchedStudent.studentId || '').toLowerCase().replace(/\s+/g, '') ||
-              itemStudentName === (matchedStudent.name || '').toLowerCase()))
-        );
-      });
-
-      // Group or specialty match
-      const groupMatch =
-        matchedStudent?.group &&
-        sess.group &&
-        sess.group.trim().toLowerCase() === matchedStudent.group.trim().toLowerCase();
-
-      const specMatch =
-        matchedStudent?.specialty &&
-        sess.specialty &&
-        sess.specialty.trim().toLowerCase() === matchedStudent.specialty.trim().toLowerCase();
-
-      if (hasItem || groupMatch || specMatch) {
-        matchedSessions.push({ session: sess, isToday });
+    // 1b. If not in students array, check inside sessions protocol items
+    if (!matchedStudent) {
+      for (const sess of (sessions || [])) {
+        const foundItem = (sess.items || []).find((item) => {
+          const itemStudentId = (item?.studentId || '').toLowerCase().replace(/[\s\-_]+/g, '');
+          const itemStudentName = (item?.studentName || '').toLowerCase().trim();
+          return itemStudentId === cleanTerm || (rawTerm.length >= 3 && itemStudentName.includes(rawTerm.toLowerCase()));
+        });
+        if (foundItem) {
+          matchedStudent = {
+            id: foundItem.studentId,
+            studentId: foundItem.studentId,
+            finCode: foundItem.studentId,
+            name: foundItem.studentName,
+            group: foundItem.group || sess.group || '1-ci kurs',
+            specialty: sess.specialty || 'Yüksək Texniki Peşə',
+            semester: sess.semester || '1-ci kurs 1-ci semestr',
+            status: 'active',
+          };
+          break;
+        }
       }
     }
 
-    // Sort matching sessions: put today's exam first!
-    matchedSessions.sort((a, b) => {
-      if (a.isToday && !b.isToday) return -1;
-      if (!a.isToday && b.isToday) return 1;
-      return 0;
-    });
+    // 1c. If still not found, check inside gradebook course grades
+    if (!matchedStudent) {
+      for (const crs of (courses || [])) {
+        const foundGrade = (crs.grades || []).find((g) => {
+          const gId = (g.studentId || '').toLowerCase().replace(/[\s\-_]+/g, '');
+          const gNum = (g.idNumber || '').toLowerCase().replace(/[\s\-_]+/g, '');
+          const gName = (g.studentName || '').toLowerCase().trim();
+          return gId === cleanTerm || gNum === cleanTerm || (rawTerm.length >= 3 && gName.includes(rawTerm.toLowerCase()));
+        });
+        if (foundGrade) {
+          matchedStudent = {
+            id: foundGrade.studentId || rawTerm,
+            studentId: foundGrade.studentId || rawTerm,
+            finCode: foundGrade.idNumber || foundGrade.studentId || rawTerm,
+            name: foundGrade.studentName || 'Tələbə',
+            group: crs.group || '1-ci kurs',
+            specialty: crs.specialty || 'Yüksək Texniki Peşə',
+            semester: crs.semester || '1-ci kurs 1-ci semestr',
+            status: 'active',
+          };
+          break;
+        }
+      }
+    }
 
-    if (!matchedStudent && matchedSessions.length === 0) {
+    if (!matchedStudent) {
       setErrorMessage(
-        `"${rawTerm}" üzrə sistemdə tələbə və ya imtahan qeydiyyatı tapılmadı. Zəhmət olmasa Tələbə ID-nizi (məs: TL-001) və ya FİN kodunuzu dəqiqləşdirin.`
+        `"${rawTerm}" nömrəli Tələbə ID sistemdə tapılmadı. Zəhmət olmasa tələbə ID-nizi (məsələn: 828391) dəqiqləşdirib yenidən daxil edin.`
       );
       return;
     }
 
-    // Stable ticket number based on student ID
-    const studentIdentifier = matchedStudent?.studentId || rawTerm.toUpperCase();
+    const studentIdentifier = matchedStudent.studentId || matchedStudent.finCode || rawTerm.toUpperCase();
+    const studentGroup = (matchedStudent.group || '').trim().toLowerCase();
+    const studentSpecialty = (matchedStudent.specialty || '').trim().toLowerCase();
+    const studentSemester = (matchedStudent.semester || '').trim().toLowerCase();
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    // Stable base ticket number derived from student ID
     const hashVal = studentIdentifier
       .split('')
       .reduce((acc, c) => acc + c.charCodeAt(0), 0);
     const baseTicketNum = (Math.abs(hashVal) % 25) + 1;
 
     const ticketsList: TicketRecord[] = [];
+    const addedSubjectKeys = new Set<string>();
 
-    if (matchedSessions.length > 0) {
-      matchedSessions.forEach(({ session, isToday }, idx) => {
-        const ticketNum = ((baseTicketNum + idx - 1) % 25) + 1;
-        const subject = session.subject || 'İxtisas İmtahanı';
-        const specialty = session.specialty || matchedStudent?.specialty || 'Yüksək Texniki Peşə';
-        const courseLevel = extractCourseLevel(matchedStudent);
-        const questions = get5ExamQuestions(subject, specialty, ticketNum);
+    // 2. Find sessions matching student
+    const matchedSessions: Array<{ session: ExamSession; isToday: boolean }> = [];
+    for (const sess of (sessions || [])) {
+      if (!sess) continue;
+      const sessDate = sess.date || '';
+      const isToday = sessDate === todayStr;
 
-        ticketsList.push({
-          studentName: matchedStudent?.name || 'Tələbə',
-          studentId: studentIdentifier,
-          finCode: matchedStudent?.finCode || '-',
-          specialty,
-          courseLevel,
-          group: session.group || matchedStudent?.group || courseLevel,
-          subject,
-          date: session.date || todayStr,
-          time: session.time || '10:00',
-          ticketNumber: ticketNum,
-          questions,
-          academicYear: session.academicYear || '2024/2025 Tədris İli',
-          semester: session.semester || 'Yaz Semestri',
-          isToday,
-        });
+      const hasItem = (sess.items || []).some((item) => {
+        const itemStudentId = (item?.studentId || '').toLowerCase().replace(/[\s\-_]+/g, '');
+        const itemStudentName = (item?.studentName || '').toLowerCase().trim();
+        return (
+          itemStudentId === cleanTerm ||
+          (matchedStudent &&
+            (itemStudentId === (matchedStudent.studentId || '').toLowerCase().replace(/[\s\-_]+/g, '') ||
+              itemStudentName === (matchedStudent.name || '').toLowerCase().trim()))
+        );
       });
-    } else if (matchedStudent) {
-      // Fallback if no explicit session exists yet in DB
+
+      const sessGroup = (sess.group || '').trim().toLowerCase();
+      const sessSpec = (sess.specialty || '').trim().toLowerCase();
+
+      const groupMatch = studentGroup && sessGroup && (
+        sessGroup === studentGroup ||
+        sessGroup.includes(studentGroup) ||
+        studentGroup.includes(sessGroup)
+      );
+
+      const specMatch = studentSpecialty && sessSpec && (
+        sessSpec === studentSpecialty ||
+        sessSpec.includes(studentSpecialty) ||
+        studentSpecialty.includes(sessSpec)
+      );
+
+      if (hasItem || (groupMatch && specMatch) || (specMatch && !sessGroup) || (groupMatch && !sessSpec)) {
+        matchedSessions.push({ session: sess, isToday });
+      }
+    }
+
+    // Sort matching sessions: today first
+    matchedSessions.sort((a, b) => {
+      if (a.isToday && !b.isToday) return -1;
+      if (!a.isToday && b.isToday) return 1;
+      return 0;
+    });
+
+    matchedSessions.forEach(({ session, isToday }, idx) => {
+      const subject = session.subject || 'İxtisas İmtahanı';
+      const key = `${subject.toLowerCase()}`;
+      if (addedSubjectKeys.has(key)) return;
+      addedSubjectKeys.add(key);
+
+      const ticketNum = ((baseTicketNum + idx - 1) % 25) + 1;
+      const specialty = session.specialty || matchedStudent?.specialty || 'Yüksək Texniki Peşə';
       const courseLevel = extractCourseLevel(matchedStudent);
-      const subject = 'İxtisas Fənni üzrə Yekun İmtahan';
+      const questions = get5ExamQuestions(subject, specialty, ticketNum);
+
+      ticketsList.push({
+        studentName: matchedStudent?.name || 'Tələbə',
+        studentId: studentIdentifier,
+        finCode: matchedStudent?.finCode || '-',
+        specialty,
+        courseLevel,
+        group: session.group || matchedStudent?.group || courseLevel,
+        subject,
+        date: session.date || todayStr,
+        time: session.time || '10:00',
+        ticketNumber: ticketNum,
+        questions,
+        academicYear: session.academicYear || '2024/2025 Tədris İli',
+        semester: session.semester || matchedStudent?.semester || 'Yaz Semestri',
+        isToday,
+      });
+    });
+
+    // 3. Supplement with student's active Courses (Gradebook / Curriculum Subjects)
+    const matchedCourses = (courses || []).filter((c) => {
+      if (!c || !c.subject) return false;
+      const cGroup = (c.group || '').trim().toLowerCase();
+      const cSpec = (c.specialty || '').trim().toLowerCase();
+      const cSem = (c.semester || '').trim().toLowerCase();
+
+      // Check if student has grades in course
+      const inGrades = (c.grades || []).some((g) => {
+        const gId = (g.studentId || '').toLowerCase().replace(/[\s\-_]+/g, '');
+        const gNum = (g.idNumber || '').toLowerCase().replace(/[\s\-_]+/g, '');
+        const gName = (g.studentName || '').toLowerCase().trim();
+        return (
+          gId === cleanTerm ||
+          gNum === cleanTerm ||
+          (matchedStudent &&
+            (gId === (matchedStudent.studentId || '').toLowerCase().replace(/[\s\-_]+/g, '') ||
+              gName === (matchedStudent.name || '').toLowerCase().trim()))
+        );
+      });
+
+      if (inGrades) return true;
+
+      const specMatch = studentSpecialty && cSpec && (
+        cSpec === studentSpecialty ||
+        cSpec.includes(studentSpecialty) ||
+        studentSpecialty.includes(cSpec)
+      );
+
+      const groupMatch = studentGroup && cGroup && (
+        cGroup === studentGroup ||
+        cGroup.includes(studentGroup) ||
+        studentGroup.includes(cGroup)
+      );
+
+      const semMatch = studentSemester && cSem && (
+        cSem === studentSemester ||
+        cSem.includes(studentSemester) ||
+        studentSemester.includes(cSem)
+      );
+
+      if (specMatch && (groupMatch || semMatch)) return true;
+      if (specMatch) return true;
+      if (groupMatch && !cSpec) return true;
+
+      return false;
+    });
+
+    matchedCourses.forEach((c, idx) => {
+      const subject = c.subject.trim();
+      const key = `${subject.toLowerCase()}`;
+      if (addedSubjectKeys.has(key)) return;
+      addedSubjectKeys.add(key);
+
+      const ticketNum = ((baseTicketNum + ticketsList.length) % 25) + 1;
+      const specialty = c.specialty || matchedStudent?.specialty || 'Yüksək Texniki Peşə';
+      const courseLevel = extractCourseLevel(matchedStudent);
+      const questions = get5ExamQuestions(subject, specialty, ticketNum);
+
+      ticketsList.push({
+        studentName: matchedStudent?.name || 'Tələbə',
+        studentId: studentIdentifier,
+        finCode: matchedStudent?.finCode || '-',
+        specialty,
+        courseLevel,
+        group: c.group || matchedStudent?.group || courseLevel,
+        subject,
+        date: todayStr,
+        time: '10:00',
+        ticketNumber: ticketNum,
+        questions,
+        academicYear: '2024/2025 Tədris İli',
+        semester: c.semester || matchedStudent?.semester || 'Yaz Semestri',
+        isToday: true,
+      });
+    });
+
+    // 4. If still no tickets created, generate a tailored default exam ticket
+    if (ticketsList.length === 0) {
+      const courseLevel = extractCourseLevel(matchedStudent);
+      const subject = `${matchedStudent.specialty || 'İxtisas'} üzrə İmtahan`;
       const specialty = matchedStudent.specialty || 'Yüksək Texniki Peşə';
       const questions = get5ExamQuestions(subject, specialty, baseTicketNum);
 
