@@ -595,10 +595,10 @@ export const ExamTicketKioskView: React.FC<ExamTicketKioskViewProps> = ({
                 <FileText className="w-8 h-8" />
               </div>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                İmtahan Biletini Əldə Edin
+                İmtahan Biletini Çək
               </h2>
               <p className="text-xs sm:text-sm text-slate-400 mt-2 max-w-sm mx-auto">
-                Həmin gün keçirilən imtahan üçün biletinizi və 5 imtahan sualınızı ekrana çıxarmaq üçün Tələbə ID-nizi daxil edin.
+                İmtahan suallarınızı və rəsmi biletinizi ekrana çıxarmaq üçün Tələbə ID nömrənizi daxil edin.
               </p>
             </div>
 
@@ -609,7 +609,7 @@ export const ExamTicketKioskView: React.FC<ExamTicketKioskViewProps> = ({
                   htmlFor="studentIdInput"
                   className="block text-xs font-semibold text-slate-300 mb-1.5"
                 >
-                  Tələbə ID və ya FİN Kodu
+                  Tələbə ID nömrəsi
                 </label>
                 <div className="relative">
                   <User className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-400" />
@@ -623,7 +623,7 @@ export const ExamTicketKioskView: React.FC<ExamTicketKioskViewProps> = ({
                       setStudentIdInput(e.target.value);
                       if (errorMessage) setErrorMessage(null);
                     }}
-                    placeholder="Məsələn: TL-001 və ya 1290927"
+                    placeholder="Məsələn: 828391 və ya TL-001"
                     className="w-full pl-11 pr-4 py-3.5 bg-slate-800/70 border border-slate-700 rounded-xl text-base text-white placeholder-slate-500 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all font-mono uppercase"
                   />
                 </div>
@@ -641,8 +641,8 @@ export const ExamTicketKioskView: React.FC<ExamTicketKioskViewProps> = ({
                 id="search-ticket-btn"
                 className="w-full py-4 bg-gradient-to-r from-[#6d28d9] to-[#8b5cf6] hover:from-[#5b21b6] hover:to-[#7c3aed] text-white font-bold text-sm sm:text-base rounded-xl shadow-lg shadow-purple-950 transition-all flex items-center justify-center gap-2.5 active:scale-[0.99] cursor-pointer"
               >
-                <Printer className="w-5 h-5" />
-                <span>İmtahan Biletini Tap və Göstər</span>
+                <FileText className="w-5 h-5" />
+                <span>Bileti Çək və Göstər</span>
               </button>
             </form>
           </div>

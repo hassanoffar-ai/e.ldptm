@@ -23,7 +23,7 @@ interface StudentAuthViewProps {
   students: Student[];
   onRegisterStudent: (newStudent: Student) => void;
   onLoginSuccess: (studentUser: StudentUser) => void;
-  onNavigateToTicket?: (studentId?: string) => void;
+  onNavigateToTicket?: () => void;
 }
 
 export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
@@ -32,17 +32,13 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
   onLoginSuccess,
   onNavigateToTicket,
 }) => {
-  const [authMode, setAuthMode] = useState<'login' | 'ticket' | 'register'>('login');
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
   // Login form states
   const [loginIdentifier, setLoginIdentifier] = useState(''); // Student ID
   const [loginPassword, setLoginPassword] = useState('');
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
-
-  // Ticket quick access states
-  const [ticketStudentId, setTicketStudentId] = useState('');
-  const [ticketError, setTicketError] = useState<string | null>(null);
 
   // Register form states (Student ID assigned by admin)
   const [registerStudentId, setRegisterStudentId] = useState('');
@@ -56,19 +52,6 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
   const [registerSuccessMsg, setRegisterSuccessMsg] = useState<string | null>(null);
 
   const cleanRegisterId = registerStudentId.trim();
-
-  // Find student in registered DB for ticket search
-  const cleanTicketId = ticketStudentId.trim().toLowerCase().replace(/[\s\-_]+/g, '');
-  const matchedTicketStudent =
-    cleanTicketId.length >= 2
-      ? (students || []).find((s) => {
-          if (!s) return false;
-          const sId = (s.studentId || '').toLowerCase().replace(/[\s\-_]+/g, '');
-          const sFin = (s.finCode || '').toLowerCase().replace(/[\s\-_]+/g, '');
-          const sDbId = (s.id || '').toLowerCase().replace(/[\s\-_]+/g, '');
-          return sId === cleanTicketId || sFin === cleanTicketId || sDbId === cleanTicketId;
-        }) || null
-      : null;
 
   // Find student in registered DB by Student ID (or finCode for legacy)
   const matchedStudentById =
@@ -108,8 +91,8 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
       return;
     }
 
-    // Direct access if bilet / bilet123 entered
-    if (cleanId === 'bilet' && cleanPass === 'bilet123') {
+    // Direct access if bilet / bilet or bilet123 entered
+    if (cleanId === 'bilet' && (cleanPass === 'bilet' || cleanPass === 'bilet123' || cleanPass === '123456')) {
       if (onNavigateToTicket) {
         onNavigateToTicket();
       }
@@ -159,19 +142,6 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
 
     saveStoredStudentSession(sessionUser);
     onLoginSuccess(sessionUser);
-  };
-
-  // Handle direct exam ticket lookup
-  const handleTicketSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const cleanId = ticketStudentId.trim();
-    if (!cleanId) {
-      setTicketError('Zəhmət olmasa Tələbə ID nömrənizi daxil edin.');
-      return;
-    }
-    if (onNavigateToTicket) {
-      onNavigateToTicket(cleanId);
-    }
   };
 
   // Handle Student Registration
@@ -268,85 +238,17 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
           </div>
         </div>
 
-        {onNavigateToTicket && (
-          <button
-            type="button"
-            onClick={() => onNavigateToTicket()}
-            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl bg-purple-600/25 hover:bg-purple-600/40 text-purple-200 hover:text-white border border-purple-500/30 text-xs sm:text-sm font-bold backdrop-blur-md transition-all cursor-pointer shadow-lg shadow-purple-950/40"
-          >
-            <Ticket className="w-4 h-4 text-purple-300" />
-            <span>İmtahan Bileti</span>
-          </button>
-        )}
+        {/* Top Navbar Right side */}
       </header>
 
       {/* Main Center Container */}
       <main className="flex-1 flex items-center justify-center p-3 sm:p-6 relative z-10 my-2 sm:my-4">
         <div className="w-full max-w-xl bg-slate-900/85 backdrop-blur-2xl border border-slate-700/60 rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-2xl shadow-purple-950/60 relative">
-          {/* Mode Switcher Tabs */}
-          <div className="flex p-1 bg-slate-800/80 rounded-2xl border border-slate-700/60 mb-5">
-            <button
-              type="button"
-              onClick={() => {
-                setAuthMode('login');
-                setLoginError(null);
-              }}
-              className={`flex-1 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                authMode === 'login'
-                  ? 'bg-gradient-to-r from-[#5300b7] to-[#7c3aed] text-white shadow-md'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <User className="w-4 h-4" />
-              <span>Tələbə Girişi</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setAuthMode('ticket');
-                setTicketError(null);
-              }}
-              className={`flex-1 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                authMode === 'ticket'
-                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <Ticket className="w-4 h-4" />
-              <span>İmtahan Bileti</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setAuthMode('register');
-                setRegisterError(null);
-                setRegisterSuccessMsg(null);
-              }}
-              className={`flex-1 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                authMode === 'register'
-                  ? 'bg-gradient-to-r from-[#5300b7] to-[#7c3aed] text-white shadow-md'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <KeyRound className="w-4 h-4" />
-              <span>Qeydiyyat</span>
-            </button>
-          </div>
-
           {/* Header Banner */}
           <div className="text-center mb-5 sm:mb-6">
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              {authMode === 'login'
-                ? 'Tələbə Girişi'
-                : authMode === 'ticket'
-                ? 'İmtahan Biletini Əldə Et'
-                : 'Tələbə Qeydiyyatı'}
+              {authMode === 'login' ? 'Tələbə Girişi' : 'Tələbə Qeydiyyatı'}
             </h2>
-            {authMode === 'ticket' && (
-              <p className="text-xs sm:text-sm text-slate-400 mt-1.5">
-                Tələbə ID nömrənizi daxil edərək birbaşa imtahan sualları biletinizə keçin
-              </p>
-            )}
           </div>
 
           {/* Registration Success Notification (when redirected to login) */}
@@ -423,25 +325,8 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
                 <ArrowRight className="w-4 h-4" />
               </button>
 
-              {/* Direct link to Exam Ticket without password */}
-              <div className="mt-4 pt-3 border-t border-slate-800 text-center">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAuthMode('ticket');
-                    if (loginIdentifier.trim()) {
-                      setTicketStudentId(loginIdentifier.trim());
-                    }
-                  }}
-                  className="inline-flex items-center gap-1.5 text-xs text-purple-400 hover:text-purple-300 font-semibold transition-colors cursor-pointer"
-                >
-                  <Ticket className="w-3.5 h-3.5" />
-                  <span>Yalnız İmtahan Biletini almaq istəyirsiniz? Şifrəsiz Bilet Girişi</span>
-                </button>
-              </div>
-
               {/* Bottom prompt for registration */}
-              <div className="mt-3 text-center">
+              <div className="mt-6 pt-5 border-t border-slate-800/80 text-center">
                 <p className="text-xs sm:text-sm text-slate-400">
                   Hesabınız yoxdur?{' '}
                   <button
@@ -457,63 +342,6 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
                   </button>
                 </p>
               </div>
-            </form>
-          )}
-
-          {/* TAB 2: EXAM TICKET RETRIEVAL - ONLY STUDENT ID NEEDED */}
-          {authMode === 'ticket' && (
-            <form onSubmit={handleTicketSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  Tələbə ID nömrəniz
-                </label>
-                <div className="relative">
-                  <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-400" />
-                  <input
-                    type="text"
-                    required
-                    autoFocus
-                    placeholder="Məsələn: 828391 və ya TL-001"
-                    value={ticketStudentId}
-                    onChange={(e) => {
-                      setTicketStudentId(e.target.value);
-                      setTicketError(null);
-                    }}
-                    className="w-full pl-10 pr-4 py-3 bg-slate-800/60 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all font-mono"
-                  />
-                </div>
-              </div>
-
-              {matchedTicketStudent && (
-                <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs rounded-xl flex items-center gap-3 animate-in fade-in duration-200">
-                  <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-400" />
-                  <div>
-                    <strong className="block text-emerald-200 font-bold text-sm">
-                      {matchedTicketStudent.name}
-                    </strong>
-                    <span className="text-emerald-400/90 text-xs">
-                      {matchedTicketStudent.specialty} • {matchedTicketStudent.group}
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {ticketError && (
-                <div className="p-3 bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs rounded-xl flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
-                  <span>{ticketError}</span>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                id="ticket-submit-btn"
-                className="w-full py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-purple-950/50 transition-all flex items-center justify-center gap-2 active:scale-[0.99] cursor-pointer mt-2"
-              >
-                <Ticket className="w-4 h-4" />
-                <span>İmtahan Biletinə Daxil Ol</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
             </form>
           )}
 
