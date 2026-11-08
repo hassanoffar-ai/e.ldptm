@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { ExamSession, GradeBookCourse, SpecialtyItem, SpecialtyModule, Student } from '../types';
+import { ExamSession, GradeBookCourse, SpecialtyItem, SpecialtyModule, Student, UserProfile } from '../types';
 
 const getEnvVar = (key: string, fallback: string): string => {
   try {
@@ -490,4 +490,201 @@ export async function deleteModuleFromDb(id: string): Promise<void> {
     console.error('Error deleting module from Supabase:', err);
   }
 }
+
+// ==================== PROFILES & AUTH ====================
+
+export const mapDbToProfile = (row: any): UserProfile => ({
+  id: row.id,
+  username: row.username || '',
+  passwordHash: row.password_hash || '',
+  role: row.role || 'student',
+  fullName: row.full_name || row.username || '',
+  email: row.email || undefined,
+  phone: row.phone || undefined,
+  studentId: row.student_id || undefined,
+  totpSecret: row.totp_secret || undefined,
+  isTotpEnabled: Boolean(row.is_totp_enabled),
+  status: row.status || 'active',
+});
+
+/**
+ * Fetch a user profile by username or student ID from Supabase
+ */
+export async function fetchProfileByUsername(
+  rawUsername: string
+): Promise<UserProfile | null> {
+  const username = (rawUsername || '').trim().toLowerCase();
+  if (!username) return null;
+
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .or(`username.ilike.${username},student_id.ilike.${username}`)
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      console.warn('Error fetching profile from Supabase:', error.message);
+      return null;
+    }
+    if (!data) return null;
+    return mapDbToProfile(data);
+  } catch (err) {
+    console.error('Exception fetching profile:', err);
+    return null;
+  }
+}
+
+/**
+ * Fetch all profiles from Supabase (for admin user management)
+ */
+export async function fetchProfilesList(): Promise<UserProfile[]> {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.warn('Error fetching profiles list from Supabase:', error.message);
+      return [];
+    }
+    return (data || []).map(mapDbToProfile);
+  } catch (err) {
+    console.error('Exception fetching profiles list:', err);
+    return [];
+  }
+}
+
+/**
+ * Save or update a profile in Supabase
+ */
+export async function upsertProfileToDb(
+  profile: Partial<UserProfile> & { username: string }
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const cleanUser = profile.username.trim().toLowerCase();
+    const payload: any = {
+      username: cleanUser,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (profile.role) payload.role = profile.role;
+    if (profile.fullName) payload.full_name = profile.fullName;
+    if (profile.email !== undefined) payload.email = profile.email || null;
+    if (profile.phone !== undefined) payload.phone = profile.phone || null;
+    if (profile.studentId !== undefined) payload.student_id = profile.studentId || null;
+    if (profile.passwordHash !== undefined) payload.password_hash = profile.passwordHash;
+    if (profile.totpSecret !== undefined) payload.totp_secret = profile.totpSecret;
+    if (profile.isTotpEnabled !== undefined) payload.is_totp_enabled = profile.isTotpEnabled;
+    if (profile.status) payload.status = profile.status;
+
+    const { error } = await supabase
+      .from('profiles')
+      .upsert(payload, { onConflict: 'username' });
+
+    if (error) {
+      console.error('Error saving profile to Supabase:', error);
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (err: any) {
+    console.error('Exception upserting profile:', err);
+    return { success: false, error: err?.message || 'Gözlənilməz xəta baş verdi' };
+  }
+}
+
+/**
+ * Update password for a user in public.profiles
+ */
+export async function updateProfilePasswordInDb(
+  username: string,
+  newPasswordHash: string
+): Promise<{ success: boolean; error?: string }> {
+  const cleanUser = username.trim().toLowerCase();
+  try {
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        password_hash: newPasswordHash,
+        updated_at: new Date().toISOString(),
+      })
+      .ilike('username', cleanUser);
+
+    if (error) {
+      console.error('Error updating password in Supabase:', error);
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Şifrə yenilənə bilmədi' };
+  }
+}
+
+/**
+ * Update Google Authenticator (TOTP) secret and status in public.profiles
+ */
+export async function updateProfileTotpInDb(
+  username: string,
+  totpSecret: string,
+  isEnabled: boolean
+): Promise<{ success: boolean; error?: string }> {
+  const cleanUser = username.trim().toLowerCase();
+  try {
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        totp_secret: totpSecret,
+        is_totp_enabled: isEnabled,
+        updated_at: new Date().toISOString(),
+      })
+      .ilike('username', cleanUser);
+
+    if (error) {
+      console.error('Error updating TOTP in Supabase:', error);
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Autozator yenilənə bilmədi' };
+  }
+}
+
+/**
+ * Sync student registration or password update to public.profiles
+ */
+export async function syncStudentToProfiles(
+  student: Student,
+  password?: string
+): Promise<void> {
+  if (!student) return;
+  const username = (student.studentId || student.finCode || student.id || '').trim().toLowerCase();
+  if (!username) return;
+
+  try {
+    const payload: any = {
+      username: username,
+      student_id: student.studentId || null,
+      full_name: student.name,
+      role: 'student',
+      email: student.email || null,
+      phone: student.phone || null,
+      status: student.status || 'active',
+      is_totp_enabled: false,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (password) {
+      payload.password_hash = password;
+    } else if (student.passwordHash) {
+      payload.password_hash = student.passwordHash;
+    }
+
+    await supabase.from('profiles').upsert(payload, { onConflict: 'username' });
+  } catch (err) {
+    console.error('Exception syncing student to profiles:', err);
+  }
+}
+
 

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Student, StudentUser } from '../types';
 import { saveStoredStudentSession } from '../data/auth';
+import { fetchProfileByUsername, syncStudentToProfiles } from '../lib/supabase';
 
 interface StudentAuthViewProps {
   students: Student[];
@@ -78,8 +79,8 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
     }
   }, [matchedStudentById]);
 
-  // Handle Student Login
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  // Handle Student Login directly against Supabase public.profiles & local students state
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError(null);
 
@@ -91,15 +92,24 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
       return;
     }
 
-    // Direct access if bilet / bilet or bilet123 entered
-    if (cleanId === 'bilet' && (cleanPass === 'bilet' || cleanPass === 'bilet123' || cleanPass === '123456')) {
+    // Direct access if bilet entered
+    if (cleanId === 'bilet' && cleanPass.length > 0) {
       if (onNavigateToTicket) {
         onNavigateToTicket();
       }
       return;
     }
 
-    // Match by studentId, id, or legacy finCode
+    // First try to check profile in Supabase public.profiles
+    let profilePassword: string | null = null;
+    try {
+      const dbProfile = await fetchProfileByUsername(cleanId);
+      if (dbProfile && dbProfile.passwordHash) {
+        profilePassword = dbProfile.passwordHash;
+      }
+    } catch {}
+
+    // Match student in local loaded students
     const matched = (students || []).find((s) => {
       if (!s) return false;
       const sId = (s.studentId || '').toLowerCase();
@@ -115,9 +125,9 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
       return;
     }
 
-    // Check password
-    const expectedPassword = matched.passwordHash || '123456';
-    if (cleanPass !== expectedPassword) {
+    // Check password from Supabase profiles first, or student's own record
+    const expectedPassword = profilePassword || matched.passwordHash;
+    if (!expectedPassword || cleanPass !== expectedPassword) {
       if (!matched.isRegistered) {
         setLoginError(
           'Daxil edilmiş şifrə yanlışdır. Əgər portalda ilk dəfəsinizsə, aşağıdakı "Qeydiyyatdan keçin" bölməsindən şifrənizi təyin edin.'
@@ -145,7 +155,7 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
   };
 
   // Handle Student Registration
-  const handleRegisterSubmit = (e: React.FormEvent) => {
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setRegisterError(null);
 
@@ -186,17 +196,25 @@ export const StudentAuthView: React.FC<StudentAuthViewProps> = ({
       return;
     }
 
+    const cleanPass = password.trim();
     const updatedStudent: Student = {
       ...matchedStudentById,
       name: matchedStudentById.name,
-      passwordHash: password.trim(),
+      passwordHash: cleanPass,
       phone: phone.trim(),
       email: email.trim(),
       isRegistered: true,
     };
 
-    // Save updated student
+    // Save updated student locally & in students DB
     onRegisterStudent(updatedStudent);
+
+    // Also sync password directly to Supabase public.profiles
+    try {
+      await syncStudentToProfiles(updatedStudent, cleanPass);
+    } catch (err) {
+      console.warn('Could not sync student to public.profiles:', err);
+    }
 
     // Provide feedback and switch to login page
     setRegisterSuccessMsg(

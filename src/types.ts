@@ -154,6 +154,21 @@ export type ActiveTab =
   | 'settings';
 
 export type UserRole = 'super_admin' | 'admin';
+export type ProfileRole = 'super_admin' | 'admin' | 'student';
+
+export interface UserProfile {
+  id?: string;
+  username: string;
+  passwordHash?: string;
+  role: ProfileRole;
+  fullName: string;
+  email?: string;
+  phone?: string;
+  studentId?: string;
+  totpSecret?: string;
+  isTotpEnabled?: boolean;
+  status?: string;
+}
 
 export interface AdminPermissions {
   canManageStudents: boolean;

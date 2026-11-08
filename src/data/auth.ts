@@ -2,9 +2,9 @@ import { AdminPermissions, AdminUser, StudentUser, UserRole } from '../types';
 
 export interface AccountCredentials {
   username: string;
-  passwordHash: string; // Stored in localStorage
   fullName: string;
   role: UserRole;
+  passwordHash?: string; // Loaded directly from Supabase public.profiles
 }
 
 export const DEFAULT_ADMIN_PERMISSIONS: AdminPermissions = {
@@ -20,22 +20,20 @@ export const DEFAULT_ADMIN_PERMISSIONS: AdminPermissions = {
   canManageAttendance: true,
 };
 
+// Default system accounts metadata (Passwords are securely fetched and verified in Supabase public.profiles)
 const DEFAULT_ACCOUNTS: AccountCredentials[] = [
   {
     username: 'superadmin',
-    passwordHash: 'Subhanallah313',
     fullName: 'Baş Administrator (Super Admin)',
     role: 'super_admin',
   },
   {
     username: 'admin',
-    passwordHash: 'LDPTM2026',
     fullName: 'Köməkçi Admin',
     role: 'admin',
   },
   {
     username: 'bilet',
-    passwordHash: 'bilet123',
     fullName: 'İmtahan Bilet Sistemi',
     role: 'admin',
   },
@@ -47,36 +45,11 @@ export const getStoredAccounts = (): AccountCredentials[] => {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        let hasChanges = false;
-        const migrated = parsed.map((acc: AccountCredentials) => {
-          if (acc.username === 'superadmin' && acc.passwordHash === 'super123') {
-            hasChanges = true;
-            return { ...acc, passwordHash: 'Subhanallah313', fullName: 'Baş Administrator (Super Admin)' };
-          }
-          if (acc.username === 'admin' && acc.passwordHash === 'admin123') {
-            hasChanges = true;
-            return { ...acc, passwordHash: 'LDPTM2026', fullName: 'Köməkçi Admin' };
-          }
-          return acc;
-        });
-
-        const hasBiletAccount = migrated.some(
-          (a: AccountCredentials) => a.username.toLowerCase() === 'bilet'
-        );
-        if (!hasBiletAccount) {
-          migrated.push({
-            username: 'bilet',
-            passwordHash: 'bilet123',
-            fullName: 'İmtahan Bilet Sistemi',
-            role: 'admin',
-          });
-          hasChanges = true;
-        }
-
-        if (hasChanges) {
-          saveStoredAccounts(migrated);
-        }
-        return migrated;
+        return parsed.map((acc: AccountCredentials) => ({
+          username: acc.username,
+          fullName: acc.fullName,
+          role: acc.role,
+        }));
       }
     }
   } catch (e) {
