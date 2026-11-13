@@ -865,10 +865,6 @@ export default function App() {
         courses={courses}
         sessions={sessions}
         onLogout={handleStudentLogout}
-        onNavigateToTicket={(id) => {
-          if (id) setKioskStudentId(id);
-          navigateTo('ticket');
-        }}
       />
     );
   }
