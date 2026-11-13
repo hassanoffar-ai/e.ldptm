@@ -6,24 +6,17 @@ import {
   KeyRound,
   CheckCircle2,
   Lock,
-  Smartphone,
-  RotateCcw,
-  AlertTriangle,
   Save,
-  Check,
   Loader2,
 } from 'lucide-react';
 import { AdminPermissions, AdminUser, UserProfile } from '../types';
 import {
-  AccountCredentials,
-  getStoredAccounts,
   getStoredPermissions,
   saveStoredPermissions,
 } from '../data/auth';
 import {
   fetchProfileByUsername,
   updateProfilePasswordInDb,
-  updateProfileTotpInDb,
 } from '../lib/supabase';
 
 interface AdminPermissionsViewProps {
@@ -122,31 +115,6 @@ export const AdminPermissionsView: React.FC<AdminPermissionsViewProps> = ({
     }
   };
 
-  // Reset TOTP Authenticator for a user (allows scanning QR code again)
-  const handleResetTotp = async (targetUser: 'superadmin' | 'admin') => {
-    if (currentUser.role !== 'super_admin') {
-      alert('Yalnız Super Admin Autozatoru sıfırlaya bilər!');
-      return;
-    }
-
-    const confirmed = window.confirm(
-      `${targetUser.toUpperCase()} hesabı üçün Google Authenticator tənzimləməsini sıfırlamaq istədiyinizdən əminsiniz? Növbəti girişdə istifadəçidən yeni QR kod skan etməsi tələb olunacaq.`
-    );
-    if (!confirmed) return;
-
-    try {
-      const result = await updateProfileTotpInDb(targetUser, '', false);
-      if (result.success) {
-        showToast(`${targetUser} üçün Autozator sıfırlandı. Növbəti girişdə yeni QR kod təqdim ediləcək.`);
-        await loadProfiles();
-      } else {
-        alert('Autozator sıfırlana bilmədi: ' + (result.error || ''));
-      }
-    } catch (err: any) {
-      alert('Xəta baş verdi: ' + (err?.message || ''));
-    }
-  };
-
   return (
     <div className="p-4 md:p-8 flex-1 max-w-7xl mx-auto w-full space-y-8">
       {/* Toast */}
@@ -168,7 +136,7 @@ export const AdminPermissionsView: React.FC<AdminPermissionsViewProps> = ({
           </h2>
         </div>
         <p className="text-sm text-[#64748b]">
-          Super Admin və Admin hesablarının parolları və Google Authenticator (Autozator) tənzimləmələri birbaşa Supabase <span className="font-mono text-purple-700">public.profiles</span> serverində idarə olunur
+          Super Admin və Admin hesablarının parolları və səlahiyyətləri birbaşa Supabase <span className="font-mono text-purple-700">public.profiles</span> serverində idarə olunur
         </p>
       </div>
 
@@ -181,11 +149,11 @@ export const AdminPermissionsView: React.FC<AdminPermissionsViewProps> = ({
               <span>SUPER ADMIN TƏHLÜKƏSİZLİK MƏRKƏZİ</span>
             </div>
             <h3 className="text-xl md:text-2xl font-extrabold tracking-tight">
-              Mütləq Səlahiyyət və 2FA Rejimi
+              Mütləq Səlahiyyət Rejimi
             </h3>
             <p className="text-white/80 text-xs md:text-sm mt-1 max-w-2xl leading-relaxed">
               Bütün admin icazələri və sistem giriş şifrələri yalnız Super Admin tərəfindən tənzimlənir.
-              Hər iki admin hesabı Google Authenticator vasitəsilə iki faktorlu doğrulamadan (2FA) keçir.
+              Admin hesabı verilən icazələr çərçivəsində fəaliyyət göstərir.
             </p>
           </div>
           <div className="px-4 py-2 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 text-xs font-mono">
@@ -227,19 +195,6 @@ export const AdminPermissionsView: React.FC<AdminPermissionsViewProps> = ({
                 <span>İcazələri dəyişmə hüququ:</span>
                 <strong className="text-emerald-600 font-bold">Bəli (Yalnız Super Admin)</strong>
               </div>
-              <div className="flex justify-between items-center">
-                <span>Google Authenticator:</span>
-                {superAdminProfile?.isTotpEnabled ? (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200">
-                    <Smartphone className="w-3.5 h-3.5" />
-                    Aktivdir
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 font-semibold border border-amber-200">
-                    Quraşdırılmayıb (İlk girişdə tələb olunacaq)
-                  </span>
-                )}
-              </div>
               <div className="flex justify-between">
                 <span>Saxlanma yeri:</span>
                 <span className="font-mono text-purple-700 font-medium">Supabase public.profiles</span>
@@ -247,7 +202,7 @@ export const AdminPermissionsView: React.FC<AdminPermissionsViewProps> = ({
             </div>
           </div>
 
-          {/* Change Super Admin Password & Reset 2FA */}
+          {/* Change Super Admin Password */}
           <div className="mt-5 pt-4 border-t border-slate-100 space-y-3">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5">
@@ -272,19 +227,6 @@ export const AdminPermissionsView: React.FC<AdminPermissionsViewProps> = ({
                 </button>
               </div>
             </div>
-
-            {superAdminProfile?.isTotpEnabled && (
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={() => handleResetTotp('superadmin')}
-                  className="text-xs text-slate-500 hover:text-rose-600 flex items-center gap-1 transition-colors cursor-pointer"
-                >
-                  <RotateCcw className="w-3 h-3" />
-                  <span>Super Admin üçün Autozatoru sıfırla (Yeni QR kod)</span>
-                </button>
-              </div>
-            )}
           </div>
         </div>
 
@@ -319,19 +261,6 @@ export const AdminPermissionsView: React.FC<AdminPermissionsViewProps> = ({
                 <span>İcazələri dəyişmə hüququ:</span>
                 <strong className="text-rose-600 font-medium">Yoxdur</strong>
               </div>
-              <div className="flex justify-between items-center">
-                <span>Google Authenticator:</span>
-                {adminProfile?.isTotpEnabled ? (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200">
-                    <Smartphone className="w-3.5 h-3.5" />
-                    Aktivdir
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 font-semibold border border-amber-200">
-                    Quraşdırılmayıb (İlk girişdə tələb olunacaq)
-                  </span>
-                )}
-              </div>
               <div className="flex justify-between">
                 <span>Saxlanma yeri:</span>
                 <span className="font-mono text-purple-700 font-medium">Supabase public.profiles</span>
@@ -339,7 +268,7 @@ export const AdminPermissionsView: React.FC<AdminPermissionsViewProps> = ({
             </div>
           </div>
 
-          {/* Change Admin Password & Reset 2FA */}
+          {/* Change Admin Password */}
           <div className="mt-5 pt-4 border-t border-slate-100 space-y-3">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5">
@@ -364,19 +293,6 @@ export const AdminPermissionsView: React.FC<AdminPermissionsViewProps> = ({
                 </button>
               </div>
             </div>
-
-            {adminProfile?.isTotpEnabled && (
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={() => handleResetTotp('admin')}
-                  className="text-xs text-slate-500 hover:text-rose-600 flex items-center gap-1 transition-colors cursor-pointer"
-                >
-                  <RotateCcw className="w-3 h-3" />
-                  <span>Admin üçün Autozatoru sıfırla (Yeni QR kod)</span>
-                </button>
-              </div>
-            )}
           </div>
         </div>
       </div>
